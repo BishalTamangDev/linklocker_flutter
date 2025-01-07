@@ -136,8 +136,13 @@ class _HomePageState extends State<HomePage> {
 
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                      child: const Text("A"),
+                      child: const Text("Links"),
                     ),
+
+                    // Padding(
+                    //   padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                    //   child: const Text("A"),
+                    // ),
 
                     // links
                     ClipRRect(
@@ -147,7 +152,7 @@ class _HomePageState extends State<HomePage> {
                         children: [
                           Container(
                             color: colorScheme.surface,
-                            height: 10.0,
+                            height: 0.0,
                           ),
                           ...List.generate(
                             5,
@@ -166,7 +171,9 @@ class _HomePageState extends State<HomePage> {
                                   },
                                   leading: CircleAvatar(
                                     radius: 24.0,
-                                    backgroundColor: colorScheme.secondary,
+                                    // backgroundColor: colorScheme.secondary,
+                                    foregroundImage: AssetImage(
+                                        'assets/images/blank_user.png'),
                                   ),
                                   title: Text("Alexander Bose - ${index + 1}"),
                                   subtitle: const Text("someone@gmail.com"),
@@ -224,53 +231,18 @@ class _HomePageState extends State<HomePage> {
                           ),
                           Container(
                             color: colorScheme.surface,
-                            height: 10.0,
+                            height: 0.0,
                           ),
                         ],
                       ),
                     ),
 
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                      child: const Text("B"),
-                    ),
-
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(16.0),
+                    Center(
                       child: Column(
-                        // spacing: 1.0,
+                        spacing: 12.0,
                         children: [
-                          Container(
-                            color: colorScheme.surface,
-                            height: 10.0,
-                          ),
-                          ...List.generate(
-                            10,
-                            (index) {
-                              return Container(
-                                color: colorScheme.surface,
-                                child: ListTile(
-                                  leading: CircleAvatar(
-                                    radius: 24.0,
-                                    backgroundColor: colorScheme.secondary,
-                                  ),
-                                  title: Text("Brian Adams - ${index + 1}"),
-                                  subtitle: const Text("someone@gmail.com"),
-                                  trailing: IconButton(
-                                    color: Colors.green,
-                                    onPressed: () {
-                                      developer.log("Call now");
-                                    },
-                                    icon: Icon(Icons.call),
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                          Container(
-                            color: colorScheme.surface,
-                            height: 10.0,
-                          ),
+                          Icon(Icons.hourglass_empty_outlined),
+                          const Text("Empty!"),
                         ],
                       ),
                     ),

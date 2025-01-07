@@ -55,16 +55,15 @@ class _ProfilePageState extends State<ProfilePage> {
                 child: Container(
                   color: colorScheme.surface,
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 8.0, horizontal: 8.0),
                     child: Column(
                       children: [
                         ListTile(
                           leading: Icon(Icons.phone_outlined),
                           title: Text("+977 9658745214"),
                         ),
-
                         Divider(),
-
                         ListTile(
                           leading: Icon(Icons.phone_outlined),
                           title: Text("+977 1234567895"),
@@ -81,7 +80,8 @@ class _ProfilePageState extends State<ProfilePage> {
                 child: Container(
                   color: colorScheme.surface,
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 8.0, horizontal: 8.0),
                     child: ListTile(
                       leading: Icon(Icons.email_outlined),
                       title: Text("someone@gmail.com"),
@@ -94,7 +94,9 @@ class _ProfilePageState extends State<ProfilePage> {
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      // bottom actions
       floatingActionButton: Container(
+        color: themeContext.canvasColor,
         width: mediaQuery.size.width,
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -104,10 +106,11 @@ class _ProfilePageState extends State<ProfilePage> {
             children: [
               // contact qr code
               InkWell(
-                hoverColor: Colors.red,
                 onTap: () {
                   developer.log("Show qr code of the contact");
                 },
+                splashColor: colorScheme.surface, // Custom splash color
+                highlightColor: colorScheme.surface,
                 child: Column(
                   spacing: 6.0,
                   mainAxisSize: MainAxisSize.min,
@@ -120,6 +123,8 @@ class _ProfilePageState extends State<ProfilePage> {
                 onTap: () {
                   developer.log("Edit contact");
                 },
+                splashColor: colorScheme.surface,
+                highlightColor: colorScheme.surface,
                 child: Column(
                   spacing: 6.0,
                   mainAxisSize: MainAxisSize.min,
@@ -132,6 +137,8 @@ class _ProfilePageState extends State<ProfilePage> {
                 onTap: () {
                   developer.log("Share contact");
                 },
+                splashColor: colorScheme.surface,
+                highlightColor: colorScheme.surface,
                 child: Column(
                   spacing: 6.0,
                   mainAxisSize: MainAxisSize.min,

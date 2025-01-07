@@ -38,10 +38,11 @@ class _ViewPageState extends State<ViewPage> {
                     CircleAvatar(
                       radius: 80.0,
                       backgroundColor: colorScheme.surface,
-                      backgroundImage: AssetImage('assets/images/user.jpg'),
+                      backgroundImage:
+                          AssetImage('assets/images/blank_user.png'),
                     ),
                     Text(
-                      "Bishal Tamang",
+                      "Bishal Tamang - ${widget.id}",
                       style: textTheme.headlineSmall,
                     ),
                   ],
@@ -55,16 +56,24 @@ class _ViewPageState extends State<ViewPage> {
                   color: colorScheme.surface,
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
-                        vertical: 8.0, horizontal: 8.0),
+                      vertical: 8.0,
+                      horizontal: 8.0,
+                    ),
                     child: Column(
                       children: [
                         ListTile(
-                          leading: Icon(Icons.phone_outlined),
+                          leading: Icon(
+                            Icons.phone_outlined,
+                            color: Colors.green,
+                          ),
                           title: Text("+977 9658745214"),
                         ),
                         Divider(),
                         ListTile(
-                          leading: Icon(Icons.phone_outlined),
+                          leading: Icon(
+                            Icons.phone_outlined,
+                            color: Colors.green,
+                          ),
                           title: Text("+977 1234567895"),
                         ),
                       ],
@@ -82,18 +91,84 @@ class _ViewPageState extends State<ViewPage> {
                     padding: const EdgeInsets.symmetric(
                         vertical: 8.0, horizontal: 8.0),
                     child: ListTile(
-                      leading: Icon(Icons.email_outlined),
+                      leading: Icon(
+                        Icons.email_outlined,
+                        color: Colors.deepOrange,
+                      ),
                       title: Text("someone@gmail.com"),
                     ),
                   ),
                 ),
               ),
+
+              //   birthday
+              ClipRRect(
+                borderRadius: BorderRadius.circular(16.0),
+                child: Container(
+                  color: colorScheme.surface,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 8.0, horizontal: 8.0),
+                    child: ListTile(
+                      leading: Icon(
+                        Icons.cake_outlined,
+                        color: Colors.blue,
+                      ),
+                      title: Text("17th June, 2002"),
+                    ),
+                  ),
+                ),
+              ),
+
+              //   category
+              ClipRRect(
+                borderRadius: BorderRadius.circular(16.0),
+                child: Container(
+                  color: colorScheme.surface,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 8.0, horizontal: 8.0),
+                    child: ListTile(
+                      leading: Icon(
+                        Icons.group,
+                        color: Colors.orangeAccent,
+                      ),
+                      title: Text("Family"),
+                    ),
+                  ),
+                ),
+              ),
+
+              //   note
+              ClipRRect(
+                borderRadius: BorderRadius.circular(16.0),
+                child: Container(
+                  color: colorScheme.surface,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 8.0, horizontal: 8.0),
+                    child: ListTile(
+                      leading: Icon(
+                        Icons.note_alt_outlined,
+                        color: Colors.blue,
+                      ),
+                      title: Text(
+                          "A good friend is like a lighthouse in the storm, guiding you back to calm waters. They celebrate your joys as if they were their own and stand steadfast during your struggles. A good friend listens without judgment, speaks truth with kindness, and reminds you of your worth when you’ve forgotten it. They bring laughter to your darkest days and make life’s best moments even brighter. With a good friend, you never walk alone—because even in silence, their presence feels like home."),
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 56.0),
             ],
           ),
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+
+      // bottom actions
       floatingActionButton: Container(
+        color: themeContext.canvasColor,
         width: mediaQuery.size.width,
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -103,10 +178,11 @@ class _ViewPageState extends State<ViewPage> {
             children: [
               // contact qr code
               InkWell(
-                hoverColor: Colors.red,
                 onTap: () {
                   developer.log("Show qr code of the contact");
                 },
+                splashColor: colorScheme.surface, // Custom splash color
+                highlightColor: colorScheme.surface,
                 child: Column(
                   spacing: 6.0,
                   mainAxisSize: MainAxisSize.min,
@@ -119,6 +195,8 @@ class _ViewPageState extends State<ViewPage> {
                 onTap: () {
                   developer.log("Edit contact");
                 },
+                splashColor: colorScheme.surface,
+                highlightColor: colorScheme.surface,
                 child: Column(
                   spacing: 6.0,
                   mainAxisSize: MainAxisSize.min,
@@ -131,6 +209,8 @@ class _ViewPageState extends State<ViewPage> {
                 onTap: () {
                   developer.log("Share contact");
                 },
+                splashColor: colorScheme.surface,
+                highlightColor: colorScheme.surface,
                 child: Column(
                   spacing: 6.0,
                   mainAxisSize: MainAxisSize.min,

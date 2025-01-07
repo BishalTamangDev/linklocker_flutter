@@ -157,7 +157,10 @@ class CustomDrawerWidget extends StatelessWidget {
               height: 44.0,
               child: OutlinedButton(
                 onPressed: () {},
-                child: Text("Reset Contact List"),
+                child: Text(
+                  "Reset List",
+                  style: textTheme.bodyMedium!.copyWith(color: Colors.red),
+                ),
               ),
             ),
           ),
