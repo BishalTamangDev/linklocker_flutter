@@ -26,7 +26,6 @@ class CustomTextFieldWidget extends StatelessWidget {
       controller: controller,
       autofocus: autofocus,
       maxLines: maxLine,
-      textAlignVertical: TextAlignVertical.top,
       decoration: InputDecoration(
         prefixIcon: Icon(
           leadingIcon,
