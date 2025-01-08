@@ -3,14 +3,21 @@ import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import 'package:linklocker/shared/widgets/custom_text_field_widget.dart';
 
-class AddPage extends StatefulWidget {
-  const AddPage({super.key});
+class AddLinkPage extends StatefulWidget {
+  const AddLinkPage({
+    super.key,
+    this.task = "add",
+    this.id = 0,
+  });
+
+  final String task;
+  final int id;
 
   @override
-  State<AddPage> createState() => _AddPageState();
+  State<AddLinkPage> createState() => _AddLinkPageState();
 }
 
-class _AddPageState extends State<AddPage> {
+class _AddLinkPageState extends State<AddLinkPage> {
   // variables
   String category = "other";
 
@@ -21,6 +28,21 @@ class _AddPageState extends State<AddPage> {
   var noteController = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    nameController.clear();
+    phoneController.clear();
+    emailController.clear();
+    noteController.clear();
+    category = "others";
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     var mediaQuery = MediaQuery.of(context);
     var themeContext = Theme.of(context);
@@ -29,10 +51,19 @@ class _AddPageState extends State<AddPage> {
 
     return Scaffold(
       backgroundColor: themeContext.canvasColor,
+      appBar: AppBar(
+        elevation: 0,
+        backgroundColor: themeContext.canvasColor,
+        leading: Icon(Icons.arrow_back_ios_new_rounded),
+        title: Text(widget.task == "add" ? "Add New Link" : "Edit Link"),
+      ),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: Column(
+            spacing: 20.0,
+            mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Column(
                 spacing: 16.0,
@@ -51,6 +82,8 @@ class _AddPageState extends State<AddPage> {
                   Center(
                     child: const Text("Profile Picture"),
                   ),
+
+                  const SizedBox(),
 
                   //   name
                   CustomTextFieldWidget(
@@ -76,6 +109,10 @@ class _AddPageState extends State<AddPage> {
                   DropdownMenu(
                     width: mediaQuery.size.width,
                     label: const Text("Category"),
+                    leadingIcon: Icon(
+                      Icons.group_add_outlined,
+                      color: Colors.blue,
+                    ),
                     menuStyle: MenuStyle(
                       shape: WidgetStateProperty.all(
                         RoundedRectangleBorder(
@@ -117,7 +154,7 @@ class _AddPageState extends State<AddPage> {
                     hintText: "Note",
                     leadingIcon: Icons.note_alt_outlined,
                     leadingIconColor: Colors.grey,
-                    maxLine: 4,
+                    maxLine: 6,
                   ),
                 ],
               ),

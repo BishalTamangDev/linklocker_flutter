@@ -1,17 +1,19 @@
 import 'dart:developer' as developer;
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:linklocker/core/constants/app_constants.dart';
 
-class ViewPage extends StatefulWidget {
-  const ViewPage({super.key, required this.id});
+class ViewLinkPage extends StatefulWidget {
+  const ViewLinkPage({super.key, required this.id});
 
   final int id;
 
   @override
-  State<ViewPage> createState() => _ViewPageState();
+  State<ViewLinkPage> createState() => _ViewLinkPageState();
 }
 
-class _ViewPageState extends State<ViewPage> {
+class _ViewLinkPageState extends State<ViewLinkPage> {
   @override
   Widget build(BuildContext context) {
     var mediaQuery = MediaQuery.of(context);
@@ -43,11 +45,15 @@ class _ViewPageState extends State<ViewPage> {
                     ),
                     Text(
                       "Bishal Tamang - ${widget.id}",
-                      style: textTheme.headlineSmall,
+                      style: textTheme.headlineSmall!.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ],
                 ),
               ),
+
+              const SizedBox(),
 
               //   contacts
               ClipRRect(
@@ -61,21 +67,27 @@ class _ViewPageState extends State<ViewPage> {
                     ),
                     child: Column(
                       children: [
-                        ListTile(
-                          leading: Icon(
-                            Icons.phone_outlined,
-                            color: Colors.green,
+                        ...List.generate(
+                          3,
+                          (context) => ListTile(
+                            onTap: () {
+                              developer.log("Call now");
+                            },
+                            leading: Icon(
+                              Icons.phone_outlined,
+                              color: Colors.green,
+                            ),
+                            title: Text("+977 9658745215"),
                           ),
-                          title: Text("+977 9658745214"),
                         ),
-                        Divider(),
-                        ListTile(
-                          leading: Icon(
-                            Icons.phone_outlined,
-                            color: Colors.green,
-                          ),
-                          title: Text("+977 1234567895"),
-                        ),
+                        // Divider(),
+                        // ListTile(
+                        //   leading: Icon(
+                        //     Icons.phone_outlined,
+                        //     color: AppConstants.callIconColor,
+                        //   ),
+                        //   title: Text("+977 1234567895"),
+                        // ),
                       ],
                     ),
                   ),
@@ -93,7 +105,7 @@ class _ViewPageState extends State<ViewPage> {
                     child: ListTile(
                       leading: Icon(
                         Icons.email_outlined,
-                        color: Colors.deepOrange,
+                        color: AppConstants.emailIconColor,
                       ),
                       title: Text("someone@gmail.com"),
                     ),
@@ -112,7 +124,7 @@ class _ViewPageState extends State<ViewPage> {
                     child: ListTile(
                       leading: Icon(
                         Icons.cake_outlined,
-                        color: Colors.blue,
+                        color: AppConstants.birthdayIconColor,
                       ),
                       title: Text("17th June, 2002"),
                     ),
@@ -130,8 +142,8 @@ class _ViewPageState extends State<ViewPage> {
                         vertical: 8.0, horizontal: 8.0),
                     child: ListTile(
                       leading: Icon(
-                        Icons.group,
-                        color: Colors.orangeAccent,
+                        Icons.group_add_outlined,
+                        color: AppConstants.categoryIconColor,
                       ),
                       title: Text("Family"),
                     ),
@@ -146,14 +158,20 @@ class _ViewPageState extends State<ViewPage> {
                   color: colorScheme.surface,
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
-                        vertical: 8.0, horizontal: 8.0),
+                      vertical: 8.0,
+                      horizontal: 8.0,
+                    ),
                     child: ListTile(
                       leading: Icon(
                         Icons.note_alt_outlined,
-                        color: Colors.blue,
+                        color: AppConstants.noteIconColor,
                       ),
-                      title: Text(
-                          "A good friend is like a lighthouse in the storm, guiding you back to calm waters. They celebrate your joys as if they were their own and stand steadfast during your struggles. A good friend listens without judgment, speaks truth with kindness, and reminds you of your worth when you’ve forgotten it. They bring laughter to your darkest days and make life’s best moments even brighter. With a good friend, you never walk alone—because even in silence, their presence feels like home."),
+                      title: Opacity(
+                        opacity: 0.5,
+                        child: Text(
+                          "A good friend is like a lighthouse in the storm, guiding you back to calm waters. They celebrate your joys as if they were their own and stand steadfast during your struggles. A good friend listens without judgment, speaks truth with kindness, and reminds you of your worth when you’ve forgotten it. They bring laughter to your darkest days and make life’s best moments even brighter. With a good friend, you never walk alone—because even in silence, their presence feels like home.",
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -178,9 +196,7 @@ class _ViewPageState extends State<ViewPage> {
             children: [
               // contact qr code
               InkWell(
-                onTap: () {
-                  developer.log("Show qr code of the contact");
-                },
+                onTap: showQrCode,
                 splashColor: colorScheme.surface, // Custom splash color
                 highlightColor: colorScheme.surface,
                 child: Column(
@@ -192,9 +208,7 @@ class _ViewPageState extends State<ViewPage> {
 
               //   edit
               InkWell(
-                onTap: () {
-                  developer.log("Edit contact");
-                },
+                onTap: () => context.push('/link/edit/${widget.id}'),
                 splashColor: colorScheme.surface,
                 highlightColor: colorScheme.surface,
                 child: Column(
@@ -219,6 +233,24 @@ class _ViewPageState extends State<ViewPage> {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  // show qr code
+  void showQrCode() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        content: Column(
+          spacing: 16.0,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text("Username"),
+            Image.asset('assets/images/app_qr.png'),
+            Text("Scan the QR code above."),
+          ],
         ),
       ),
     );

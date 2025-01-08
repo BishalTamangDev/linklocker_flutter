@@ -1,15 +1,17 @@
 import 'dart:developer' as developer;
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:linklocker/core/constants/app_constants.dart';
 
-class ProfilePage extends StatefulWidget {
-  const ProfilePage({super.key});
+class ViewProfilePage extends StatefulWidget {
+  const ViewProfilePage({super.key});
 
   @override
-  State<ProfilePage> createState() => _ProfilePageState();
+  State<ViewProfilePage> createState() => _ViewProfilePageState();
 }
 
-class _ProfilePageState extends State<ProfilePage> {
+class _ViewProfilePageState extends State<ViewProfilePage> {
   @override
   Widget build(BuildContext context) {
     var mediaQuery = MediaQuery.of(context);
@@ -60,12 +62,18 @@ class _ProfilePageState extends State<ProfilePage> {
                     child: Column(
                       children: [
                         ListTile(
-                          leading: Icon(Icons.phone_outlined),
+                          leading: Icon(
+                            Icons.phone_outlined,
+                            color: AppConstants.callIconColor,
+                          ),
                           title: Text("+977 9658745214"),
                         ),
-                        Divider(),
+                        Divider(height: 5.0),
                         ListTile(
-                          leading: Icon(Icons.phone_outlined),
+                          leading: Icon(
+                            Icons.phone_outlined,
+                            color: AppConstants.callIconColor,
+                          ),
                           title: Text("+977 1234567895"),
                         ),
                       ],
@@ -83,7 +91,10 @@ class _ProfilePageState extends State<ProfilePage> {
                     padding: const EdgeInsets.symmetric(
                         vertical: 8.0, horizontal: 8.0),
                     child: ListTile(
-                      leading: Icon(Icons.email_outlined),
+                      leading: Icon(
+                        Icons.email_outlined,
+                        color: AppConstants.emailIconColor,
+                      ),
                       title: Text("someone@gmail.com"),
                     ),
                   ),
@@ -120,15 +131,16 @@ class _ProfilePageState extends State<ProfilePage> {
 
               //   edit
               InkWell(
-                onTap: () {
-                  developer.log("Edit contact");
-                },
+                onTap: () => context.push('/profile/edit'),
                 splashColor: colorScheme.surface,
                 highlightColor: colorScheme.surface,
                 child: Column(
                   spacing: 6.0,
                   mainAxisSize: MainAxisSize.min,
-                  children: [Icon(Icons.edit), const Text("Edit")],
+                  children: [
+                    Icon(Icons.edit),
+                    const Text("Edit"),
+                  ],
                 ),
               ),
 

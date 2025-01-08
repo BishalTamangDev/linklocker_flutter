@@ -1,7 +1,7 @@
 import 'dart:developer' as developer;
 
 import 'package:flutter/material.dart';
-import 'package:linklocker/features/presentation/profile/profile_page.dart';
+import 'package:go_router/go_router.dart';
 
 class UserProfileCard extends StatelessWidget {
   const UserProfileCard({super.key});
@@ -66,15 +66,7 @@ class UserProfileCard extends StatelessWidget {
                 },
                 icon: Icon(Icons.share),
               ),
-              onTap: () {
-                //   navigate to profile page
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ProfilePage(),
-                  ),
-                );
-              },
+              onTap: () => context.push('/profile/view'),
             ),
             const SizedBox(),
           ],
