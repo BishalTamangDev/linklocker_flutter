@@ -3,6 +3,7 @@ import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:linklocker/core/constants/app_constants.dart';
+import 'package:linklocker/features/data/source/local/local_data_source.dart';
 
 class ViewProfilePage extends StatefulWidget {
   const ViewProfilePage({super.key});
@@ -12,6 +13,21 @@ class ViewProfilePage extends StatefulWidget {
 }
 
 class _ViewProfilePageState extends State<ViewProfilePage> {
+  // variables
+  late Future<Map<String, dynamic>> _userData;
+
+  @override
+  void initState() {
+    super.initState();
+    _userData = LocalDataSource.getInstance().getUser();
+  }
+
+  _refreshUserData() {
+    setState(() {
+      _userData = LocalDataSource.getInstance().getUser();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     var mediaQuery = MediaQuery.of(context);
@@ -43,13 +59,25 @@ class _ViewProfilePageState extends State<ViewProfilePage> {
                         backgroundImage: AssetImage('assets/images/user.jpg'),
                       ),
                     ),
-                    Text(
-                      "Bishal Tamang",
-                      style: textTheme.headlineSmall,
+                    FutureBuilder(
+                      future: _userData,
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.done &&
+                            !snapshot.hasError) {
+                          return Text(
+                            "${snapshot.data!['name']}",
+                            style: textTheme.headlineSmall,
+                          );
+                        } else {
+                          return Text("-", style: textTheme.headlineSmall);
+                        }
+                      },
                     ),
                   ],
                 ),
               ),
+
+              const SizedBox(),
 
               //   contacts
               ClipRRect(
@@ -66,15 +94,7 @@ class _ViewProfilePageState extends State<ViewProfilePage> {
                             Icons.phone_outlined,
                             color: AppConstants.callIconColor,
                           ),
-                          title: Text("+977 9658745214"),
-                        ),
-                        Divider(height: 5.0),
-                        ListTile(
-                          leading: Icon(
-                            Icons.phone_outlined,
-                            color: AppConstants.callIconColor,
-                          ),
-                          title: Text("+977 1234567895"),
+                          title: Text("+977 -"),
                         ),
                       ],
                     ),
@@ -95,7 +115,18 @@ class _ViewProfilePageState extends State<ViewProfilePage> {
                         Icons.email_outlined,
                         color: AppConstants.emailIconColor,
                       ),
-                      title: Text("someone@gmail.com"),
+                      title: FutureBuilder(
+                        future: _userData,
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                                  ConnectionState.done &&
+                              !snapshot.hasError) {
+                            return Text("${snapshot.data!['email']}");
+                          } else {
+                            return Text("-", style: textTheme.headlineSmall);
+                          }
+                        },
+                      ),
                     ),
                   ),
                 ),
@@ -131,7 +162,9 @@ class _ViewProfilePageState extends State<ViewProfilePage> {
 
               //   edit
               InkWell(
-                onTap: () => context.push('/profile/edit'),
+                onTap: () => context.push('/profile/edit').then(
+                      (_) => _refreshUserData(),
+                    ),
                 splashColor: colorScheme.surface,
                 highlightColor: colorScheme.surface,
                 child: Column(

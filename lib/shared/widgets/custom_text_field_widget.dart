@@ -9,9 +9,11 @@ class CustomTextFieldWidget extends StatelessWidget {
     required this.hintText,
     required this.leadingIcon,
     required this.leadingIconColor,
+    this.textInputType = TextInputType.text,
     this.maxLine = 1,
   });
 
+  final TextInputType textInputType;
   final BuildContext context;
   final bool autofocus;
   final TextEditingController controller;
@@ -24,6 +26,7 @@ class CustomTextFieldWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextField(
       controller: controller,
+      keyboardType: textInputType,
       autofocus: autofocus,
       maxLines: maxLine,
       decoration: InputDecoration(

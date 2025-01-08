@@ -1,6 +1,9 @@
 import 'dart:developer' as developer;
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:linklocker/features/data/models/user_model.dart';
+import 'package:linklocker/features/data/source/local/local_data_source.dart';
 import 'package:linklocker/shared/widgets/custom_text_field_widget.dart';
 
 class AddLinkPage extends StatefulWidget {
@@ -20,6 +23,8 @@ class AddLinkPage extends StatefulWidget {
 class _AddLinkPageState extends State<AddLinkPage> {
   // variables
   String category = "other";
+  var userModel = UserModel();
+  var localDataStorage = LocalDataSource.getInstance();
 
   // controllers
   var nameController = TextEditingController();
@@ -54,7 +59,14 @@ class _AddLinkPageState extends State<AddLinkPage> {
       appBar: AppBar(
         elevation: 0,
         backgroundColor: themeContext.canvasColor,
-        leading: Icon(Icons.arrow_back_ios_new_rounded),
+        leading: IconButton(
+          splashColor: Colors.transparent,
+          highlightColor: Colors.transparent,
+          onPressed: () {
+            context.pop();
+          },
+          icon: Icon(Icons.arrow_back_ios_new_rounded),
+        ),
         title: Text(widget.task == "add" ? "Add New Link" : "Edit Link"),
       ),
       body: SingleChildScrollView(
@@ -106,34 +118,49 @@ class _AddLinkPageState extends State<AddLinkPage> {
                   ),
 
                   //   category
-                  DropdownMenu(
-                    width: mediaQuery.size.width,
-                    label: const Text("Category"),
-                    leadingIcon: Icon(
-                      Icons.group_add_outlined,
-                      color: Colors.blue,
-                    ),
-                    menuStyle: MenuStyle(
-                      shape: WidgetStateProperty.all(
-                        RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16.0),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(16.0),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: colorScheme.surface,
+                        border: Border.all(
+                          width: 2.0,
+                          color: colorScheme.surface,
                         ),
+                        borderRadius: BorderRadius.circular(16.0),
+                      ),
+                      child: DropdownMenu(
+                        width: mediaQuery.size.width,
+                        label: const Text("Category"),
+                        leadingIcon: Icon(
+                          Icons.group_add_outlined,
+                          color: Colors.blue,
+                        ),
+                        menuStyle: MenuStyle(
+                          shape: WidgetStateProperty.all(
+                            RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16.0),
+                            ),
+                          ),
+                        ),
+                        trailingIcon: Icon(Icons.keyboard_arrow_down_sharp),
+                        onSelected: (newValue) {
+                          setState(() {
+                            category = newValue!;
+                          });
+                        },
+                        dropdownMenuEntries: [
+                          DropdownMenuEntry(value: 'family', label: 'Family'),
+                          DropdownMenuEntry(value: 'friend', label: 'Friend'),
+                          DropdownMenuEntry(
+                              value: 'relative', label: 'Relative'),
+                          DropdownMenuEntry(value: 'teacher', label: 'Teacher'),
+                          DropdownMenuEntry(
+                              value: 'coworker', label: 'Coworker'),
+                          DropdownMenuEntry(value: 'other', label: 'Other'),
+                        ],
                       ),
                     ),
-                    trailingIcon: Icon(Icons.keyboard_arrow_down_sharp),
-                    onSelected: (newValue) {
-                      setState(() {
-                        category = newValue!;
-                      });
-                    },
-                    dropdownMenuEntries: [
-                      DropdownMenuEntry(value: 'family', label: 'Family'),
-                      DropdownMenuEntry(value: 'friend', label: 'Friend'),
-                      DropdownMenuEntry(value: 'relative', label: 'Relative'),
-                      DropdownMenuEntry(value: 'teacher', label: 'Teacher'),
-                      DropdownMenuEntry(value: 'coworker', label: 'Coworker'),
-                      DropdownMenuEntry(value: 'other', label: 'Other'),
-                    ],
                   ),
 
                   //   email address

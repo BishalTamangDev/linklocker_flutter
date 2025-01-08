@@ -1,17 +1,25 @@
 import 'dart:developer' as developer;
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:linklocker/features/data/source/local/local_data_source.dart';
 import 'package:linklocker/shared/widgets/custom_text_field_widget.dart';
 
-class EditProfilePage extends StatefulWidget {
-  const EditProfilePage({super.key});
+class AddProfilePage extends StatefulWidget {
+  const AddProfilePage({super.key, this.task = "add"});
+
+  final String task;
 
   @override
-  State<EditProfilePage> createState() => _EditProfilePageState();
+  State<AddProfilePage> createState() => _AddProfilePageState();
 }
 
-class _EditProfilePageState extends State<EditProfilePage> {
+class _AddProfilePageState extends State<AddProfilePage> {
   // variables
+  late Map<String, dynamic> _userData;
+
+  var localDataStorage = LocalDataSource.getInstance();
+
   FileImage? fileImage;
 
   // controllers
@@ -22,6 +30,18 @@ class _EditProfilePageState extends State<EditProfilePage> {
   @override
   void initState() {
     super.initState();
+
+    if (widget.task == "edit") {
+      _fetchUserData();
+    }
+  }
+
+  _fetchUserData() async {
+    _userData = await LocalDataSource.getInstance().getUser();
+    setState(() {
+      nameController.text = _userData['name'];
+      emailController.text = _userData['email'];
+    });
   }
 
   @override
@@ -43,7 +63,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     return Scaffold(
       backgroundColor: themeContext.canvasColor,
       appBar: AppBar(
-        title: const Text("Edit Profile"),
+        title: Text(widget.task == "add" ? "Add Profile" : "Edit Profile"),
         elevation: 0,
         backgroundColor: themeContext.canvasColor,
       ),
@@ -93,6 +113,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     hintText: "Phone Number",
                     leadingIcon: Icons.call_outlined,
                     leadingIconColor: Colors.green,
+                    textInputType: TextInputType.numberWithOptions(),
                   ),
 
                   //   email address
@@ -103,6 +124,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     hintText: "Email Address",
                     leadingIcon: Icons.email_outlined,
                     leadingIconColor: Colors.orangeAccent,
+                    textInputType: TextInputType.emailAddress,
                   ),
                 ],
               ),
@@ -129,7 +151,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       ),
                     ),
 
-                    // button :: save
+                    // button :: add || update
                     SizedBox(
                       height: 50.0,
                       width: mediaQuery.size.width / 2 - 26,
@@ -139,15 +161,69 @@ class _EditProfilePageState extends State<EditProfilePage> {
                             borderRadius: BorderRadius.circular(32.0),
                           ),
                         ),
-                        onPressed: () {
+                        onPressed: () async {
+                          var scaffoldMessenger = ScaffoldMessenger.of(context);
+
+                          var data = {
+                            'name': nameController.text ?? '',
+                            'email': emailController.text ?? '',
+                          };
+
                           //   get values
-                          developer.log("Name : ${nameController.text}");
-                          developer
-                              .log("Phone number : ${phoneController.text}");
-                          developer
-                              .log("Email address : ${emailController.text}");
+                          developer.log("User data : $data");
+
+                          // add profile
+                          if (widget.task == "add") {
+                            String response =
+                                await localDataStorage.insertUser(data);
+
+                            // user created
+                            if (context.mounted) {
+                              if (scaffoldMessenger.mounted) {
+                                scaffoldMessenger.hideCurrentSnackBar();
+                              }
+
+                              scaffoldMessenger.showSnackBar(
+                                SnackBar(
+                                  behavior: SnackBarBehavior.floating,
+                                  content: Text(response == "success"
+                                      ? "Profile added successfully."
+                                      : "Profile couldn't be created."),
+                                ),
+                              );
+
+                              await Future.delayed(const Duration(seconds: 2));
+
+                              if (context.mounted) context.pop();
+                            }
+                          } else {
+                            // update
+                            String response =
+                                await localDataStorage.updateUser(data);
+
+                            if (context.mounted) {
+                              if (scaffoldMessenger.mounted) {
+                                scaffoldMessenger.hideCurrentSnackBar();
+                              }
+
+                              scaffoldMessenger.showSnackBar(
+                                SnackBar(
+                                  content: Text(response == "success"
+                                      ? "Profile updated successfully."
+                                      : "Couldn't update profile."),
+                                ),
+                              );
+
+                              if (response == "success") {
+                                await Future.delayed(
+                                    const Duration(seconds: 2));
+
+                                if (context.mounted) context.pop();
+                              }
+                            }
+                          }
                         },
-                        child: const Text("Save"),
+                        child: Text(widget.task == "add" ? "Save" : "Update"),
                       ),
                     ),
                   ],

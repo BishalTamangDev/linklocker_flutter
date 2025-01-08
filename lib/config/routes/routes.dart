@@ -4,19 +4,19 @@ import 'package:linklocker/features/presentation/home/home_page.dart';
 import 'package:linklocker/features/presentation/link/add/add_link_page.dart';
 import 'package:linklocker/features/presentation/link/view/view_link_page.dart';
 import 'package:linklocker/features/presentation/page_not_found_page.dart';
-import 'package:linklocker/features/presentation/profile/edit_profile_page.dart';
+import 'package:linklocker/features/presentation/profile/add_profile_page.dart';
 import 'package:linklocker/features/presentation/profile/view_profile_page.dart';
 import 'package:linklocker/features/presentation/search/search_page.dart';
 
 class AppRoute {
   static final GoRouter routes = GoRouter(
-    initialLocation: '/',
+    initialLocation: '/home',
 
     // routes
     routes: [
       // home
       GoRoute(
-        path: '/',
+        path: '/home',
         pageBuilder: (context, state) => CustomTransitionPage(
           child: HomePage(),
           transitionsBuilder: immediateTransitionBuilder,
@@ -39,9 +39,16 @@ class AppRoute {
             ),
           ),
           GoRoute(
+            path: '/add',
+            pageBuilder: (context, state) => CustomTransitionPage(
+              child: AddProfilePage(task: 'add'),
+              transitionsBuilder: slideUpTransitionBuilder,
+            ),
+          ),
+          GoRoute(
             path: '/edit',
             pageBuilder: (context, state) => CustomTransitionPage(
-              child: EditProfilePage(),
+              child: AddProfilePage(task: 'edit'),
               transitionsBuilder: slideUpTransitionBuilder,
             ),
           ),

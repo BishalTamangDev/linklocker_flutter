@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class PageNotFoundPage extends StatelessWidget {
   const PageNotFoundPage({super.key});
@@ -15,6 +16,10 @@ class PageNotFoundPage extends StatelessWidget {
             Text(
               "Page Not Found!",
               style: TextStyle(color: Colors.grey.shade500),
+            ),
+            OutlinedButton(
+              onPressed: () => context.pop(),
+              child: const Text("Home"),
             ),
           ],
         ),
