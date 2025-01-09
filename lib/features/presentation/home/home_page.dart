@@ -1,10 +1,13 @@
-import 'dart:developer' as developer;
-
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:linklocker/core/constants/app_constants.dart';
+import 'package:linklocker/features/data/models/contact_model.dart';
+import 'package:linklocker/features/data/models/link_model.dart';
+import 'package:linklocker/features/data/models/user_model.dart';
 import 'package:linklocker/features/data/source/local/local_data_source.dart';
 import 'package:linklocker/features/presentation/home/widgets/custom_drawer_widget.dart';
+import 'package:linklocker/features/presentation/home/widgets/empty_links_widget.dart';
+import 'package:linklocker/features/presentation/home/widgets/fetching_links_widget.dart';
+import 'package:linklocker/features/presentation/home/widgets/link_widget.dart';
 import 'package:linklocker/features/presentation/home/widgets/user_profile_card.dart';
 
 class HomePage extends StatefulWidget {
@@ -16,14 +19,39 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   // variables
+  bool hide = false;
+  var userModel = UserModel();
   var localDataSource = LocalDataSource.getInstance();
 
-  bool hide = false;
+  // future data
+  late Future<List<Map<dynamic, dynamic>>> _linkList;
+  late Future<List<Map<dynamic, dynamic>>> _contactLists;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+
+    //   fetch link list
+    _linkList = localDataSource.getLinks();
+
+    //   fetch all contacts
+    _contactLists = localDataSource.getAllContacts();
+  }
+
+  // refresh link list
+  _refreshLinkList() {
+    setState(() {
+      _linkList = localDataSource.getLinks();
+    });
+    _refreshContactLists();
+  }
+
+  // refresh contact list
+  _refreshContactLists() {
+    setState(() {
+      _contactLists = localDataSource.getAllContacts();
+    });
   }
 
   @override
@@ -136,8 +164,9 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     IconButton(
-                                      onPressed: () =>
-                                          context.push('/link/add'),
+                                      onPressed: () => context
+                                          .push('/link/add')
+                                          .then((_) => _refreshLinkList()),
                                       iconSize: 26.0,
                                       icon: Icon(Icons.add),
                                     ),
@@ -164,78 +193,149 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                             // user profile card
                             UserProfileCard(),
 
+                            //   reset database
+                            ElevatedButton(
+                              onPressed: () async {
+                                await localDataSource.resetDb();
+                              },
+                              child: const Text("Reset Database"),
+                            ),
+
+                            Opacity(
+                              opacity: 0.5,
+                              child: Text("RESET TABLE"),
+                            ),
+
+                            // reset tables
+                            Wrap(
+                              spacing: 10.0,
+                              // runSpacing: 10.0,
+                              children: [
+                                ElevatedButton(
+                                  onPressed: () async {
+                                    _refreshLinkList();
+                                  },
+                                  child: const Text("Refresh"),
+                                ),
+                                ElevatedButton(
+                                  onPressed: () async {
+                                    await localDataSource.resetUserTable();
+                                  },
+                                  child: const Text("User Table"),
+                                ),
+                                ElevatedButton(
+                                  onPressed: () async {
+                                    await localDataSource.resetLinkTable();
+
+                                    if (context.mounted) {
+                                      _refreshLinkList();
+                                    }
+                                  },
+                                  child: const Text("Reset Link Table"),
+                                ),
+                                ElevatedButton(
+                                  onPressed: () async {
+                                    await localDataSource.resetContactTable();
+                                    _refreshContactLists();
+                                  },
+                                  child: const Text("Reset Contact Table"),
+                                ),
+                              ],
+                            ),
+
                             Padding(
                               padding:
                                   const EdgeInsets.symmetric(horizontal: 4.0),
                               child: const Text("Links"),
                             ),
 
-                            // links
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(16.0),
-                              child: Column(
-                                children: [
-                                  Container(
-                                    color: colorScheme.surface,
-                                    height: 0.0,
-                                  ),
-                                  ...List.generate(
-                                    3,
-                                    (index) {
-                                      return Container(
-                                        color: colorScheme.surface,
-                                        child: ListTile(
-                                          onTap: () =>
-                                              context.push('/link/view/$index'),
-                                          leading: CircleAvatar(
-                                            radius: 24.0,
-                                            backgroundColor:
-                                                colorScheme.secondary,
-                                            foregroundImage: AssetImage(
-                                                'assets/images/blank_user.png'),
-                                          ),
-                                          title: Text(
-                                              "Alexander Bose - ${index + 1}"),
-                                          subtitle:
-                                              const Text("someone@gmail.com"),
-                                          trailing: IconButton(
-                                            color: AppConstants.callIconColor,
-                                            onPressed: () {
-                                              developer.log("Call now");
-                                              showCallBottomSheet();
+                            // link lists :: actual
+                            FutureBuilder(
+                              future: _linkList,
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState ==
+                                    ConnectionState.done) {
+                                  if (snapshot.hasError) {
+                                    return FetchingLinksWidget();
+                                  } else {
+                                    if (snapshot.data!.isEmpty) {
+                                      return EmptyLinksWidget();
+                                    } else {
+                                      // return Text("${snapshot.data}");
+                                      return ClipRRect(
+                                        borderRadius:
+                                            BorderRadius.circular(16.0),
+                                        child: Container(
+                                          color: colorScheme.surface,
+                                          child: ListView.builder(
+                                            shrinkWrap: true,
+                                            physics:
+                                                const NeverScrollableScrollPhysics(),
+                                            itemCount: snapshot.data!.length,
+                                            itemBuilder: (context, index) {
+                                              // map data
+                                              var data = snapshot.data![index];
+
+                                              var linkModel = LinkModel();
+                                              var contactModel = ContactModel();
+
+                                              linkModel.linkId =
+                                                  data['link_id'];
+                                              linkModel.name = data['name'];
+                                              linkModel.category =
+                                                  data['category'];
+                                              linkModel.emailAddress =
+                                                  data['email'];
+
+                                              var contacts = data['contacts'];
+
+                                              // return Text("$contacts");
+
+                                              return Container(
+                                                color: colorScheme.surface,
+                                                child: LinkWidget(
+                                                  linkWidgetData: {
+                                                    'name': linkModel.name,
+                                                    'email':
+                                                        linkModel.emailAddress,
+                                                  },
+                                                  navCallBack: () => context.push(
+                                                      '/link/view/${linkModel.linkId}'),
+                                                  callCallBack: () =>
+                                                      showCallBottomSheet(
+                                                          contacts),
+                                                ),
+                                              );
                                             },
-                                            icon: Icon(Icons.call),
                                           ),
                                         ),
                                       );
-                                    },
-                                  ),
-                                  Container(
-                                    color: colorScheme.surface,
-                                    height: 0.0,
-                                  ),
-
-                                  const SizedBox(height: 32.0),
-
-                                  //   reset database
-                                  ElevatedButton(
-                                    onPressed: () async {
-                                      await localDataSource.resetDb();
-                                    },
-                                    child: const Text("Reset Database"),
-                                  ),
-                                ],
-                              ),
+                                    }
+                                  }
+                                } else {
+                                  return FetchingLinksWidget();
+                                }
+                              },
                             ),
 
-                            Center(
-                              child: Column(
-                                spacing: 12.0,
-                                children: const <Widget>[
-                                  Icon(Icons.hourglass_empty_outlined),
-                                  Text("No link found!"),
-                                ],
-                              ),
+                            const SizedBox(),
+
+                            // temporary :: contacts
+                            FutureBuilder(
+                              future: _contactLists,
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState ==
+                                    ConnectionState.done) {
+                                  if (snapshot.hasError) {
+                                    return Text(
+                                        "Couldn't fetch contacts. Error :: ${snapshot.error}");
+                                  } else {
+                                    return Text("${snapshot.data}");
+                                  }
+                                } else {
+                                  return CircularProgressIndicator();
+                                }
+                              },
                             ),
 
                             const SizedBox(),
@@ -251,7 +351,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   }
 
   // bottom sheet call
-  showCallBottomSheet() {
+  showCallBottomSheet(List<Map<String, dynamic>> contacts) {
     showModalBottomSheet(
       context: context,
       useSafeArea: true,
@@ -267,15 +367,12 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                 spacing: 1.0,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  ...List.generate(
-                    2,
-                    (index) => SizedBox(
-                      child: ListTile(
-                        title: Text("+977 ${(index + 1) * 785412}"),
-                        trailing: OutlinedButton(
-                          onPressed: () {},
-                          child: const Text("Call Now"),
-                        ),
+                  ...contacts.map(
+                    (contact) => ListTile(
+                      title: Text(contact['contact']),
+                      trailing: OutlinedButton(
+                        onPressed: () {},
+                        child: const Text("Call Now"),
                       ),
                     ),
                   ),

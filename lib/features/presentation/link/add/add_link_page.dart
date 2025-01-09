@@ -39,12 +39,17 @@ class _AddLinkPageState extends State<AddLinkPage> {
 
   @override
   void dispose() {
+    _resetData();
+    super.dispose();
+  }
+
+  // functions
+  _resetData() {
     nameController.clear();
     phoneController.clear();
     emailController.clear();
     noteController.clear();
     category = "others";
-    super.dispose();
   }
 
   @override
@@ -53,6 +58,7 @@ class _AddLinkPageState extends State<AddLinkPage> {
     var themeContext = Theme.of(context);
     var colorScheme = Theme.of(context).colorScheme;
     var textTheme = Theme.of(context).textTheme;
+    var scaffoldMessenger = ScaffoldMessenger.of(context);
 
     return Scaffold(
       backgroundColor: themeContext.canvasColor,
@@ -115,6 +121,7 @@ class _AddLinkPageState extends State<AddLinkPage> {
                     hintText: "Phone Number",
                     leadingIcon: Icons.call_outlined,
                     leadingIconColor: Colors.green,
+                    textInputType: TextInputType.number,
                   ),
 
                   //   category
@@ -137,6 +144,9 @@ class _AddLinkPageState extends State<AddLinkPage> {
                           color: Colors.blue,
                         ),
                         menuStyle: MenuStyle(
+                          backgroundColor: WidgetStatePropertyAll(
+                            colorScheme.surface,
+                          ),
                           shape: WidgetStateProperty.all(
                             RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(16.0),
@@ -149,6 +159,7 @@ class _AddLinkPageState extends State<AddLinkPage> {
                             category = newValue!;
                           });
                         },
+                        initialSelection: category,
                         dropdownMenuEntries: [
                           DropdownMenuEntry(value: 'family', label: 'Family'),
                           DropdownMenuEntry(value: 'friend', label: 'Friend'),
@@ -171,6 +182,7 @@ class _AddLinkPageState extends State<AddLinkPage> {
                     hintText: "Email Address",
                     leadingIcon: Icons.email_outlined,
                     leadingIconColor: Colors.orangeAccent,
+                    textInputType: TextInputType.emailAddress,
                   ),
 
                   // note
@@ -198,20 +210,16 @@ class _AddLinkPageState extends State<AddLinkPage> {
                       width: mediaQuery.size.width / 2 - 26,
                       child: TextButton(
                         style: TextButton.styleFrom(
-                          // backgroundColor: Colors.red,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(32.0),
                           ),
                         ),
-                        onPressed: () {
-                          //   clear values
-                          Navigator.pop(context);
-                        },
+                        onPressed: () => Navigator.pop(context),
                         child: const Text("Cancel"),
                       ),
                     ),
 
-                    // button :: save
+                    // button :: save || update
                     SizedBox(
                       height: 50.0,
                       width: mediaQuery.size.width / 2 - 26,
@@ -221,17 +229,87 @@ class _AddLinkPageState extends State<AddLinkPage> {
                             borderRadius: BorderRadius.circular(32.0),
                           ),
                         ),
-                        onPressed: () {
-                          //   get values
-                          developer.log("Name : ${nameController.text}");
-                          developer
-                              .log("Phone number : ${phoneController.text}");
-                          developer.log("Category : $category");
-                          developer
-                              .log("Email address : ${emailController.text}");
-                          developer.log("Note: ${noteController.text}");
+                        onPressed: () async {
+                          String response = "";
+
+                          if (scaffoldMessenger.mounted) {
+                            scaffoldMessenger.hideCurrentSnackBar();
+                          }
+
+                          // phone number is mandatory
+                          if (phoneController.text.isEmpty) {
+                            scaffoldMessenger.showSnackBar(
+                              SnackBar(
+                                behavior: SnackBarBehavior.floating,
+                                content:
+                                    const Text("Enter the phone number first."),
+                              ),
+                            );
+                            return;
+                          }
+
+                          // link data
+                          var linkData = {
+                            'name': nameController.text.isNotEmpty
+                                ? nameController.text.toString()
+                                : "unknown",
+                            'category': category,
+                            'email': emailController.text.toString(),
+                            'note': noteController.text.toString(),
+                          };
+
+                          developer.log("Link data: $linkData");
+
+                          if (widget.task == "add") {
+                            // add link
+                            int linkId =
+                                await localDataStorage.insertLink(linkData);
+
+                            developer.log("Link ID :: $linkId");
+
+                            if (linkId != 0) {
+                              // contact data
+                              Map<String, dynamic> contactData = {
+                                'country': 'nepal',
+                                'contact': phoneController.text.toString(),
+                              };
+
+                              developer.log("Contact data: $contactData");
+
+                              int contactId = await localDataStorage
+                                  .insertContact(linkId, contactData);
+
+                              developer.log("Contact id :: $contactId");
+
+                              if (context.mounted) {
+                                if (contactId != 0) {
+                                  response = "success";
+                                  FocusScope.of(context).unfocus();
+                                  _resetData();
+                                }
+                              }
+                            }
+                          } else {
+                            response = await localDataStorage.updateContact(
+                                widget.id, linkData);
+                          }
+
+                          if (context.mounted) {
+                            scaffoldMessenger.showSnackBar(
+                              SnackBar(
+                                behavior: SnackBarBehavior.floating,
+                                content: widget.task == "add"
+                                    ? Text(response == "success"
+                                        ? "Link added successfully."
+                                        : "Link couldn't be added.")
+                                    : Text(response == "success"
+                                        ? "Link updated successfully."
+                                        : "Link couldn't be updated."),
+                              ),
+                            );
+                          }
                         },
-                        child: const Text("Save"),
+                        child: Text(widget.task == "add" ? "Save" : "Update"),
                       ),
                     ),
                   ],

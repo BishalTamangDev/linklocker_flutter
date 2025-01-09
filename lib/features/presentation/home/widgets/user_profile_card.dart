@@ -94,12 +94,14 @@ class _UserProfileCardState extends State<UserProfileCard> {
                           style: Theme.of(context).textTheme.bodyLarge,
                         ),
                       ),
-                      trailing: IconButton(
-                        onPressed: () {
-                          showUserQrCode(snapshot.data!['name']);
-                        },
-                        icon: Icon(Icons.share),
-                      ),
+                      trailing: snapshot.data['user_id'] == null
+                          ? null
+                          : IconButton(
+                              onPressed: () {
+                                showUserQrCode(snapshot.data!['name']);
+                              },
+                              icon: Icon(Icons.share),
+                            ),
                       onTap: () {
                         if (snapshot.data['user_id'] == null) {
                           context.push('/profile/add').then((_) {

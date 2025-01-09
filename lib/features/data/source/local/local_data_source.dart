@@ -41,22 +41,22 @@ class LocalDataSource {
         bool userTblResponse = await dbPath
             .execute(
                 "CREATE TABLE $userTblName (user_id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, contact TEXT, email TEXT)")
-            .then((onValue) => true)
-            .catchError((error) => false);
+            .then((_) => true)
+            .catchError((_) => false);
 
         // create link table
         bool linkTblResponse = await dbPath
             .execute(
                 "CREATE TABLE $linkTblName (link_id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, category TEXT, email TEXT, date_of_birth TEXT, note TEXT)")
-            .then((onValue) => true)
-            .catchError((error) => false);
+            .then((_) => true)
+            .catchError((_) => false);
 
         // create contact table
         bool contactTblResponse = await dbPath
             .execute(
                 "CREATE TABLE $contactTblName (contact_id INTEGER PRIMARY KEY AUTOINCREMENT, link_id INTEGER, contact TEXT, country TEXT)")
-            .then((onValue) => true)
-            .catchError((error) => false);
+            .then((_) => true)
+            .catchError((_) => false);
 
         // debugging
         developer.log(userTblResponse
@@ -88,20 +88,19 @@ class LocalDataSource {
   Future<void> resetDb() async {
     Database? tempDb = await getDb();
 
-    int rowAffected1 = await tempDb.delete(userTblName);
-    int rowAffected2 = await tempDb.delete(linkTblName);
-    int rowAffected3 = await tempDb.delete(contactTblName);
+    bool userTableResponse = await resetUserTable();
+    bool linkTableResponse = await resetLinkTable();
+    bool contactTableResponse = await resetContactTable();
 
-    bool response1 = rowAffected1 > 0 ? true : false;
-    bool response2 = rowAffected2 > 0 ? true : false;
-    bool response3 = rowAffected3 > 0 ? true : false;
-
-    developer
-        .log(response1 ? "user table reset successfully" : "user rest failed");
-    developer
-        .log(response2 ? "link table reset successfully" : "link rest failed");
-    developer.log(
-        response3 ? "contact table reset successfully" : "contact rest failed");
+    developer.log(userTableResponse
+        ? "user table reset successfully"
+        : "user rest failed");
+    developer.log(linkTableResponse
+        ? "link table reset successfully"
+        : "link rest failed");
+    developer.log(contactTableResponse
+        ? "contact table reset successfully"
+        : "contact rest failed");
   }
 
 //   user table
@@ -160,21 +159,30 @@ class LocalDataSource {
     return response;
   }
 
-//   links
-// insert link
-  Future<String> insertLink(Map<String, dynamic> data) async {
+//   reset user table
+  Future<bool> resetUserTable() async {
     Database tempDb = await getDb();
 
-    String response = await tempDb
-        .insert(linkTblName, data)
-        .then((onValue) => "success")
-        .catchError((error) => error);
+    bool reset = await tempDb
+        .delete(userTblName)
+        .then((_) => true)
+        .catchError((_) => false);
 
-    return response;
+    developer.log(
+        reset ? "User table reset successfully!" : "Couldn't reset user table");
+
+    return reset;
+  }
+
+//   links
+// insert link
+  Future<int> insertLink(Map<String, dynamic> data) async {
+    Database tempDb = await getDb();
+    return await tempDb.insert(linkTblName, data);
   }
 
 // update link
-  Future<String> updateLink(int link_id, dynamic data) async {
+  Future<String> updateLink(int linkId, dynamic data) async {
     Database tempDb = await getDb();
 
     String response = await tempDb
@@ -182,7 +190,7 @@ class LocalDataSource {
           linkTblName,
           data,
           where: "link_id = ?",
-          whereArgs: [link_id],
+          whereArgs: [linkId],
         )
         .then((onValue) => "success")
         .catchError((error) => error);
@@ -190,19 +198,31 @@ class LocalDataSource {
     return response;
   }
 
-// get all links
+  // get all links
   Future<List<Map<String, dynamic>>> getLinks() async {
+    await Future.delayed(const Duration(seconds: 3));
+
     Database tempDb = await getDb();
 
-    List<Map<String, dynamic>> data = [];
+    List<Map<String, dynamic>> data = await tempDb.query(linkTblName);
 
-    data = await tempDb.query(linkTblName);
+    // convert data into mutable data
+    List<Map<String, dynamic>> mutableData = data.map((datum) {
+      return {
+        ...datum,
+      };
+    }).toList();
 
-    return data;
+    // fetch contacts for each link
+    for (var datum in mutableData) {
+      datum['contacts'] = await getContacts(datum['link_id']);
+    }
+
+    return mutableData;
   }
 
 // get link
-  Future<Map<String, dynamic>> getLink(int link_id) async {
+  Future<Map<String, dynamic>> getLink(int linkId) async {
     Database tempDb = await getDb();
 
     Map<String, dynamic> data = {};
@@ -210,7 +230,7 @@ class LocalDataSource {
     List<dynamic> links = await tempDb.query(
       linkTblName,
       where: "link_id = ?",
-      whereArgs: [link_id],
+      whereArgs: [linkId],
     );
 
     for (var link in links) {
@@ -221,14 +241,14 @@ class LocalDataSource {
   }
 
 // delete link
-  Future<String> deleteLink(int id) async {
+  Future<String> deleteLink(int linkId) async {
     Database tempDb = await getDb();
 
     String response = await tempDb
         .delete(
           linkTblName,
           where: "link_id = ?",
-          whereArgs: [id],
+          whereArgs: [linkId],
         )
         .then((onValue) => "success")
         .catchError((error) => error);
@@ -236,23 +256,40 @@ class LocalDataSource {
     return response;
   }
 
-// contacts
-// insert contact
-  Future<String> insertContact(dynamic data) async {
+  //   reset link table
+  Future<bool> resetLinkTable() async {
     Database tempDb = await getDb();
 
-    String response = await tempDb
-        .insert(contactTblName, data)
-        .then((onValue) => "success")
-        .catchError(
-          (error) => error,
-        );
+    bool reset = await tempDb
+        .delete(linkTblName)
+        .then((_) => true)
+        .catchError((_) => false);
 
-    return response;
+    developer.log(
+        reset ? "Link table reset successfully!" : "Couldn't reset link table");
+
+    return reset;
   }
 
-  // get contacts
-  Future<List<Map<String, dynamic>>> getContacts(int link_id) async {
+// contacts
+// insert contact
+  Future<int> insertContact(int linkId, Map<String, dynamic> data) async {
+    Database tempDb = await getDb();
+
+    data['link_id'] = linkId;
+
+    developer.log("Contact data :: $data");
+
+    int id = await tempDb
+        .insert(contactTblName, data)
+        .then((id) => id)
+        .catchError((_) => 0);
+
+    return id;
+  }
+
+  // get all contacts :: temporary
+  Future<List<Map<String, dynamic>>> getAllContacts() async {
     Database tempDb = await getDb();
 
     List<Map<String, dynamic>> data = await tempDb.query(contactTblName);
@@ -260,8 +297,23 @@ class LocalDataSource {
     return data;
   }
 
+  // get contacts
+  Future<List<Map<String, dynamic>>> getContacts(int linkId) async {
+    Database tempDb = await getDb();
+
+    List<Map<String, dynamic>> data = [];
+
+    data = await tempDb.query(
+      contactTblName,
+      where: "link_id = ?",
+      whereArgs: [linkId],
+    );
+
+    return data;
+  }
+
   // get contact
-  Future<Map<String, dynamic>> getContact(int contact_id) async {
+  Future<Map<String, dynamic>> getContact(int contactId) async {
     Map<String, dynamic> data = {};
 
     Database tempDb = await getDb();
@@ -269,7 +321,7 @@ class LocalDataSource {
     List<Map<String, dynamic>> contacts = await tempDb.query(
       contactTblName,
       where: "contact_id = ?",
-      whereArgs: [contact_id],
+      whereArgs: [contactId],
     );
 
     for (var contact in contacts) {
@@ -321,5 +373,21 @@ class LocalDataSource {
         .catchError((error) => error);
 
     return response;
+  }
+
+  //   reset contact table
+  Future<bool> resetContactTable() async {
+    Database tempDb = await getDb();
+
+    bool reset = await tempDb
+        .delete(contactTblName)
+        .then((_) => true)
+        .catchError((_) => false);
+
+    developer.log(reset
+        ? "Contact table reset successfully!"
+        : "Couldn't reset contact table");
+
+    return reset;
   }
 }
