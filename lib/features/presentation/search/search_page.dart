@@ -2,6 +2,11 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:linklocker/features/data/source/local/local_data_source.dart';
+import 'package:linklocker/features/presentation/home/widgets/link_widget.dart';
+import 'package:linklocker/features/presentation/search/widgets/no_data_widget.dart';
+import 'package:linklocker/features/presentation/search/widgets/search_error_widget.dart';
+import 'package:linklocker/features/presentation/search/widgets/searching_widget.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
@@ -12,9 +17,30 @@ class SearchPage extends StatefulWidget {
 
 class _SearchPageState extends State<SearchPage> {
   // variable
+  bool searched = false;
   bool hasText = false;
-
+  bool searchByString = true;
   var searchController = TextEditingController();
+  var localDataSource = LocalDataSource.getInstance();
+
+  late Future<List<Map<String, dynamic>>> _links;
+
+  @override
+  void initState() {
+    super.initState();
+    _links = localDataSource.searchLink(title: '');
+  }
+
+  // search link
+  _searchLink(String title) {
+    setState(() {
+      _links = localDataSource.searchLink(title: title);
+      searched = title.isEmpty ? false : true;
+    });
+  }
+
+  // search contact
+  _searchContact() {}
 
   @override
   Widget build(BuildContext context) {
@@ -30,6 +56,7 @@ class _SearchPageState extends State<SearchPage> {
             setState(() {
               hasText = newValue.isEmpty ? false : true;
             });
+            _searchLink(newValue);
           },
           decoration: InputDecoration(
             border: InputBorder.none,
@@ -47,12 +74,10 @@ class _SearchPageState extends State<SearchPage> {
                           //   clear search text
                           searchController.clear();
                           hasText = false;
+                          _searchLink("");
                         });
                       },
-                      child: Icon(
-                        Icons.add,
-                        color: colorScheme.onSecondary,
-                      ),
+                      child: Icon(Icons.add),
                     ),
                   ),
           ),
@@ -63,39 +88,88 @@ class _SearchPageState extends State<SearchPage> {
         ),
         backgroundColor: Theme.of(context).canvasColor,
         elevation: 1,
+        shadowColor: colorScheme.surface,
         actions: [
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.more_vert),
-          ),
+          // IconButton(
+          //   onPressed: () {},
+          //   icon: const Icon(Icons.more_vert),
+          // ),
         ],
       ),
 
       backgroundColor: Theme.of(context).canvasColor,
 
       //   body
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              Container(
-                color: colorScheme.surface,
-                child: ListTile(
-                  onTap: () => context.push('/link/view/1'),
-                  leading: CircleAvatar(
-                    radius: 24.0,
-                    backgroundColor: colorScheme.secondary,
-                    foregroundImage: AssetImage('assets/images/blank_user.png'),
-                  ),
-                  title: Text("Alexander Bose - 1"),
-                  subtitle: const Text("someone@gmail.com"),
-                ),
+      body: !searched
+          ? Center(
+              child: Opacity(
+                opacity: 0.6,
+                child: Text("Search links by name or contact number."),
               ),
-            ],
-          ),
-        ),
-      ),
+            )
+          : FutureBuilder(
+              future: _links,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.done) {
+                  if (snapshot.hasError) {
+                    return SearchErrorWidget();
+                  } else {
+                    if (snapshot.data!.isEmpty) {
+                      return NoDataWidget();
+                    } else {
+                      //   has data
+                      return Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: ListView.builder(
+                          shrinkWrap: true,
+                          itemCount: snapshot.data!.length,
+                          itemBuilder: (context, index) {
+                            // link datum
+                            var data = snapshot.data![index];
+
+                            int id = data['link_id'];
+
+                            Map<String, dynamic> linkWidgetData = {
+                              'name': data['name'],
+                              'email': data['email'],
+                              'contacts': data['contacts'],
+                            };
+
+                            return Column(
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(12.0),
+                                  child: Container(
+                                    color:
+                                        Theme.of(context).colorScheme.surface,
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 5.0),
+                                      child: LinkWidget(
+                                        linkWidgetData: linkWidgetData,
+                                        navCallBack: () => context
+                                            .push('/link/view/', extra: data)
+                                            .then((_) => _searchLink(
+                                                searchController.text
+                                                    .toString())),
+                                        callCallBack: () {},
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 10.0),
+                              ],
+                            );
+                          },
+                        ),
+                      );
+                    }
+                  }
+                } else {
+                  return SearchingWidget();
+                }
+              },
+            ),
     );
   }
 }

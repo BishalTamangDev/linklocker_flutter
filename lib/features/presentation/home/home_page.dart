@@ -173,7 +173,9 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                                       icon: Icon(Icons.add),
                                     ),
                                     IconButton(
-                                      onPressed: () => context.push('/search'),
+                                      onPressed: () => context
+                                          .push('/search')
+                                          .then((_) => _refreshLinkList()),
                                       icon: Icon(Icons.search_outlined),
                                     ),
                                   ],
@@ -194,56 +196,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                           children: [
                             // user profile card
                             UserProfileCard(),
-
-                            //   reset database
-                            ElevatedButton(
-                              onPressed: () async {
-                                await localDataSource.resetDb();
-                              },
-                              child: const Text("Reset Database"),
-                            ),
-
-                            Opacity(
-                              opacity: 0.5,
-                              child: Text("RESET TABLE"),
-                            ),
-
-                            // reset tables
-                            Wrap(
-                              spacing: 10.0,
-                              // runSpacing: 10.0,
-                              children: [
-                                ElevatedButton(
-                                  onPressed: () async {
-                                    _refreshLinkList();
-                                  },
-                                  child: const Text("Refresh"),
-                                ),
-                                ElevatedButton(
-                                  onPressed: () async {
-                                    await localDataSource.resetUserTable();
-                                  },
-                                  child: const Text("User Table"),
-                                ),
-                                ElevatedButton(
-                                  onPressed: () async {
-                                    await localDataSource.resetLinkTable();
-
-                                    if (context.mounted) {
-                                      _refreshLinkList();
-                                    }
-                                  },
-                                  child: const Text("Reset Link Table"),
-                                ),
-                                ElevatedButton(
-                                  onPressed: () async {
-                                    await localDataSource.resetContactTable();
-                                    _refreshContactLists();
-                                  },
-                                  child: const Text("Reset Contact Table"),
-                                ),
-                              ],
-                            ),
 
                             Padding(
                               padding:
@@ -326,25 +278,57 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
                             const SizedBox(),
 
-                            // temporary :: contacts
-                            FutureBuilder(
-                              future: _contactLists,
-                              builder: (context, snapshot) {
-                                if (snapshot.connectionState ==
-                                    ConnectionState.done) {
-                                  if (snapshot.hasError) {
-                                    return Text(
-                                        "Couldn't fetch contacts. Error :: ${snapshot.error}");
-                                  } else {
-                                    return Text("${snapshot.data}");
-                                  }
-                                } else {
-                                  return CircularProgressIndicator();
-                                }
-                              },
-                            ),
+                            // reset tables
+                            Wrap(
+                              spacing: 10.0,
+                              // runSpacing: 10.0,
+                              children: [
+                                // refresh
+                                OutlinedButton(
+                                  onPressed: () async {
+                                    _refreshLinkList();
+                                  },
+                                  child: const Text("Refresh"),
+                                ),
 
-                            const SizedBox(),
+                                // reset user table
+                                OutlinedButton(
+                                  onPressed: () async {
+                                    await localDataSource.resetUserTable();
+                                  },
+                                  child: const Text("Reset User Table"),
+                                ),
+
+                                // reset link table
+                                OutlinedButton(
+                                  onPressed: () async {
+                                    await localDataSource.resetLinkTable();
+
+                                    if (context.mounted) {
+                                      _refreshLinkList();
+                                    }
+                                  },
+                                  child: const Text("Reset Link Table"),
+                                ),
+
+                                // reset contact table
+                                OutlinedButton(
+                                  onPressed: () async {
+                                    await localDataSource.resetContactTable();
+                                    _refreshContactLists();
+                                  },
+                                  child: const Text("Reset Contact Table"),
+                                ),
+
+                                //   reset database
+                                OutlinedButton(
+                                  onPressed: () async {
+                                    await localDataSource.resetDb();
+                                  },
+                                  child: const Text("Reset Database"),
+                                ),
+                              ],
+                            ),
                           ],
                         ),
                       ),

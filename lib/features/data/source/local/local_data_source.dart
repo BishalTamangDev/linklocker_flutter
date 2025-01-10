@@ -151,7 +151,7 @@ class LocalDataSource {
 
     String response = await tempDb
         .delete(userTblName)
-        .then((onValue) => "success")
+        .then((_) => "success")
         .catchError((error) => error);
 
     return response;
@@ -205,11 +205,11 @@ class LocalDataSource {
     List<Map<String, dynamic>> data = await tempDb.query(linkTblName);
 
     // convert data into mutable data
-    List<Map<String, dynamic>> mutableData = data.map((datum) {
-      return {
-        ...datum,
-      };
-    }).toList();
+    List<Map<String, dynamic>> mutableData = data
+        .map(
+          (datum) => {...datum},
+        )
+        .toList();
 
     // fetch contacts for each link
     for (var datum in mutableData) {
@@ -252,6 +252,38 @@ class LocalDataSource {
         .catchError((error) => error);
 
     return response;
+  }
+
+  // search link
+  Future<List<Map<String, dynamic>>> searchLink({required String title}) async {
+    List<Map<String, dynamic>> data = [];
+    List<Map<String, dynamic>> finalData = [];
+
+    if (title == "") {
+      return [];
+    }
+
+    var tempDb = await getDb();
+
+    data = await tempDb.query(
+      linkTblName,
+      where: "name LIKE ?",
+      whereArgs: ["%$title%"],
+    );
+
+    // convert data into mutable data
+    List<Map<String, dynamic>> mutableData =
+        data.map((datum) => {...datum}).toList();
+
+    developer.log("Final data :: $mutableData");
+
+    for (var datum in mutableData) {
+      // fetch contacts
+      datum['contacts'] = await getContacts(datum['link_id']);
+      finalData.add(datum);
+    }
+
+    return finalData;
   }
 
   //   reset link table
@@ -342,14 +374,14 @@ class LocalDataSource {
   }
 
   // delete contact
-  Future<String> deleteContact(int contact_id) async {
+  Future<String> deleteContact(int contactId) async {
     Database tempDb = await getDb();
 
     String response = await tempDb
         .delete(
           contactTblName,
           where: "contact_id = ?",
-          whereArgs: [contact_id],
+          whereArgs: [contactId],
         )
         .then((onValue) => "success")
         .catchError((error) => error);
@@ -358,14 +390,14 @@ class LocalDataSource {
   }
 
   // delete contacts by link
-  Future<String> deleteContacts(int link_id) async {
+  Future<String> deleteContacts(int linkId) async {
     Database tempDb = await getDb();
 
     String response = await tempDb
         .delete(
           contactTblName,
           where: "link_id = ?",
-          whereArgs: [link_id],
+          whereArgs: [linkId],
         )
         .then((onValue) => "success")
         .catchError((error) => error);

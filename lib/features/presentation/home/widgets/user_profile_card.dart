@@ -86,7 +86,7 @@ class _UserProfileCardState extends State<UserProfileCard> {
                         ),
                       ),
                       title: Text(userModel.getName?.isNotEmpty
-                          ? userModel.name.toString()
+                          ? AppFunctions.getCapitalizedWords(userModel.name.toString())
                           : "-"),
                       subtitle: Opacity(
                         opacity: 0.6,

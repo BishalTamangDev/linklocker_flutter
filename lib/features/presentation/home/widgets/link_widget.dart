@@ -32,12 +32,9 @@ class LinkWidget extends StatelessWidget {
               (contact) => Text(
                   "${AppFunctions.getCountryCode(contact['country'])} ${contact['contact']}"),
             ),
-            // Text("${linkWidgetData['contacts']}"),
           ],
         ),
       ),
-      // subtitle: Text("${linkWidgetData['contacts']}"),
-      // subtitle: Text(linkWidgetData['email']),
       trailing: IconButton(
         color: AppConstants.callIconColor,
         onPressed: callCallBack,
