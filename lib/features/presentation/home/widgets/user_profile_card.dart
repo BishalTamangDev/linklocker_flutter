@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:linklocker/core/constants/app_functions.dart';
 import 'package:linklocker/features/data/models/user_model.dart';
 import 'package:linklocker/features/data/source/local/local_data_source.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 class UserProfileCard extends StatefulWidget {
   const UserProfileCard({super.key});
@@ -66,9 +67,17 @@ class _UserProfileCardState extends State<UserProfileCard> {
                   ),
                 );
               } else {
-                userModel.setId = snapshot.data['user_id'] ?? 0;
-                userModel.setName = snapshot.data['name'] ?? "";
-                userModel.setEmail = snapshot.data['email'] ?? "";
+                var userData = snapshot.data;
+
+                userModel.setId = userData['user_id'] ?? 0;
+                userModel.setName = userData['name'] ?? "";
+                userModel.setEmail = userData['email'] ?? "";
+
+                var qrData = {
+                  'contact': '-',
+                  'email_address': userModel.getEmail,
+                  'name': userModel.getName,
+                };
 
                 return Column(
                   spacing: 12.0,
@@ -85,9 +94,8 @@ class _UserProfileCardState extends State<UserProfileCard> {
                           backgroundImage: AssetImage('assets/images/user.jpg'),
                         ),
                       ),
-
                       title: Text(
-                        AppFunctions.getCapitalizedWords(snapshot.data['name']),
+                        AppFunctions.getCapitalizedWords(userData['name']),
                       ),
                       subtitle: Opacity(
                         opacity: 0.6,
@@ -96,16 +104,16 @@ class _UserProfileCardState extends State<UserProfileCard> {
                           style: Theme.of(context).textTheme.bodyLarge,
                         ),
                       ),
-                      trailing: snapshot.data['user_id'] == null
+                      trailing: userData['user_id'] == null
                           ? null
                           : IconButton(
                               onPressed: () {
-                                showUserQrCode(snapshot.data!['name']);
+                                showUserQrCode(qrData);
                               },
                               icon: Icon(Icons.share),
                             ),
                       onTap: () {
-                        if (snapshot.data['user_id'] == null) {
+                        if (userData['user_id'] == null) {
                           context.push('/profile/add').then((_) {
                             _refreshUserData();
                           });
@@ -148,7 +156,7 @@ class _UserProfileCardState extends State<UserProfileCard> {
   }
 
   // user qr code
-  void showUserQrCode(String username) {
+  void showUserQrCode(Map<String, dynamic> qrData) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -157,20 +165,18 @@ class _UserProfileCardState extends State<UserProfileCard> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Text(AppFunctions.getCapitalizedWords(username)),
-            Container(
+            Text(AppFunctions.getCapitalizedWords(qrData['name'])),
+            SizedBox(
               width: MediaQuery.of(context).size.width / 2.5,
               height: MediaQuery.of(context).size.width / 2.5,
-              decoration: BoxDecoration(
-                border: Border.all(
-                  width: 1.0,
-                  color: Theme.of(context).colorScheme.secondary,
+              child: Padding(
+                padding: const EdgeInsets.all(3.0),
+                child: QrImageView(
+                  data: qrData.toString(),
+                  version: QrVersions.auto,
+                  size: 200.0,
+                  backgroundColor: Colors.white,
                 ),
-                borderRadius: BorderRadius.circular(12.0),
-              ),
-              child: Icon(
-                Icons.qr_code_2,
-                size: MediaQuery.of(context).size.width / 2.75,
               ),
             ),
             Opacity(

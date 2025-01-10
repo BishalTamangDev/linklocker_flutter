@@ -8,7 +8,7 @@ class UserModel {
 
   get getName => name;
 
-  get getEmail => id;
+  get getEmail => email;
 
 //   setters
   set setId(int newId) {

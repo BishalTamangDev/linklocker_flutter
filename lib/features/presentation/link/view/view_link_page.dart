@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:linklocker/core/constants/app_constants.dart';
 import 'package:linklocker/core/constants/app_functions.dart';
 import 'package:linklocker/features/data/source/local/local_data_source.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 class ViewLinkPage extends StatefulWidget {
   const ViewLinkPage({super.key, required this.link});
@@ -400,16 +401,34 @@ class _ViewLinkPageState extends State<ViewLinkPage> {
 
   // show qr code
   void showQrCode() {
+    var qrData = {
+      'name': widget.link['name'],
+      'contact': widget.link['contacts'],
+      'email': widget.link['email'],
+    };
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         content: Column(
+          spacing: 4.0,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text("Username"),
-            Icon(
-              Icons.qr_code_2,
-              size: 160.0,
+            Text(AppFunctions.getCapitalizedWords(qrData['name'])),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(16.0),
+              child: SizedBox(
+                width: MediaQuery.of(context).size.width / 2.5,
+                height: MediaQuery.of(context).size.width / 2.5,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: QrImageView(
+                    data: qrData.toString(),
+                    version: QrVersions.auto,
+                    size: 200.0,
+                    backgroundColor: Colors.white,
+                  ),
+                ),
+              ),
             ),
             Text("Scan the QR code above."),
           ],
