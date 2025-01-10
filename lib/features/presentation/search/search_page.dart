@@ -1,3 +1,4 @@
+import 'dart:developer' as developer;
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -24,6 +25,7 @@ class _SearchPageState extends State<SearchPage> {
   var localDataSource = LocalDataSource.getInstance();
 
   late Future<List<Map<String, dynamic>>> _links;
+  late Future<List<Map<String, dynamic>>> _contacts;
 
   @override
   void initState() {
@@ -40,7 +42,12 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   // search contact
-  _searchContact() {}
+  _searchContact(String number) {
+    setState(() {
+      _contacts = localDataSource.searchContact(number);
+      searched = number.isEmpty ? false : true;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -53,10 +60,26 @@ class _SearchPageState extends State<SearchPage> {
           autofocus: true,
           controller: searchController,
           onChanged: (newValue) {
+            newValue = newValue.trim();
+            setState(() {
+              searchByString = true;
+            });
+
             setState(() {
               hasText = newValue.isEmpty ? false : true;
             });
-            _searchLink(newValue);
+
+            try {
+              int.parse(newValue);
+              developer.log("Search by number");
+              _searchContact(newValue);
+              setState(() {
+                searchByString = false;
+              });
+            } catch (error) {
+              _searchLink(newValue);
+              developer.log("Search by name or email.");
+            }
           },
           decoration: InputDecoration(
             border: InputBorder.none,
@@ -108,7 +131,7 @@ class _SearchPageState extends State<SearchPage> {
               ),
             )
           : FutureBuilder(
-              future: _links,
+              future: searchByString ? _links : _contacts,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.done) {
                   if (snapshot.hasError) {
@@ -149,8 +172,12 @@ class _SearchPageState extends State<SearchPage> {
                                         linkWidgetData: linkWidgetData,
                                         navCallBack: () => context
                                             .push('/link/view/', extra: data)
-                                            .then((_) => _searchLink(
-                                                searchController.text
+                                            .then((_) => searchByString
+                                                ? _searchLink(searchController
+                                                    .text
+                                                    .toString())
+                                                : _searchContact(searchController
+                                                    .text
                                                     .toString())),
                                         callCallBack: () {},
                                       ),
@@ -173,3 +200,72 @@ class _SearchPageState extends State<SearchPage> {
     );
   }
 }
+
+//
+// FutureBuilder
+// (
+// future: _contacts,
+// builder: (context, snapshot) {
+// if (snapshot.connectionState == ConnectionState.done) {
+// if (snapshot.hasError) {
+// return SearchErrorWidget();
+// } else {
+// if (snapshot.data!.isEmpty) {
+// return NoDataWidget();
+// } else {
+// //   has data
+// return Padding(
+// padding: const EdgeInsets.all(16.0),
+// child: ListView.builder(
+// shrinkWrap: true,
+// itemCount: snapshot.data!.length,
+// itemBuilder: (context, index) {
+// // link datum
+// var data = snapshot.data![index];
+//
+// int id = data['link_id'];
+//
+// Map<String, dynamic> linkWidgetData = {
+// 'name': data['name'],
+// 'email': data['email'],
+// 'contacts': data['contacts'],
+// };
+//
+// return Column(
+// children: [
+// ClipRRect(
+// borderRadius: BorderRadius.circular(12.0),
+// child: Container(
+// color: Theme.of(context)
+//     .colorScheme
+//     .surface,
+// child: Padding(
+// padding: const EdgeInsets.symmetric(
+// vertical: 5.0),
+// child: LinkWidget(
+// linkWidgetData: linkWidgetData,
+// navCallBack: () => context
+//     .push('/link/view/',
+// extra: data)
+//     .then((_) => _searchLink(
+// searchController.text
+//     .toString())),
+// callCallBack: () {},
+// ),
+// ),
+// ),
+// ),
+// const SizedBox(height: 10.0),
+// ],
+// );
+// },
+// ),
+// );
+// }
+// }
+// } else {
+// return SearchingWidget();
+// }
+// },
+// )
+// ,

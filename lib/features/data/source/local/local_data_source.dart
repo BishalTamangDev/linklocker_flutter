@@ -405,6 +405,35 @@ class LocalDataSource {
     return response;
   }
 
+  // search contacts
+  Future<List<Map<String, dynamic>>> searchContact(String contact) async {
+    Database tempDb = await getDb();
+    List<Map<String, dynamic>> finalData = [];
+    // get contacts
+    List<Map<String, dynamic>> contacts = await tempDb.query(
+      contactTblName,
+      where: "contact LIKE ?",
+      whereArgs: ["%$contact%"],
+    );
+
+    // get link details
+    for (var contact in contacts) {
+      var link = await getLink(contact['link_id']);
+
+      Map<String, dynamic> mutableLink = {};
+      mutableLink.addAll(link);
+
+      List<Map<String, dynamic>> contactIntoList = [];
+      contactIntoList.add(contact);
+
+      mutableLink['contacts'] = contactIntoList;
+
+      finalData.add(mutableLink);
+    }
+
+    return finalData;
+  }
+
   //   reset contact table
   Future<bool> resetContactTable() async {
     Database tempDb = await getDb();

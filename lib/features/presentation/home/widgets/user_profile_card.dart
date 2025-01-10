@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:linklocker/core/constants/app_constants.dart';
 import 'package:linklocker/core/constants/app_functions.dart';
 import 'package:linklocker/features/data/models/user_model.dart';
 import 'package:linklocker/features/data/source/local/local_data_source.dart';
@@ -81,13 +80,15 @@ class _UserProfileCardState extends State<UserProfileCard> {
                         tag: 'profile_picture',
                         child: CircleAvatar(
                           radius: 32.0,
-                          backgroundColor: Theme.of(context).colorScheme.surface,
+                          backgroundColor:
+                              Theme.of(context).colorScheme.surface,
                           backgroundImage: AssetImage('assets/images/user.jpg'),
                         ),
                       ),
-                      title: Text(userModel.getName?.isNotEmpty
-                          ? AppFunctions.getCapitalizedWords(userModel.name.toString())
-                          : "-"),
+
+                      title: Text(
+                        AppFunctions.getCapitalizedWords(snapshot.data['name']),
+                      ),
                       subtitle: Opacity(
                         opacity: 0.6,
                         child: Text(

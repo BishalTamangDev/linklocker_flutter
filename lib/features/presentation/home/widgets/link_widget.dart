@@ -24,7 +24,7 @@ class LinkWidget extends StatelessWidget {
         backgroundColor: Theme.of(context).colorScheme.surface,
         foregroundImage: AssetImage('assets/images/blank_user.png'),
       ),
-      title: Text(linkWidgetData['name']),
+      title: Text(AppFunctions.getCapitalizedWords(linkWidgetData['name'])),
       subtitle: SizedBox(
         child: Wrap(
           children: [
