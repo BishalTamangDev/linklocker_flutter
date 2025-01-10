@@ -10,4 +10,14 @@ class AppConstants {
   static Color birthdayIconColor = Colors.lightBlue;
   static Color categoryIconColor = Colors.deepPurple;
   static Color noteIconColor = Colors.grey;
+
+//   categories
+  static List<String> categoryList = [
+    'family',
+    'friend',
+    'relative',
+    'coworker',
+    'teacher',
+    'other',
+  ];
 }

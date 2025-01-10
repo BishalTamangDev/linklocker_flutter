@@ -86,8 +86,6 @@ class LocalDataSource {
 
 //   reset database
   Future<void> resetDb() async {
-    Database? tempDb = await getDb();
-
     bool userTableResponse = await resetUserTable();
     bool linkTableResponse = await resetLinkTable();
     bool contactTableResponse = await resetContactTable();

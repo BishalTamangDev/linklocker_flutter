@@ -1,3 +1,5 @@
+import 'dart:developer' as developer;
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:linklocker/features/data/models/contact_model.dart';
@@ -261,53 +263,51 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                                     if (snapshot.data!.isEmpty) {
                                       return EmptyLinksWidget();
                                     } else {
-                                      // return Text("${snapshot.data}");
+                                      developer
+                                          .log("All data :: ${snapshot.data}");
                                       return ClipRRect(
                                         borderRadius:
                                             BorderRadius.circular(16.0),
-                                        child: Container(
-                                          color: colorScheme.surface,
-                                          child: ListView.builder(
-                                            shrinkWrap: true,
-                                            physics:
-                                                const NeverScrollableScrollPhysics(),
-                                            itemCount: snapshot.data!.length,
-                                            itemBuilder: (context, index) {
-                                              // map data
-                                              var data = snapshot.data![index];
+                                        child: ListView.separated(
+                                          separatorBuilder: (context, index) =>
+                                              Divider(height: 1.0),
+                                          shrinkWrap: true,
+                                          padding: EdgeInsets.zero,
+                                          physics:
+                                              const NeverScrollableScrollPhysics(),
+                                          itemCount: snapshot.data!.length,
+                                          itemBuilder: (context, index) {
+                                            // map data
+                                            var data = snapshot.data![index];
 
-                                              var linkModel = LinkModel();
-                                              var contactModel = ContactModel();
+                                            var linkModel = LinkModel();
+                                            var contactModel = ContactModel();
 
-                                              linkModel.linkId =
-                                                  data['link_id'];
-                                              linkModel.name = data['name'];
-                                              linkModel.category =
-                                                  data['category'];
-                                              linkModel.emailAddress =
-                                                  data['email'];
+                                            linkModel.linkId = data['link_id'];
+                                            linkModel.name = data['name'];
+                                            linkModel.category =
+                                                data['category'];
+                                            linkModel.emailAddress =
+                                                data['email'];
 
-                                              var contacts = data['contacts'];
+                                            var contacts = data['contacts'];
 
-                                              // return Text("$contacts");
-
-                                              return Container(
-                                                color: colorScheme.surface,
-                                                child: LinkWidget(
-                                                  linkWidgetData: {
-                                                    'name': linkModel.name,
-                                                    'email':
-                                                        linkModel.emailAddress,
-                                                  },
-                                                  navCallBack: () => context.push(
-                                                      '/link/view/${linkModel.linkId}'),
-                                                  callCallBack: () =>
-                                                      showCallBottomSheet(
-                                                          contacts),
-                                                ),
-                                              );
-                                            },
-                                          ),
+                                            return Container(
+                                              color: colorScheme.surface,
+                                              child: LinkWidget(
+                                                linkWidgetData: {
+                                                  'name': linkModel.name,
+                                                  'email':
+                                                      linkModel.emailAddress,
+                                                },
+                                                navCallBack: () => context.push(
+                                                    '/link/view/${linkModel.linkId}'),
+                                                callCallBack: () =>
+                                                    showCallBottomSheet(
+                                                        contacts),
+                                              ),
+                                            );
+                                          },
                                         ),
                                       );
                                     }

@@ -2,6 +2,8 @@ import 'dart:developer' as developer;
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:linklocker/core/constants/app_constants.dart';
+import 'package:linklocker/core/constants/app_functions.dart';
 import 'package:linklocker/features/data/models/user_model.dart';
 import 'package:linklocker/features/data/source/local/local_data_source.dart';
 import 'package:linklocker/shared/widgets/custom_text_field_widget.dart';
@@ -25,6 +27,7 @@ class _AddLinkPageState extends State<AddLinkPage> {
   String category = "other";
   var userModel = UserModel();
   var localDataStorage = LocalDataSource.getInstance();
+  DateTime? birthday;
 
   // controllers
   var nameController = TextEditingController();
@@ -49,7 +52,8 @@ class _AddLinkPageState extends State<AddLinkPage> {
     phoneController.clear();
     emailController.clear();
     noteController.clear();
-    category = "others";
+    birthday = null;
+    category = "other";
   }
 
   @override
@@ -124,52 +128,52 @@ class _AddLinkPageState extends State<AddLinkPage> {
                     textInputType: TextInputType.number,
                   ),
 
-                  //   category
+                  // category
                   ClipRRect(
                     borderRadius: BorderRadius.circular(16.0),
                     child: Container(
-                      decoration: BoxDecoration(
-                        color: colorScheme.surface,
-                        border: Border.all(
-                          width: 2.0,
-                          color: colorScheme.surface,
+                      color: colorScheme.surface,
+                      width: mediaQuery.size.width - 32,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16.0,
+                          vertical: 8.0,
                         ),
-                        borderRadius: BorderRadius.circular(16.0),
-                      ),
-                      child: DropdownMenu(
-                        width: mediaQuery.size.width,
-                        label: const Text("Category"),
-                        leadingIcon: Icon(
-                          Icons.group_add_outlined,
-                          color: Colors.blue,
-                        ),
-                        menuStyle: MenuStyle(
-                          backgroundColor: WidgetStatePropertyAll(
-                            colorScheme.surface,
-                          ),
-                          shape: WidgetStateProperty.all(
-                            RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16.0),
+                        child: Row(
+                          spacing: 16.0,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.group_add_outlined,
+                              color: AppConstants.categoryIconColor,
                             ),
-                          ),
+                            Expanded(
+                              child: DropdownButton(
+                                value: category,
+                                elevation: 3,
+                                hint: const Text("Category"),
+                                underline: Container(height: 0),
+                                isExpanded: true,
+                                style: textTheme.bodyMedium,
+                                items: [
+                                  ...AppConstants.categoryList.map(
+                                    (category) => DropdownMenuItem(
+                                      value: category,
+                                      child: Text(
+                                          "${category[0].toUpperCase()}${category.substring(1)}"),
+                                    ),
+                                  ),
+                                ],
+                                onChanged: (newCategory) {
+                                  setState(() {
+                                    category = newCategory!;
+                                  });
+                                },
+                              ),
+                            ),
+                          ],
                         ),
-                        trailingIcon: Icon(Icons.keyboard_arrow_down_sharp),
-                        onSelected: (newValue) {
-                          setState(() {
-                            category = newValue!;
-                          });
-                        },
-                        initialSelection: category,
-                        dropdownMenuEntries: [
-                          DropdownMenuEntry(value: 'family', label: 'Family'),
-                          DropdownMenuEntry(value: 'friend', label: 'Friend'),
-                          DropdownMenuEntry(
-                              value: 'relative', label: 'Relative'),
-                          DropdownMenuEntry(value: 'teacher', label: 'Teacher'),
-                          DropdownMenuEntry(
-                              value: 'coworker', label: 'Coworker'),
-                          DropdownMenuEntry(value: 'other', label: 'Other'),
-                        ],
                       ),
                     ),
                   ),
@@ -183,6 +187,73 @@ class _AddLinkPageState extends State<AddLinkPage> {
                     leadingIcon: Icons.email_outlined,
                     leadingIconColor: Colors.orangeAccent,
                     textInputType: TextInputType.emailAddress,
+                  ),
+
+                  //   date of birth
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(16.0),
+                    child: Container(
+                      width: mediaQuery.size.width,
+                      color: colorScheme.surface,
+                      child: Padding(
+                        padding: const EdgeInsets.only(
+                          top: 18.0,
+                          bottom: 20.0,
+                          left: 10.0,
+                          right: 18.0,
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.max,
+                          spacing: 16.0,
+                          children: [
+                            Icon(
+                              Icons.cake_outlined,
+                              color: AppConstants.birthdayIconColor,
+                            ),
+                            Expanded(
+                              child: Row(
+                                mainAxisSize: MainAxisSize.max,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text("Birthday"),
+                                  InkWell(
+                                    onTap: () async {
+                                      developer.log("Select birthday!");
+
+                                      final DateTime? pickedDate =
+                                          await showDatePicker(
+                                        context: context,
+                                        initialDate: birthday,
+                                        firstDate:
+                                            DateTime(DateTime.now().year - 50),
+                                        lastDate: DateTime.now(),
+                                      );
+
+                                      if (pickedDate != null) {
+                                        setState(() {
+                                          birthday = pickedDate;
+                                        });
+                                        developer
+                                            .log("Picked data :: $pickedDate");
+                                      } else {
+                                        developer.log("No date selected!");
+                                      }
+                                    },
+                                    child: Text(
+                                      birthday == null
+                                          ? "Select birthday"
+                                          : AppFunctions.getFormattedDate(
+                                              birthday!),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
 
                   // note
@@ -254,6 +325,8 @@ class _AddLinkPageState extends State<AddLinkPage> {
                                 ? nameController.text.toString()
                                 : "unknown",
                             'category': category,
+                            'date_of_birth':
+                                birthday != null ? birthday.toString() : "",
                             'email': emailController.text.toString(),
                             'note': noteController.text.toString(),
                           };
