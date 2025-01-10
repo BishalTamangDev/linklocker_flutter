@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:linklocker/core/constants/app_constants.dart';
+import 'package:linklocker/core/constants/app_functions.dart';
 
 class LinkWidget extends StatelessWidget {
   const LinkWidget({
@@ -24,7 +25,19 @@ class LinkWidget extends StatelessWidget {
         foregroundImage: AssetImage('assets/images/blank_user.png'),
       ),
       title: Text(linkWidgetData['name']),
-      subtitle: Text(linkWidgetData['email']),
+      subtitle: SizedBox(
+        child: Wrap(
+          children: [
+            ...linkWidgetData['contacts'].map(
+              (contact) => Text(
+                  "${AppFunctions.getCountryCode(contact['country'])} ${contact['contact']}"),
+            ),
+            // Text("${linkWidgetData['contacts']}"),
+          ],
+        ),
+      ),
+      // subtitle: Text("${linkWidgetData['contacts']}"),
+      // subtitle: Text(linkWidgetData['email']),
       trailing: IconButton(
         color: AppConstants.callIconColor,
         onPressed: callCallBack,

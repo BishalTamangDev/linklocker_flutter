@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:linklocker/core/constants/app_constants.dart';
 import 'package:linklocker/core/constants/app_functions.dart';
+import 'package:linklocker/features/data/source/local/local_data_source.dart';
 
 class ViewLinkPage extends StatefulWidget {
   const ViewLinkPage({super.key, required this.link});
@@ -16,7 +17,8 @@ class ViewLinkPage extends StatefulWidget {
 
 class _ViewLinkPageState extends State<ViewLinkPage> {
   // variables
-  late final Map<String, dynamic> data;
+  Map<String, dynamic> data = {};
+  var localDataSource = LocalDataSource.getInstance();
 
   @override
   void initState() {
@@ -105,7 +107,6 @@ class _ViewLinkPageState extends State<ViewLinkPage> {
                                 title: Text("-"),
                               )
                             : SizedBox(),
-
                         ...data['contacts'].map(
                           (contact) => ListTile(
                             onTap: () {
@@ -217,7 +218,127 @@ class _ViewLinkPageState extends State<ViewLinkPage> {
                   ),
                 ),
               ),
-              // const SizedBox(height: 32.0),
+
+              // delete link
+              OutlinedButton(
+                onPressed: () async {
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      content: Column(
+                        spacing: 16.0,
+                        mainAxisSize: MainAxisSize.min,
+                        // crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          CircleAvatar(
+                            radius: 32.0,
+                            backgroundColor:
+                                Theme.of(context).colorScheme.surface,
+                            child: Icon(
+                              Icons.delete,
+                              color: Colors.red,
+                            ),
+                          ),
+                          const Text(
+                              "Are you sure you want to delete this link?"),
+                          Row(
+                            spacing: 6.0,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              // delete
+                              Expanded(
+                                child: SizedBox(
+                                  height: 44.0,
+                                  child: OutlinedButton(
+                                    onPressed: () async {
+                                      developer
+                                          .log("Link id :: ${data['link_id']}");
+
+                                      // context.pop();
+                                      String linkDelete = await localDataSource
+                                          .deleteLink(data['link_id']);
+                                      String contactDelete = "";
+
+                                      if (linkDelete == "success") {
+                                        //   delete all contacts of this link
+                                        contactDelete = await localDataSource
+                                            .deleteContacts(data['link_id']);
+                                      }
+
+                                      if (context.mounted) {
+                                        context.pop();
+
+                                        var scaffoldMessenger =
+                                            ScaffoldMessenger.of(context);
+
+                                        if (scaffoldMessenger.mounted) {
+                                          scaffoldMessenger
+                                              .hideCurrentSnackBar();
+                                        }
+
+                                        scaffoldMessenger.showSnackBar(
+                                          SnackBar(
+                                            content: Text(contactDelete ==
+                                                    "success"
+                                                ? "Link deleted successfully!"
+                                                : "Link couldn't be deleted!"),
+                                          ),
+                                        );
+
+                                        context.pop();
+                                      }
+                                    },
+                                    style: OutlinedButton.styleFrom(
+                                      overlayColor: Colors.red,
+                                    ),
+                                    child: Text(
+                                      "Yes, Delete Now",
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium,
+                                    ),
+                                  ),
+                                ),
+                              ),
+
+                              // keep
+                              Expanded(
+                                child: SizedBox(
+                                  height: 44.0,
+                                  child: OutlinedButton(
+                                    onPressed: () => context.pop(),
+                                    style: OutlinedButton.styleFrom(
+                                      overlayColor: Colors.green,
+                                    ),
+                                    child: Text(
+                                      "No, Keep it!",
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Colors.red,
+                  // backgroundColor: Colors.red,
+                  overlayColor: Colors.red,
+                ),
+                child: const Row(
+                  spacing: 8.0,
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Text("Delete Contact"),
+                  ],
+                ),
+              ),
             ],
           ),
         ),

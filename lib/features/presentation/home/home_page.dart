@@ -299,11 +299,15 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                                                   'name': linkModel.name,
                                                   'email':
                                                       linkModel.emailAddress,
+                                                  'contacts': contacts
                                                 },
-                                                navCallBack: () => context.push(
-                                                  '/link/view',
-                                                  extra: data,
-                                                ),
+                                                navCallBack: () => context
+                                                    .push(
+                                                      '/link/view',
+                                                      extra: data,
+                                                    )
+                                                    .then((_) =>
+                                                        _refreshLinkList()),
                                                 callCallBack: () =>
                                                     showCallBottomSheet(
                                                         contacts),

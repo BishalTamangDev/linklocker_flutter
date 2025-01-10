@@ -81,8 +81,7 @@ class _UserProfileCardState extends State<UserProfileCard> {
                         tag: 'profile_picture',
                         child: CircleAvatar(
                           radius: 32.0,
-                          backgroundColor:
-                              Theme.of(context).colorScheme.secondary,
+                          backgroundColor: Theme.of(context).colorScheme.surface,
                           backgroundImage: AssetImage('assets/images/user.jpg'),
                         ),
                       ),
@@ -127,11 +126,15 @@ class _UserProfileCardState extends State<UserProfileCard> {
                 children: [
                   const SizedBox(),
                   ListTile(
-                    leading: CircularProgressIndicator(),
+                    leading: CircleAvatar(
+                      radius: 32.0,
+                      backgroundColor: Theme.of(context).canvasColor,
+                    ),
                     title: Opacity(
                       opacity: 0.6,
                       child: Text("Loading your details..."),
                     ),
+                    subtitle: Text(""),
                   ),
                   const SizedBox(),
                 ],
