@@ -198,7 +198,7 @@ class LocalDataSource {
 
   // get all links
   Future<List<Map<String, dynamic>>> getLinks() async {
-    await Future.delayed(const Duration(seconds: 3));
+    // await Future.delayed(const Duration(seconds: 3));
 
     Database tempDb = await getDb();
 

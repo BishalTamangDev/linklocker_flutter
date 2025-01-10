@@ -61,11 +61,13 @@ class AppRoute {
         builder: (context, state) => PageNotFoundPage(),
         routes: [
           GoRoute(
-            path: '/view/:id',
+            path: '/view',
             pageBuilder: (context, state) {
-              final int id = int.parse(state.pathParameters['id']!);
+              final Map<String, dynamic> link = state.extra as Map<String, dynamic>;
               return CustomTransitionPage(
-                child: ViewLinkPage(id: id),
+                child: ViewLinkPage(
+                  link: link,
+                ),
                 transitionsBuilder: immediateTransitionBuilder,
               );
             },

@@ -301,7 +301,9 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                                                       linkModel.emailAddress,
                                                 },
                                                 navCallBack: () => context.push(
-                                                    '/link/view/${linkModel.linkId}'),
+                                                  '/link/view',
+                                                  extra: data,
+                                                ),
                                                 callCallBack: () =>
                                                     showCallBottomSheet(
                                                         contacts),

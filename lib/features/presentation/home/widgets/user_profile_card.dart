@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:linklocker/core/constants/app_constants.dart';
+import 'package:linklocker/core/constants/app_functions.dart';
 import 'package:linklocker/features/data/models/user_model.dart';
 import 'package:linklocker/features/data/source/local/local_data_source.dart';
 
@@ -151,9 +153,10 @@ class _UserProfileCardState extends State<UserProfileCard> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Text(username),
+            Text(AppFunctions.getCapitalizedWords(username)),
             Container(
-              width: 200,
+              width: MediaQuery.of(context).size.width / 2.5,
+              height: MediaQuery.of(context).size.width / 2.5,
               decoration: BoxDecoration(
                 border: Border.all(
                   width: 1.0,
@@ -161,9 +164,9 @@ class _UserProfileCardState extends State<UserProfileCard> {
                 ),
                 borderRadius: BorderRadius.circular(12.0),
               ),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Image.asset('assets/images/app_qr.png'),
+              child: Icon(
+                Icons.qr_code_2,
+                size: MediaQuery.of(context).size.width / 2.75,
               ),
             ),
             Opacity(

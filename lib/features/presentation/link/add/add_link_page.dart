@@ -219,8 +219,6 @@ class _AddLinkPageState extends State<AddLinkPage> {
                                   Text("Birthday"),
                                   InkWell(
                                     onTap: () async {
-                                      developer.log("Select birthday!");
-
                                       final DateTime? pickedDate =
                                           await showDatePicker(
                                         context: context,
@@ -236,8 +234,6 @@ class _AddLinkPageState extends State<AddLinkPage> {
                                         });
                                         developer
                                             .log("Picked data :: $pickedDate");
-                                      } else {
-                                        developer.log("No date selected!");
                                       }
                                     },
                                     child: Text(
@@ -266,126 +262,130 @@ class _AddLinkPageState extends State<AddLinkPage> {
                     leadingIconColor: Colors.grey,
                     maxLine: 6,
                   ),
+
+                  const SizedBox(),
                 ],
               ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16.0),
-                child: Row(
-                  spacing: 8.0,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  mainAxisSize: MainAxisSize.max,
-                  children: [
-                    // button :: cancel
-                    SizedBox(
-                      height: 50.0,
-                      width: mediaQuery.size.width / 2 - 26,
-                      child: TextButton(
-                        style: TextButton.styleFrom(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(32.0),
-                          ),
-                        ),
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text("Cancel"),
+            ],
+          ),
+        ),
+      ),
+      bottomNavigationBar: Container(
+        color: Theme.of(context).canvasColor,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: 16.0,
+            vertical: 8.0,
+          ),
+          child: Row(
+            spacing: 4.0,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisSize: MainAxisSize.max,
+            children: [
+              // button :: cancel
+              Expanded(
+                child: SizedBox(
+                  height: 50.0,
+                  child: TextButton(
+                    style: TextButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(32.0),
                       ),
                     ),
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text("Cancel"),
+                  ),
+                ),
+              ),
 
-                    // button :: save || update
-                    SizedBox(
-                      height: 50.0,
-                      width: mediaQuery.size.width / 2 - 26,
-                      child: TextButton(
-                        style: TextButton.styleFrom(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(32.0),
+              // button :: save || update
+              Expanded(
+                child: SizedBox(
+                  height: 50.0,
+                  child: TextButton(
+                    style: TextButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(32.0),
+                      ),
+                    ),
+                    onPressed: () async {
+                      String response = "";
+
+                      if (scaffoldMessenger.mounted) {
+                        scaffoldMessenger.hideCurrentSnackBar();
+                      }
+
+                      // phone number is mandatory
+                      if (phoneController.text.isEmpty) {
+                        scaffoldMessenger.showSnackBar(
+                          SnackBar(
+                            behavior: SnackBarBehavior.floating,
+                            content:
+                                const Text("Enter the phone number first."),
                           ),
-                        ),
-                        onPressed: () async {
-                          String response = "";
+                        );
+                        return;
+                      }
 
-                          if (scaffoldMessenger.mounted) {
-                            scaffoldMessenger.hideCurrentSnackBar();
-                          }
+                      // link data
+                      var linkData = {
+                        'name': nameController.text.isNotEmpty
+                            ? nameController.text.toString()
+                            : "unknown",
+                        'category': category,
+                        'date_of_birth':
+                            birthday != null ? birthday.toString() : "",
+                        'email': emailController.text.toString() ?? "",
+                        'note': noteController.text.toString() ?? "",
+                      };
 
-                          // phone number is mandatory
-                          if (phoneController.text.isEmpty) {
-                            scaffoldMessenger.showSnackBar(
-                              SnackBar(
-                                behavior: SnackBarBehavior.floating,
-                                content:
-                                    const Text("Enter the phone number first."),
-                              ),
-                            );
-                            return;
-                          }
+                      developer.log("Link data: $linkData");
 
-                          // link data
-                          var linkData = {
-                            'name': nameController.text.isNotEmpty
-                                ? nameController.text.toString()
-                                : "unknown",
-                            'category': category,
-                            'date_of_birth':
-                                birthday != null ? birthday.toString() : "",
-                            'email': emailController.text.toString(),
-                            'note': noteController.text.toString(),
+                      if (widget.task == "add") {
+                        // add link
+                        int linkId =
+                            await localDataStorage.insertLink(linkData);
+
+                        if (linkId != 0) {
+                          // contact data
+                          Map<String, dynamic> contactData = {
+                            'country': 'nepal',
+                            'contact': phoneController.text.toString(),
                           };
 
-                          developer.log("Link data: $linkData");
-
-                          if (widget.task == "add") {
-                            // add link
-                            int linkId =
-                                await localDataStorage.insertLink(linkData);
-
-                            developer.log("Link ID :: $linkId");
-
-                            if (linkId != 0) {
-                              // contact data
-                              Map<String, dynamic> contactData = {
-                                'country': 'nepal',
-                                'contact': phoneController.text.toString(),
-                              };
-
-                              developer.log("Contact data: $contactData");
-
-                              int contactId = await localDataStorage
-                                  .insertContact(linkId, contactData);
-
-                              developer.log("Contact id :: $contactId");
-
-                              if (context.mounted) {
-                                if (contactId != 0) {
-                                  response = "success";
-                                  FocusScope.of(context).unfocus();
-                                  _resetData();
-                                }
-                              }
-                            }
-                          } else {
-                            response = await localDataStorage.updateContact(
-                                widget.id, linkData);
-                          }
+                          int contactId = await localDataStorage.insertContact(
+                              linkId, contactData);
 
                           if (context.mounted) {
-                            scaffoldMessenger.showSnackBar(
-                              SnackBar(
-                                behavior: SnackBarBehavior.floating,
-                                content: widget.task == "add"
-                                    ? Text(response == "success"
-                                        ? "Link added successfully."
-                                        : "Link couldn't be added.")
-                                    : Text(response == "success"
-                                        ? "Link updated successfully."
-                                        : "Link couldn't be updated."),
-                              ),
-                            );
+                            if (contactId != 0) {
+                              response = "success";
+                              FocusScope.of(context).unfocus();
+                              _resetData();
+                            }
                           }
-                        },
-                        child: Text(widget.task == "add" ? "Save" : "Update"),
-                      ),
-                    ),
-                  ],
+                        }
+                      } else {
+                        response = await localDataStorage.updateContact(
+                            widget.id, linkData);
+                      }
+
+                      if (context.mounted) {
+                        scaffoldMessenger.showSnackBar(
+                          SnackBar(
+                            behavior: SnackBarBehavior.floating,
+                            content: widget.task == "add"
+                                ? Text(response == "success"
+                                    ? "Link added successfully."
+                                    : "Link couldn't be added.")
+                                : Text(response == "success"
+                                    ? "Link updated successfully."
+                                    : "Link couldn't be updated."),
+                          ),
+                        );
+                      }
+                    },
+                    child: Text(widget.task == "add" ? "Save" : "Update"),
+                  ),
                 ),
               ),
             ],

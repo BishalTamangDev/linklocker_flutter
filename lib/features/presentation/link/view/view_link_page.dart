@@ -3,17 +3,27 @@ import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:linklocker/core/constants/app_constants.dart';
+import 'package:linklocker/core/constants/app_functions.dart';
 
 class ViewLinkPage extends StatefulWidget {
-  const ViewLinkPage({super.key, required this.id});
+  const ViewLinkPage({super.key, required this.link});
 
-  final int id;
+  final Map<String, dynamic> link;
 
   @override
   State<ViewLinkPage> createState() => _ViewLinkPageState();
 }
 
 class _ViewLinkPageState extends State<ViewLinkPage> {
+  // variables
+  late final Map<String, dynamic> data;
+
+  @override
+  void initState() {
+    data = widget.link;
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     var mediaQuery = MediaQuery.of(context);
@@ -22,7 +32,23 @@ class _ViewLinkPageState extends State<ViewLinkPage> {
     var textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(top: 16.0),
+        child: CircleAvatar(
+          radius: 26.0,
+          backgroundColor: colorScheme.surface,
+          child: InkWell(
+            highlightColor: Colors.red,
+            onTap: () => context.pop(),
+            child: Icon(Icons.arrow_back_ios_new_rounded),
+          ),
+        ),
+      ),
+
+      floatingActionButtonLocation: FloatingActionButtonLocation.startTop,
+
       backgroundColor: themeContext.canvasColor,
+
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -30,7 +56,7 @@ class _ViewLinkPageState extends State<ViewLinkPage> {
             spacing: 16.0,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 32.0),
+              const SizedBox(height: 64.0),
 
               //   profile picture
               Center(
@@ -44,7 +70,7 @@ class _ViewLinkPageState extends State<ViewLinkPage> {
                           AssetImage('assets/images/blank_user.png'),
                     ),
                     Text(
-                      "Bishal Tamang - ${widget.id}",
+                      AppFunctions.getCapitalizedWords(data['name']),
                       style: textTheme.headlineSmall!.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -67,9 +93,21 @@ class _ViewLinkPageState extends State<ViewLinkPage> {
                     ),
                     child: Column(
                       children: [
-                        ...List.generate(
-                          3,
-                          (context) => ListTile(
+                        data['contacts'].length == 0
+                            ? ListTile(
+                                onTap: () {
+                                  developer.log("Call now");
+                                },
+                                leading: Icon(
+                                  Icons.phone_outlined,
+                                  color: Colors.green,
+                                ),
+                                title: Text("-"),
+                              )
+                            : SizedBox(),
+
+                        ...data['contacts'].map(
+                          (contact) => ListTile(
                             onTap: () {
                               developer.log("Call now");
                             },
@@ -77,17 +115,10 @@ class _ViewLinkPageState extends State<ViewLinkPage> {
                               Icons.phone_outlined,
                               color: Colors.green,
                             ),
-                            title: Text("+977 9658745215"),
+                            title: Text(
+                                "${AppFunctions.getCountryCode(contact['country'])} ${contact['contact']}"),
                           ),
                         ),
-                        // Divider(),
-                        // ListTile(
-                        //   leading: Icon(
-                        //     Icons.phone_outlined,
-                        //     color: AppConstants.callIconColor,
-                        //   ),
-                        //   title: Text("+977 1234567895"),
-                        // ),
                       ],
                     ),
                   ),
@@ -107,7 +138,7 @@ class _ViewLinkPageState extends State<ViewLinkPage> {
                         Icons.email_outlined,
                         color: AppConstants.emailIconColor,
                       ),
-                      title: Text("someone@gmail.com"),
+                      title: Text(data['email'] != "" ? data['email'] : "-"),
                     ),
                   ),
                 ),
@@ -126,7 +157,13 @@ class _ViewLinkPageState extends State<ViewLinkPage> {
                         Icons.cake_outlined,
                         color: AppConstants.birthdayIconColor,
                       ),
-                      title: Text("17th June, 2002"),
+                      title: Text(
+                        data['date_of_birth'] == ""
+                            ? "-"
+                            : AppFunctions.getFormattedDate(
+                                DateTime.parse(data['date_of_birth']),
+                              ),
+                      ),
                     ),
                   ),
                 ),
@@ -145,7 +182,9 @@ class _ViewLinkPageState extends State<ViewLinkPage> {
                         Icons.group_add_outlined,
                         color: AppConstants.categoryIconColor,
                       ),
-                      title: Text("Family"),
+                      title: Text(
+                        AppFunctions.getCapitalizedWord(data['category']),
+                      ),
                     ),
                   ),
                 ),
@@ -169,23 +208,23 @@ class _ViewLinkPageState extends State<ViewLinkPage> {
                       title: Opacity(
                         opacity: 0.5,
                         child: Text(
-                          "A good friend is like a lighthouse in the storm, guiding you back to calm waters. They celebrate your joys as if they were their own and stand steadfast during your struggles. A good friend listens without judgment, speaks truth with kindness, and reminds you of your worth when you’ve forgotten it. They bring laughter to your darkest days and make life’s best moments even brighter. With a good friend, you never walk alone—because even in silence, their presence feels like home.",
+                          data['note'] != ""
+                              ? AppFunctions.getCapitalizedWord(data['note'])
+                              : "-",
                         ),
                       ),
                     ),
                   ),
                 ),
               ),
-
-              const SizedBox(height: 56.0),
+              // const SizedBox(height: 32.0),
             ],
           ),
         ),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
 
       // bottom actions
-      floatingActionButton: Container(
+      bottomNavigationBar: Container(
         color: themeContext.canvasColor,
         width: mediaQuery.size.width,
         child: Padding(
@@ -208,7 +247,7 @@ class _ViewLinkPageState extends State<ViewLinkPage> {
 
               //   edit
               InkWell(
-                onTap: () => context.push('/link/edit/${widget.id}'),
+                onTap: () => context.push('/link/edit', extra: data),
                 splashColor: colorScheme.surface,
                 highlightColor: colorScheme.surface,
                 child: Column(
@@ -244,11 +283,13 @@ class _ViewLinkPageState extends State<ViewLinkPage> {
       context: context,
       builder: (context) => AlertDialog(
         content: Column(
-          spacing: 16.0,
           mainAxisSize: MainAxisSize.min,
           children: [
             Text("Username"),
-            Image.asset('assets/images/app_qr.png'),
+            Icon(
+              Icons.qr_code_2,
+              size: 160.0,
+            ),
             Text("Scan the QR code above."),
           ],
         ),
