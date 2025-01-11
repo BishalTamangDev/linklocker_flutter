@@ -1,4 +1,6 @@
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:linklocker/core/constants/app_constants.dart';
 
 class AppFunctions {
   static String getFormattedDate(DateTime dateTime) =>
@@ -41,5 +43,13 @@ class AppFunctions {
     }
 
     return finalString;
+  }
+
+//   category color
+  static Color getCategoryColor(String title) {
+    Map<String, dynamic> categoryMap = AppConstants.categoryColor.firstWhere(
+        (map) => map.containsKey(title),
+        orElse: () => {title: Colors.grey});
+    return categoryMap[title];
   }
 }

@@ -20,4 +20,13 @@ class AppConstants {
     'teacher',
     'other',
   ];
+
+  static List<Map<String, Color>> categoryColor = [
+    {'family': Colors.purple},
+    {'friend': Colors.red},
+    {'relative': Colors.orange},
+    {'coworker': Colors.blue},
+    {'teacher': Colors.deepPurple},
+    {'other': Colors.grey},
+  ];
 }

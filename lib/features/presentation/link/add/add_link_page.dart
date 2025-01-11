@@ -12,11 +12,16 @@ class AddLinkPage extends StatefulWidget {
   const AddLinkPage({
     super.key,
     this.task = "add",
-    this.id = 0,
-  });
+    Map<String, dynamic>? data,
+  }) : linkData = data ??
+            const {
+              'id': 0,
+            };
 
   final String task;
-  final int id;
+
+  // final int id;
+  final Map<String, dynamic> linkData;
 
   @override
   State<AddLinkPage> createState() => _AddLinkPageState();
@@ -38,6 +43,19 @@ class _AddLinkPageState extends State<AddLinkPage> {
   @override
   void initState() {
     super.initState();
+
+    if (widget.task == "edit") {
+      nameController.text = widget.linkData['name'];
+      emailController.text = widget.linkData['email'];
+      noteController.text = widget.linkData['note'];
+      category = widget.linkData['category'];
+      birthday = widget.linkData['date_of_birth'] != null
+          ? DateTime.parse(widget.linkData['date_of_birth'])
+          : null;
+
+      //   contacts
+      phoneController.text = widget.linkData['contacts'][0]['contact'];
+    }
   }
 
   @override
@@ -365,8 +383,9 @@ class _AddLinkPageState extends State<AddLinkPage> {
                           }
                         }
                       } else {
-                        response = await localDataStorage.updateContact(
-                            widget.id, linkData);
+                        developer.log("Update link");
+                        // response = await localDataStorage.updateContact(linkData);
+                        return;
                       }
 
                       if (context.mounted) {

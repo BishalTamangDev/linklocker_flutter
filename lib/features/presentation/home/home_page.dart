@@ -26,8 +26,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   var localDataSource = LocalDataSource.getInstance();
 
   // future data
-  late Future<List<Map<dynamic, dynamic>>> _linkList;
-  late Future<List<Map<dynamic, dynamic>>> _contactLists;
+  late Future<List<Map<String, dynamic>>> _linkList;
+  late Future<List<Map<String, dynamic>>> _contactLists;
 
   @override
   void initState() {

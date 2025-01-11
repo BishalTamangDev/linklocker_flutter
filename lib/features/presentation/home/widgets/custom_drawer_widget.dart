@@ -1,9 +1,27 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
+import 'package:linklocker/core/constants/app_constants.dart';
+import 'package:linklocker/features/data/source/local/local_data_source.dart';
+import 'package:linklocker/features/presentation/home/widgets/drawer_category_widget.dart';
 
 import '../../../../config/themes/theme_constants.dart';
 
-class CustomDrawerWidget extends StatelessWidget {
+class CustomDrawerWidget extends StatefulWidget {
   const CustomDrawerWidget({super.key});
+
+  @override
+  State<CustomDrawerWidget> createState() => _CustomDrawerWidgetState();
+}
+
+class _CustomDrawerWidgetState extends State<CustomDrawerWidget> {
+  late Future<List<Map<String, dynamic>>> _chartData;
+
+  @override
+  void initState() {
+    super.initState();
+    _chartData = LocalDataSource.getInstance().getLinks();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,9 +42,18 @@ class CustomDrawerWidget extends StatelessWidget {
                     SizedBox(height: mediaQuery.padding.top * 2),
                     SizedBox(
                       width: mediaQuery.size.width / 2,
-                      child: Image.asset('assets/images/pie_chart.png'),
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          Image.asset('assets/images/pie_chart.png'),
+                          CircleAvatar(
+                            radius: 70.0,
+                            backgroundColor: Theme.of(context).canvasColor,
+                          ),
+                        ],
+                      ),
                     ),
-                    SizedBox(height: mediaQuery.padding.top),
+                    SizedBox(height: mediaQuery.padding.top * 1.5),
                   ],
                 ),
               ),
@@ -38,108 +65,11 @@ class CustomDrawerWidget extends StatelessWidget {
                   spacing: 16.0,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // family
-                    Row(
-                      spacing: 12.0,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Container(
-                          height: 16.0,
-                          width: 16.0,
-                          color: Colors.red,
-                        ),
-                        Expanded(
-                          child: Text(
-                            "Family",
-                            style: textTheme.titleLarge,
-                          ),
-                        ),
-                        Opacity(
-                          opacity: 0.6,
-                          child: Text(
-                            "100",
-                            style: textTheme.titleLarge,
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    //   friend
-                    Row(
-                      spacing: 12.0,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Container(
-                          height: 16.0,
-                          width: 16.0,
-                          color: Colors.green,
-                        ),
-                        Expanded(
-                          child: Text(
-                            "Friends",
-                            style: textTheme.titleLarge,
-                          ),
-                        ),
-                        Opacity(
-                          opacity: 0.6,
-                          child: Text(
-                            "54",
-                            style: textTheme.titleLarge,
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    // teachers
-                    Row(
-                      spacing: 12.0,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Container(
-                          height: 16.0,
-                          width: 16.0,
-                          color: Colors.orange,
-                        ),
-                        Expanded(
-                          child: Text(
-                            "Teachers",
-                            style: textTheme.titleLarge,
-                          ),
-                        ),
-                        Opacity(
-                          opacity: 0.6,
-                          child: Text(
-                            "76",
-                            style: textTheme.titleLarge,
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    //   others
-                    Row(
-                      spacing: 12.0,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Container(
-                          height: 16.0,
-                          width: 16.0,
-                          color: Colors.grey,
-                        ),
-                        Expanded(
-                          child: Text(
-                            "Others",
-                            style: textTheme.titleLarge,
-                          ),
-                        ),
-                        Opacity(
-                          opacity: 0.6,
-                          child: Text(
-                            "9",
-                            style: textTheme.titleLarge,
-                          ),
-                        ),
-                      ],
+                    ...AppConstants.categoryList.map(
+                      (category) => DrawerCategoryWidget(categoryData: {
+                        'title': category,
+                        'count': Random().nextInt(80),
+                      }),
                     ),
                   ],
                 ),

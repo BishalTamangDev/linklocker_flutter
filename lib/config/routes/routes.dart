@@ -63,7 +63,8 @@ class AppRoute {
           GoRoute(
             path: '/view',
             pageBuilder: (context, state) {
-              final Map<String, dynamic> link = state.extra as Map<String, dynamic>;
+              final Map<String, dynamic> link =
+                  state.extra as Map<String, dynamic>;
               return CustomTransitionPage(
                 child: ViewLinkPage(
                   link: link,
@@ -80,11 +81,11 @@ class AppRoute {
             ),
           ),
           GoRoute(
-            path: '/edit/:id',
+            path: '/edit',
             pageBuilder: (context, state) {
-              final int id = int.parse(state.pathParameters['id']!);
+              var linkData = state.extra as Map<String, dynamic>;
               return CustomTransitionPage(
-                child: AddLinkPage(task: "edit", id: id),
+                child: AddLinkPage(task: "edit", data: linkData),
                 transitionsBuilder: immediateTransitionBuilder,
               );
             },

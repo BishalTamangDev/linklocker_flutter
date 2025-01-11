@@ -1,4 +1,3 @@
-import 'dart:developer' as developer;
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -34,10 +33,10 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   // search link
-  _searchLink(String title) {
+  _searchLink(String title) async {
     setState(() {
-      _links = localDataSource.searchLink(title: title);
       searched = title.isEmpty ? false : true;
+      _links = localDataSource.searchLink(title: title);
     });
   }
 
@@ -59,7 +58,7 @@ class _SearchPageState extends State<SearchPage> {
         title: TextField(
           autofocus: true,
           controller: searchController,
-          onChanged: (newValue) {
+          onChanged: (newValue) async {
             newValue = newValue.trim();
             setState(() {
               searchByString = true;
@@ -71,14 +70,12 @@ class _SearchPageState extends State<SearchPage> {
 
             try {
               int.parse(newValue);
-              developer.log("Search by number");
               _searchContact(newValue);
               setState(() {
                 searchByString = false;
               });
             } catch (error) {
               _searchLink(newValue);
-              developer.log("Search by name or email.");
             }
           },
           decoration: InputDecoration(
@@ -176,9 +173,9 @@ class _SearchPageState extends State<SearchPage> {
                                                 ? _searchLink(searchController
                                                     .text
                                                     .toString())
-                                                : _searchContact(searchController
-                                                    .text
-                                                    .toString())),
+                                                : _searchContact(
+                                                    searchController.text
+                                                        .toString())),
                                         callCallBack: () {},
                                       ),
                                     ),

@@ -275,8 +275,6 @@ class LocalDataSource {
     List<Map<String, dynamic>> mutableData =
         data.map((datum) => {...datum}).toList();
 
-    developer.log("Final data :: $mutableData");
-
     for (var datum in mutableData) {
       // fetch contacts
       datum['contacts'] = await getContacts(datum['link_id']);

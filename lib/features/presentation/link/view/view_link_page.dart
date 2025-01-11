@@ -369,7 +369,7 @@ class _ViewLinkPageState extends State<ViewLinkPage> {
 
               //   edit
               InkWell(
-                onTap: () => context.push('/link/edit', extra: data),
+                onTap: () => context.push('/link/edit', extra: widget.link),
                 splashColor: colorScheme.surface,
                 highlightColor: colorScheme.surface,
                 child: Column(
