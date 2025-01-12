@@ -1,7 +1,9 @@
 import 'dart:developer' as developer;
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:linklocker/core/constants/app_constants.dart';
 import 'package:linklocker/core/constants/app_functions.dart';
 import 'package:linklocker/features/data/models/user_model.dart';
@@ -13,10 +15,7 @@ class AddLinkPage extends StatefulWidget {
     super.key,
     this.task = "add",
     Map<String, dynamic>? data,
-  }) : linkData = data ??
-            const {
-              'id': 0,
-            };
+  }) : linkData = data ?? const {'id': 0};
 
   final String task;
 
@@ -29,6 +28,7 @@ class AddLinkPage extends StatefulWidget {
 
 class _AddLinkPageState extends State<AddLinkPage> {
   // variables
+  Uint8List profilePicture = Uint8List(0);
   String category = "other";
   var userModel = UserModel();
   var localDataStorage = LocalDataSource.getInstance();
@@ -45,16 +45,7 @@ class _AddLinkPageState extends State<AddLinkPage> {
     super.initState();
 
     if (widget.task == "edit") {
-      nameController.text = widget.linkData['name'];
-      emailController.text = widget.linkData['email'];
-      noteController.text = widget.linkData['note'];
-      category = widget.linkData['category'];
-      birthday = widget.linkData['date_of_birth'] != null
-          ? DateTime.parse(widget.linkData['date_of_birth'])
-          : null;
-
-      //   contacts
-      phoneController.text = widget.linkData['contacts'][0]['contact'];
+      _backupData();
     }
   }
 
@@ -66,12 +57,49 @@ class _AddLinkPageState extends State<AddLinkPage> {
 
   // functions
   _resetData() {
-    nameController.clear();
-    phoneController.clear();
-    emailController.clear();
-    noteController.clear();
-    birthday = null;
-    category = "other";
+    setState(() {
+      nameController.clear();
+      phoneController.clear();
+      emailController.clear();
+      noteController.clear();
+      birthday = null;
+      category = "other";
+      profilePicture = Uint8List(0);
+    });
+  }
+
+  // backup data
+  _backupData() {
+    nameController.text = widget.linkData['name'];
+    emailController.text = widget.linkData['email'];
+    noteController.text = widget.linkData['note'];
+    category = widget.linkData['category'];
+    birthday = widget.linkData['date_of_birth'] != null
+        ? DateTime.parse(widget.linkData['date_of_birth'])
+        : null;
+
+    profilePicture = widget.linkData['profile_picture'];
+
+    //   contacts
+    phoneController.text = widget.linkData['contacts'][0]['contact'];
+  }
+
+  // select profile picture
+  Future<void> _pickImage() async {
+    developer.log("Pick image");
+    final imagePicker = ImagePicker();
+
+    final XFile? image =
+        await imagePicker.pickImage(source: ImageSource.gallery);
+
+    if (image != null) {
+      //   get bytes
+      var bytes = await image.readAsBytes();
+
+      setState(() {
+        profilePicture = bytes;
+      });
+    }
   }
 
   @override
@@ -113,10 +141,21 @@ class _AddLinkPageState extends State<AddLinkPage> {
                   const SizedBox(height: 32.0),
 
                   //   profile picture
-                  CircleAvatar(
-                    radius: 80.0,
-                    backgroundColor: colorScheme.surface,
-                    child: Icon(Icons.camera_alt_outlined),
+                  InkWell(
+                    onTap: _pickImage,
+                    splashColor: Colors.transparent,
+                    highlightColor: Colors.transparent,
+                    child: CircleAvatar(
+                      radius: 80.0,
+                      backgroundColor: colorScheme.surface,
+                      backgroundImage: profilePicture.isNotEmpty
+                          ? MemoryImage(profilePicture)
+                          : AssetImage(AppConstants.defaultUserImage),
+                      child: Icon(
+                        Icons.camera_alt_outlined,
+                        color: Colors.blue,
+                      ),
+                    ),
                   ),
 
                   Center(
@@ -355,6 +394,7 @@ class _AddLinkPageState extends State<AddLinkPage> {
                             birthday != null ? birthday.toString() : "",
                         'email': emailController.text.toString() ?? "",
                         'note': noteController.text.toString() ?? "",
+                        'profile_picture': profilePicture,
                       };
 
                       developer.log("Link data: $linkData");

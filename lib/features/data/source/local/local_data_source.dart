@@ -48,7 +48,7 @@ class LocalDataSource {
         // create link table
         bool linkTblResponse = await dbPath
             .execute(
-                "CREATE TABLE $linkTblName (link_id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, category TEXT, email TEXT, date_of_birth TEXT, note TEXT)")
+                "CREATE TABLE $linkTblName (link_id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, category TEXT, email TEXT, date_of_birth TEXT, note TEXT, profile_picture BLOB)")
             .then((_) => true)
             .catchError((_) => false);
 

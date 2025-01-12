@@ -1,9 +1,9 @@
 import 'dart:typed_data';
 
 class UserModel {
-  int? id;
-  String? name;
-  String? email;
+  int id;
+  String name;
+  String email;
   Uint8List? profilePicture;
 
 //   getters

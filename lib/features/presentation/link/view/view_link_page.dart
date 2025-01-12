@@ -69,8 +69,9 @@ class _ViewLinkPageState extends State<ViewLinkPage> {
                     CircleAvatar(
                       radius: 80.0,
                       backgroundColor: colorScheme.surface,
-                      backgroundImage:
-                          AssetImage(AppConstants.defaultUserImage),
+                      foregroundImage: data['profile_picture'].isNotEmpty
+                          ? MemoryImage(data['profile_picture'])
+                          : AssetImage(AppConstants.defaultUserImage),
                     ),
                     Text(
                       AppFunctions.getCapitalizedWords(data['name']),

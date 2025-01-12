@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 class LinkModel {
   int linkId;
   String name;
@@ -5,16 +7,18 @@ class LinkModel {
   String emailAddress;
   String note;
   DateTime? dateOfBirth;
+  Uint8List? profilePicture;
 
 //<editor-fold desc="Data Methods">
   LinkModel({
     this.linkId = 0,
     this.name = "",
-    this.category = "others",
+    this.category = "other",
     this.emailAddress = "",
-    DateTime? dateOfBirth,
     this.note = "",
-  }) : dateOfBirth = dateOfBirth ?? DateTime.fromMillisecondsSinceEpoch(0);
+    this.dateOfBirth,
+    this.profilePicture,
+  });
 
   @override
   bool operator ==(Object other) =>
@@ -26,7 +30,8 @@ class LinkModel {
           category == other.category &&
           emailAddress == other.emailAddress &&
           note == other.note &&
-          dateOfBirth == other.dateOfBirth);
+          dateOfBirth == other.dateOfBirth &&
+          profilePicture == other.profilePicture);
 
   @override
   int get hashCode =>
@@ -35,7 +40,8 @@ class LinkModel {
       category.hashCode ^
       emailAddress.hashCode ^
       note.hashCode ^
-      dateOfBirth.hashCode;
+      dateOfBirth.hashCode ^
+      profilePicture.hashCode;
 
   @override
   String toString() {
@@ -46,6 +52,7 @@ class LinkModel {
         ' emailAddress: $emailAddress,' +
         ' note: $note,' +
         ' dateOfBirth: $dateOfBirth,' +
+        ' profilePicture: $profilePicture,' +
         '}';
   }
 
@@ -56,6 +63,7 @@ class LinkModel {
     String? emailAddress,
     String? note,
     DateTime? dateOfBirth,
+    Uint8List? profilePicture,
   }) {
     return LinkModel(
       linkId: linkId ?? this.linkId,
@@ -64,6 +72,7 @@ class LinkModel {
       emailAddress: emailAddress ?? this.emailAddress,
       note: note ?? this.note,
       dateOfBirth: dateOfBirth ?? this.dateOfBirth,
+      profilePicture: profilePicture ?? this.profilePicture,
     );
   }
 
@@ -75,6 +84,7 @@ class LinkModel {
       'emailAddress': emailAddress,
       'note': note,
       'dateOfBirth': dateOfBirth,
+      'profilePicture': profilePicture,
     };
   }
 
@@ -86,6 +96,7 @@ class LinkModel {
       emailAddress: map['emailAddress'] as String,
       note: map['note'] as String,
       dateOfBirth: map['dateOfBirth'] as DateTime,
+      profilePicture: map['profilePicture'] as Uint8List,
     );
   }
 

@@ -69,12 +69,12 @@ class _ViewProfilePageState extends State<ViewProfilePage> {
                     Hero(
                       tag: 'profile_picture',
                       child: CircleAvatar(
-                        radius: 80.0,
-                        backgroundColor: colorScheme.surface,
-                        backgroundImage: userData['profile_picture'].length == 0
-                            ? AssetImage(AppConstants.defaultUserImage)
-                            : MemoryImage(userData['profile_picture']),
-                      ),
+                          radius: 80.0,
+                          backgroundColor: colorScheme.surface,
+                          backgroundImage:
+                              userData['profile_picture'].isNotEmpty
+                                  ? MemoryImage(userData['profile_picture'])
+                                  : AssetImage(AppConstants.defaultUserImage)),
                     ),
                     Text(
                         AppFunctions.getCapitalizedWords(

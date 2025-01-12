@@ -20,10 +20,13 @@ class LinkWidget extends StatelessWidget {
     return ListTile(
       onTap: navCallBack,
       leading: CircleAvatar(
-        radius: 24.0,
-        backgroundColor: Theme.of(context).colorScheme.surface,
-        foregroundImage: AssetImage(AppConstants.defaultUserImage),
-      ),
+          radius: 24.0,
+          backgroundColor: Theme.of(context).colorScheme.surface,
+          foregroundImage: linkWidgetData['profile_picture'].isNotEmpty
+              ? MemoryImage(linkWidgetData['profile_picture'])
+              : AssetImage(AppConstants.defaultUserImage)
+          // foregroundImage: AssetImage(AppConstants.defaultUserImage),
+          ),
       title: Text(AppFunctions.getCapitalizedWords(linkWidgetData['name'])),
       subtitle: SizedBox(
         child: Wrap(

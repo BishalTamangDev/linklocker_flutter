@@ -62,7 +62,6 @@ class _AddProfilePageState extends State<AddProfilePage> {
 
   // image picker
   Future<void> _pickImage() async {
-    developer.log("Hello!");
     final imagePicker = ImagePicker();
     final XFile? image =
         await imagePicker.pickImage(source: ImageSource.gallery);
@@ -295,6 +294,12 @@ class _AddProfilePageState extends State<AddProfilePage> {
                                   : "Profile couldn't be created."),
                             ),
                           );
+
+                          if (response == "success") {
+                            setState(() {
+                              profilePicture = Uint8List(0);
+                            });
+                          }
 
                           if (context.mounted) {
                             context.pop();

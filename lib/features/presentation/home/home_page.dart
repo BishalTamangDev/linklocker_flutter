@@ -243,6 +243,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                                                 data['category'];
                                             linkModel.emailAddress =
                                                 data['email'];
+                                            linkModel.profilePicture =
+                                                data['profile_picture'];
 
                                             var contacts = data['contacts'];
 
@@ -253,7 +255,9 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                                                   'name': linkModel.name,
                                                   'email':
                                                       linkModel.emailAddress,
-                                                  'contacts': contacts
+                                                  'contacts': contacts,
+                                                  'profile_picture':
+                                                      linkModel.profilePicture,
                                                 },
                                                 navCallBack: () => context
                                                     .push(
