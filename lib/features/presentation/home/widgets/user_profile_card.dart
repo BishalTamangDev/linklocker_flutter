@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:linklocker/core/constants/app_constants.dart';
 import 'package:linklocker/core/constants/app_functions.dart';
 import 'package:linklocker/features/data/models/user_model.dart';
 import 'package:linklocker/features/data/source/local/local_data_source.dart';
@@ -14,7 +15,7 @@ class UserProfileCard extends StatefulWidget {
 
 class _UserProfileCardState extends State<UserProfileCard> {
   // variables
-  late Future<dynamic> _userData;
+  late Future<Map<String, dynamic>> _userData;
   var userModel = UserModel();
   var localDataSource = LocalDataSource.getInstance();
 
@@ -67,66 +68,106 @@ class _UserProfileCardState extends State<UserProfileCard> {
                   ),
                 );
               } else {
-                var userData = snapshot.data;
-
-                userModel.setId = userData['user_id'] ?? 0;
-                userModel.setName = userData['name'] ?? "";
-                userModel.setEmail = userData['email'] ?? "";
-
-                var qrData = {
-                  'contact': '-',
-                  'email_address': userModel.getEmail,
-                  'name': userModel.getName,
-                };
-
-                return Column(
-                  spacing: 12.0,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(),
-                    ListTile(
-                      leading: Hero(
-                        tag: 'profile_picture',
-                        child: CircleAvatar(
-                          radius: 32.0,
-                          backgroundColor:
-                              Theme.of(context).colorScheme.surface,
-                          backgroundImage: AssetImage('assets/images/user.jpg'),
-                        ),
+                if (snapshot.data!['user_id'] == null) {
+                  return Center(
+                    child: Padding(
+                      padding: const EdgeInsets.only(
+                        top: 24.0,
+                        bottom: 6.0,
                       ),
-                      title: Text(
-                        AppFunctions.getCapitalizedWords(userData['name']),
+                      child: Column(
+                        children: [
+                          Icon(Icons.error, color: Colors.red),
+                          const SizedBox(height: 12.0),
+                          Opacity(
+                            opacity: 0.6,
+                            child:
+                                const Text("You haven't set your profile yet!"),
+                          ),
+                          TextButton(
+                            onPressed: () => context
+                                .push('/profile/add')
+                                .then((_) => _refreshUserData()),
+                            child: const Text("Setup Now"),
+                          ),
+                        ],
                       ),
-                      subtitle: Opacity(
-                        opacity: 0.6,
-                        child: Text(
-                          "My Profile",
-                          style: Theme.of(context).textTheme.bodyLarge,
-                        ),
-                      ),
-                      trailing: userData['user_id'] == null
-                          ? null
-                          : IconButton(
-                              onPressed: () {
-                                showUserQrCode(qrData);
-                              },
-                              icon: Icon(Icons.share),
-                            ),
-                      onTap: () {
-                        if (userData['user_id'] == null) {
-                          context.push('/profile/add').then((_) {
-                            _refreshUserData();
-                          });
-                        } else {
-                          context.push('/profile/view').then((_) {
-                            _refreshUserData();
-                          });
-                        }
-                      },
                     ),
-                    const SizedBox(),
-                  ],
-                );
+                  );
+                } else {
+                  var userData = snapshot.data!;
+
+                  userModel.setId = userData['user_id'] ?? 0;
+                  userModel.setName = userData['name'] ?? "";
+                  userModel.setEmail = userData['email'] ?? "";
+                  userModel.setProfilePicture = userData['profile_picture'];
+
+                  var profileData = {
+                    'user_id': userModel.getId,
+                    'name': userModel.getName,
+                    'email': userModel.getEmail,
+                    'profile_picture': userModel.getProfilePicture,
+                  };
+
+                  var qrData = {
+                    'contact': '-',
+                    'email_address': userModel.getEmail,
+                    'name': userModel.getName,
+                  };
+
+                  return Column(
+                    spacing: 12.0,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(),
+                      ListTile(
+                        leading: Hero(
+                          tag: 'profile_picture',
+                          child: CircleAvatar(
+                            radius: 32.0,
+                            backgroundColor:
+                                Theme.of(context).colorScheme.surface,
+                            backgroundImage: profileData['profile_picture']
+                                    .isEmpty
+                                ? AssetImage(AppConstants.defaultUserImage)
+                                : MemoryImage(profileData['profile_picture']),
+                          ),
+                        ),
+                        title: Text(
+                          AppFunctions.getCapitalizedWords(userData['name']),
+                        ),
+                        subtitle: Opacity(
+                          opacity: 0.6,
+                          child: Text(
+                            "My Profile",
+                            style: Theme.of(context).textTheme.bodyLarge,
+                          ),
+                        ),
+                        trailing: userData['user_id'] == null
+                            ? null
+                            : IconButton(
+                                onPressed: () {
+                                  showUserQrCode(qrData);
+                                },
+                                icon: Icon(Icons.share),
+                              ),
+                        onTap: () {
+                          if (userData['user_id'] == null) {
+                            context.push('/profile/add').then((_) async {
+                              await _refreshUserData();
+                            });
+                          } else {
+                            // view profile
+                            context
+                                .push('/profile/view', extra: profileData)
+                                .then((_) => _refreshUserData());
+                          }
+                        },
+                      ),
+                      const SizedBox(),
+                    ],
+                  );
+                }
               }
             } else {
               return Column(

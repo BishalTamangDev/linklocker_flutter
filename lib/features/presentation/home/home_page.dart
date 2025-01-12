@@ -142,6 +142,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                       ),
                     ),
 
+                    // option header
                     SliverPersistentHeader(
                       pinned: true,
                       delegate: _StickyHeaderDelegate(
@@ -187,6 +188,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                       ),
                     ),
 
+                    // main content container
                     SliverToBoxAdapter(
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16.0),

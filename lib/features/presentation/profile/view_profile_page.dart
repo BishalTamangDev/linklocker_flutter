@@ -3,10 +3,13 @@ import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:linklocker/core/constants/app_constants.dart';
+import 'package:linklocker/core/constants/app_functions.dart';
 import 'package:linklocker/features/data/source/local/local_data_source.dart';
 
 class ViewProfilePage extends StatefulWidget {
-  const ViewProfilePage({super.key});
+  const ViewProfilePage({super.key, required this.profileData});
+
+  final Map<String, dynamic> profileData;
 
   @override
   State<ViewProfilePage> createState() => _ViewProfilePageState();
@@ -14,18 +17,18 @@ class ViewProfilePage extends StatefulWidget {
 
 class _ViewProfilePageState extends State<ViewProfilePage> {
   // variables
-  late Future<Map<String, dynamic>> _userData;
+  late Map<String, dynamic> userData;
+
+  // functions
+  _refreshUserData() async {
+    userData = await LocalDataSource.getInstance().getUser();
+    setState(() {});
+  }
 
   @override
   void initState() {
     super.initState();
-    _userData = LocalDataSource.getInstance().getUser();
-  }
-
-  _refreshUserData() {
-    setState(() {
-      _userData = LocalDataSource.getInstance().getUser();
-    });
+    userData = widget.profileData;
   }
 
   @override
@@ -36,6 +39,17 @@ class _ViewProfilePageState extends State<ViewProfilePage> {
     var textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          onPressed: () => context.pop(),
+          icon: Icon(Icons.arrow_back_ios_new_rounded),
+        ),
+        centerTitle: true,
+        elevation: 0,
+        backgroundColor: Theme.of(context).canvasColor,
+        automaticallyImplyLeading: false,
+        title: const Text("My Profile"),
+      ),
       backgroundColor: themeContext.canvasColor,
       body: SingleChildScrollView(
         child: Padding(
@@ -51,28 +65,22 @@ class _ViewProfilePageState extends State<ViewProfilePage> {
                 child: Column(
                   spacing: 18.0,
                   children: [
+                    // profile picture
                     Hero(
                       tag: 'profile_picture',
                       child: CircleAvatar(
                         radius: 80.0,
                         backgroundColor: colorScheme.surface,
-                        backgroundImage: AssetImage('assets/images/user.jpg'),
+                        backgroundImage: userData['profile_picture'].length == 0
+                            ? AssetImage(AppConstants.defaultUserImage)
+                            : MemoryImage(userData['profile_picture']),
                       ),
                     ),
-                    FutureBuilder(
-                      future: _userData,
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.done &&
-                            !snapshot.hasError) {
-                          return Text(
-                            "${snapshot.data!['name']}",
-                            style: textTheme.headlineSmall,
-                          );
-                        } else {
-                          return Text("-", style: textTheme.headlineSmall);
-                        }
-                      },
-                    ),
+                    Text(
+                        AppFunctions.getCapitalizedWords(
+                          userData['name'],
+                        ),
+                        style: textTheme.headlineSmall),
                   ],
                 ),
               ),
@@ -94,7 +102,7 @@ class _ViewProfilePageState extends State<ViewProfilePage> {
                             Icons.phone_outlined,
                             color: AppConstants.callIconColor,
                           ),
-                          title: Text("+977 -"),
+                          title: Text("-"),
                         ),
                       ],
                     ),
@@ -102,7 +110,7 @@ class _ViewProfilePageState extends State<ViewProfilePage> {
                 ),
               ),
 
-              //   email address
+              // email
               ClipRRect(
                 borderRadius: BorderRadius.circular(16.0),
                 child: Container(
@@ -110,23 +118,18 @@ class _ViewProfilePageState extends State<ViewProfilePage> {
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
                         vertical: 8.0, horizontal: 8.0),
-                    child: ListTile(
-                      leading: Icon(
-                        Icons.email_outlined,
-                        color: AppConstants.emailIconColor,
-                      ),
-                      title: FutureBuilder(
-                        future: _userData,
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                                  ConnectionState.done &&
-                              !snapshot.hasError) {
-                            return Text("${snapshot.data!['email']}");
-                          } else {
-                            return Text("-", style: textTheme.headlineSmall);
-                          }
-                        },
-                      ),
+                    child: Column(
+                      children: [
+                        ListTile(
+                          leading: Icon(
+                            Icons.email_outlined,
+                            color: AppConstants.emailIconColor,
+                          ),
+                          title: Text(
+                            userData['email'] != "" ? userData['email'] : "-",
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -135,9 +138,9 @@ class _ViewProfilePageState extends State<ViewProfilePage> {
           ),
         ),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+
       // bottom actions
-      floatingActionButton: Container(
+      bottomNavigationBar: Container(
         color: themeContext.canvasColor,
         width: mediaQuery.size.width,
         child: Padding(
@@ -162,9 +165,10 @@ class _ViewProfilePageState extends State<ViewProfilePage> {
 
               //   edit
               InkWell(
-                onTap: () => context.push('/profile/edit').then(
-                      (_) => _refreshUserData(),
-                    ),
+                onTap: () =>
+                    context.push('/profile/edit', extra: userData).then(
+                          (_) => _refreshUserData(),
+                        ),
                 splashColor: colorScheme.surface,
                 highlightColor: colorScheme.surface,
                 child: Column(

@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 
 class AppConstants {
-  static final appName = "LinkLocker";
+  // application name
+  static final String appName = "LinkLocker";
+
+  // default user image
+  static final String defaultUserImage = "assets/images/blank_user.png";
 
 //   colors
   static Color primaryColor = Colors.blue;
@@ -22,7 +26,7 @@ class AppConstants {
   ];
 
   static List<Map<String, Color>> categoryColor = [
-    {'family': Colors.purple},
+    {'family': Colors.green},
     {'friend': Colors.red},
     {'relative': Colors.orange},
     {'coworker': Colors.blue},

@@ -22,7 +22,7 @@ class LinkWidget extends StatelessWidget {
       leading: CircleAvatar(
         radius: 24.0,
         backgroundColor: Theme.of(context).colorScheme.surface,
-        foregroundImage: AssetImage('assets/images/blank_user.png'),
+        foregroundImage: AssetImage(AppConstants.defaultUserImage),
       ),
       title: Text(AppFunctions.getCapitalizedWords(linkWidgetData['name'])),
       subtitle: SizedBox(

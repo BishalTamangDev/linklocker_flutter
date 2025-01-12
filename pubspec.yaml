@@ -21,6 +21,7 @@ dependencies:
   intl: ^0.20.1
   qr_flutter: ^4.1.0
   fl_chart: ^0.70.1
+  image_picker: ^1.1.2
 
 # launcher icon
 flutter_launcher_icons:

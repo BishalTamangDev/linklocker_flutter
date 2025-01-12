@@ -1,4 +1,8 @@
+import 'dart:developer' as developer;
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:linklocker/core/constants/app_constants.dart';
 
@@ -51,5 +55,23 @@ class AppFunctions {
         (map) => map.containsKey(title),
         orElse: () => {title: Colors.grey});
     return categoryMap[title];
+  }
+
+  // image picker
+  static dynamic pickImage() async {
+    final ImagePicker imagePicker = ImagePicker();
+    XFile? image;
+    try {
+      image = await imagePicker.pickImage(source: ImageSource.gallery);
+
+      if (image != null) {
+        developer.log('File path: ${image.path}');
+        Uint8List bytes = await image.readAsBytes();
+        developer.log('File size in bytes: ${bytes.length}');
+        return bytes;
+      }
+    } catch (e) {
+      developer.log("Picking mage error :: $e");
+    }
   }
 }

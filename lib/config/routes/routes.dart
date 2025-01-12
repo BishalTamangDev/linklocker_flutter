@@ -26,17 +26,23 @@ class AppRoute {
       // profile
       GoRoute(
         path: '/profile',
-        pageBuilder: (context, state) => CustomTransitionPage(
-          child: const ViewProfilePage(),
-          transitionsBuilder: immediateTransitionBuilder,
-        ),
+        pageBuilder: (context, state) {
+          var data = state.extra as Map<String, dynamic>;
+          return CustomTransitionPage(
+            child: ViewProfilePage(profileData: data),
+            transitionsBuilder: immediateTransitionBuilder,
+          );
+        },
         routes: [
           GoRoute(
             path: '/view',
-            pageBuilder: (context, state) => CustomTransitionPage(
-              child: const ViewProfilePage(),
-              transitionsBuilder: immediateTransitionBuilder,
-            ),
+            pageBuilder: (context, state) {
+              final data = state.extra as Map<String, dynamic>;
+              return CustomTransitionPage(
+                child: ViewProfilePage(profileData: data),
+                transitionsBuilder: immediateTransitionBuilder,
+              );
+            },
           ),
           GoRoute(
             path: '/add',
@@ -47,10 +53,13 @@ class AppRoute {
           ),
           GoRoute(
             path: '/edit',
-            pageBuilder: (context, state) => CustomTransitionPage(
-              child: AddProfilePage(task: 'edit'),
-              transitionsBuilder: slideUpTransitionBuilder,
-            ),
+            pageBuilder: (context, state) {
+              var profileData = state.extra as Map<String, dynamic>;
+              return CustomTransitionPage(
+                child: AddProfilePage(task: 'edit', profileData: profileData),
+                transitionsBuilder: slideUpTransitionBuilder,
+              );
+            },
           ),
         ],
       ),

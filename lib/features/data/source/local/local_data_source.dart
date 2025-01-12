@@ -1,6 +1,7 @@
 import 'dart:developer' as developer;
 import 'dart:io';
 
+import 'package:linklocker/features/data/models/user_model.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
@@ -40,7 +41,7 @@ class LocalDataSource {
         // create user table
         bool userTblResponse = await dbPath
             .execute(
-                "CREATE TABLE $userTblName (user_id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, contact TEXT, email TEXT)")
+                "CREATE TABLE $userTblName (user_id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, email TEXT, profile_picture BLOB)")
             .then((_) => true)
             .catchError((_) => false);
 
@@ -110,32 +111,52 @@ class LocalDataSource {
 
     var users = await tempDb.query(userTblName);
 
-    developer.log("Users: $users");
-
     for (var user in users) {
       data = user;
     }
+
+    developer.log("User ID :: ${data['user_id']}");
+    developer.log("User Name :: ${data['name']}");
+    developer.log("User Email :: ${data['email']}");
+
+    developer.log(data['profile_picture'] == null
+        ? "User Profile Picture :: No"
+        : "User Profile Picture :: Yes");
 
     return data;
   }
 
   // insert user
-  Future<String> insertUser(Map<String, dynamic> data) async {
+  Future<String> insertUser(UserModel userModel) async {
     Database tempDb = await getDb();
+
+    // decode data
+    var data = {
+      'name': userModel.getName,
+      'email': userModel.getEmail,
+      'profile_picture': userModel.getProfilePicture,
+    };
 
     await tempDb.delete(userTblName);
 
     String response = await tempDb
         .insert(userTblName, data)
         .then((onValue) => "success")
-        .catchError((error) => error);
+        .catchError((error) => error.toString());
 
     return response;
   }
 
   // update user
-  Future<String> updateUser(Map<String, dynamic> data) async {
+  Future<String> updateUser(UserModel userModel) async {
     Database tempDb = await getDb();
+
+    // decode data
+    var data = {
+      'name': userModel.getName,
+      'email': userModel.getEmail,
+      'profile_picture': userModel.getProfilePicture,
+    };
 
     String response = await tempDb
         .update(userTblName, data)

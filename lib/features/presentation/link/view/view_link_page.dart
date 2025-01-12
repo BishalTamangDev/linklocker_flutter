@@ -70,7 +70,7 @@ class _ViewLinkPageState extends State<ViewLinkPage> {
                       radius: 80.0,
                       backgroundColor: colorScheme.surface,
                       backgroundImage:
-                          AssetImage('assets/images/blank_user.png'),
+                          AssetImage(AppConstants.defaultUserImage),
                     ),
                     Text(
                       AppFunctions.getCapitalizedWords(data['name']),
