@@ -27,9 +27,8 @@ class _UserProfileCardState extends State<UserProfileCard> {
 
   // functions
   _refreshUserData() async {
-    setState(() {
-      _userData = localDataSource.getUser();
-    });
+    _userData = localDataSource.getUser();
+    setState(() {});
   }
 
   @override

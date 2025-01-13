@@ -21,6 +21,7 @@ class LocalDataSource {
 
   // table
   final String userTblName = "user_tbl";
+  final String userContactTblName = "user_contact_tbl";
   final String linkTblName = "link_tbl";
   final String contactTblName = "contact_tbl";
 
@@ -45,6 +46,13 @@ class LocalDataSource {
             .then((_) => true)
             .catchError((_) => false);
 
+        // create user contact table
+        bool userContactTblResponse = await dbPath
+            .execute(
+                "CREATE TABLE $userContactTblName (user_contact_id INTEGER PRIMARY KEY AUTOINCREMENT, country TEXT, contact TEXT)")
+            .then((_) => true)
+            .catchError((_) => false);
+
         // create link table
         bool linkTblResponse = await dbPath
             .execute(
@@ -62,15 +70,21 @@ class LocalDataSource {
         // debugging
         developer.log(userTblResponse
             ? "User table created"
-            : "Error in creating user table");
+            : "Unable to create user table");
+        developer.log(userContactTblResponse
+            ? "User contact table created,"
+            : "Unable to create user contact table.");
         developer.log(linkTblResponse
             ? "Link table created"
-            : "Error in creating link table");
+            : "Unable to create link table");
         developer.log(contactTblResponse
             ? "Contact table created"
-            : "Error in creating contact table");
+            : "Unable to create contact table");
 
-        if (!userTblResponse || !linkTblResponse || !contactTblResponse) {
+        if (!userTblResponse ||
+            !userContactTblResponse ||
+            !linkTblResponse ||
+            !contactTblResponse) {
           //   delete database
           developer.log(
               "Error occurred in initiating database. Some table couldn't be created.");
@@ -88,18 +102,22 @@ class LocalDataSource {
 //   reset database
   Future<void> resetDb() async {
     bool userTableResponse = await resetUserTable();
+    bool userContactTableResponse = await resetUserContactTable();
     bool linkTableResponse = await resetLinkTable();
     bool contactTableResponse = await resetContactTable();
 
     developer.log(userTableResponse
-        ? "user table reset successfully"
-        : "user rest failed");
+        ? "user table reset successfully."
+        : "Unable to reset user table.");
+    developer.log(userContactTableResponse
+        ? "user contact table reset successfully"
+        : "Unable to reset user contact table.");
     developer.log(linkTableResponse
         ? "link table reset successfully"
-        : "link rest failed");
+        : "Unable to reset link table.");
     developer.log(contactTableResponse
         ? "contact table reset successfully"
-        : "contact rest failed");
+        : "Unable to reset contact table.");
   }
 
 //   user table
@@ -109,19 +127,28 @@ class LocalDataSource {
 
     Database tempDb = await getDb();
 
-    var users = await tempDb.query(userTblName);
+    // fetch users
+    List<Map<String, dynamic>> users = await tempDb.query(userTblName);
+    var mutableUsers = users.map((user) => {...user}).toList();
 
-    for (var user in users) {
+    // fetch user contacts
+    List<Map<String, dynamic>> contacts = await fetchUserContacts();
+    var mutableContacts = contacts.map((contact) => {...contact}).toList();
+
+    // get last user
+    for (var user in mutableUsers) {
       data = user;
     }
 
-    developer.log("User ID :: ${data['user_id']}");
-    developer.log("User Name :: ${data['name']}");
-    developer.log("User Email :: ${data['email']}");
+    data['contacts'] = mutableContacts;
 
-    developer.log(data['profile_picture'] == null
-        ? "User Profile Picture :: No"
-        : "User Profile Picture :: Yes");
+    developer.log(
+        "User details -> id :: ${data['user_id']}, name :: ${data['name']}, email :: ${data['email']} ");
+    developer.log("User contacts :: ${data['contacts']}");
+
+    // developer.log(data['profile_picture'] == null
+    //     ? "Profile Picture :: No"
+    //     : "Profile Picture :: Yes");
 
     return data;
   }
@@ -189,6 +216,59 @@ class LocalDataSource {
 
     developer.log(
         reset ? "User table reset successfully!" : "Couldn't reset user table");
+
+    return reset;
+  }
+
+//   user contact
+//   insert user contact
+  Future<String> insertUserContact(Map<String, dynamic> data) async {
+    Database tempDb = await getDb();
+
+    String response = await tempDb
+        .insert(userContactTblName, data)
+        .then((_) => "success")
+        .catchError((e) => e.toString());
+
+    return response;
+  }
+
+//   update user contact
+  Future<String> updateUserContact(
+      int userContactId, Map<String, dynamic> data) async {
+    Database tempDb = await getDb();
+
+    String response = await tempDb
+        .update(
+          userContactTblName,
+          data,
+          where: "user_contact_id = ?",
+          whereArgs: [userContactId],
+        )
+        .then((_) => "success")
+        .catchError((e) => e.toString());
+
+    return response;
+  }
+
+//   fetch user contacts
+  Future<List<Map<String, dynamic>>> fetchUserContacts() async {
+    Database tempDb = await getDb();
+
+    List<Map<String, dynamic>> contacts =
+        await tempDb.query(userContactTblName);
+
+    return contacts;
+  }
+
+//   reset user contact table
+  Future<bool> resetUserContactTable() async {
+    Database tempDb = await getDb();
+
+    bool reset = await tempDb
+        .delete(userContactTblName)
+        .then((_) => true)
+        .catchError((_) => false);
 
     return reset;
   }

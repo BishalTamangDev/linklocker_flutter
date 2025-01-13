@@ -27,12 +27,12 @@ class AddProfilePage extends StatefulWidget {
 class _AddProfilePageState extends State<AddProfilePage> {
   // variables
   // late Map<String, dynamic> _userData;
-  var _isDisposed = false;
+  bool _isDisposed = false;
 
   // user model
   UserModel userModel = UserModel();
 
-  var localDataStorage = LocalDataSource.getInstance();
+  LocalDataSource localDataStorage = LocalDataSource.getInstance();
 
   Uint8List profilePicture = Uint8List(0);
 
@@ -47,11 +47,12 @@ class _AddProfilePageState extends State<AddProfilePage> {
       nameController.text = widget.backupData['name'];
       emailController.text = widget.backupData['email'];
       profilePicture = widget.backupData['profile_picture'];
+      phoneController.text = widget.backupData['contacts'][0]['contact'];
     });
   }
 
   // reset data function
-  _resetData() {
+  _resetProfileData() {
     setState(() {
       nameController.clear();
       phoneController.clear();
@@ -62,26 +63,29 @@ class _AddProfilePageState extends State<AddProfilePage> {
 
   // image picker
   Future<void> _pickImage() async {
-    final imagePicker = ImagePicker();
-    final XFile? image =
-        await imagePicker.pickImage(source: ImageSource.gallery);
+    try {
+      final imagePicker = ImagePicker();
+      final XFile? image =
+          await imagePicker.pickImage(source: ImageSource.gallery);
 
-    if (image != null) {
-      final bytes = await image.readAsBytes();
+      if (image != null) {
+        developer.log("Image path :: ${image.path}");
+        final Uint8List bytes = await image.readAsBytes();
 
-      developer.log("Image :: ${image.path}");
-      developer.log("Image bytes :: ${bytes.length}");
+        developer.log("Image bytes :: $bytes");
 
-      setState(() {
-        profilePicture = bytes;
-      });
+        setState(() {
+          profilePicture = bytes;
+        });
+      }
+    } catch (e) {
+      developer.log("Error occurred!");
     }
   }
 
   @override
   void initState() {
     super.initState();
-
     if (widget.task == "edit") {
       _backupData();
     }
@@ -99,6 +103,7 @@ class _AddProfilePageState extends State<AddProfilePage> {
     var themeContext = Theme.of(context);
     var colorScheme = Theme.of(context).colorScheme;
     var textTheme = Theme.of(context).textTheme;
+    var scaffoldMessenger = ScaffoldMessenger.of(context);
 
     return Scaffold(
       backgroundColor: themeContext.canvasColor,
@@ -117,7 +122,9 @@ class _AddProfilePageState extends State<AddProfilePage> {
             padding: const EdgeInsets.only(right: 8.0),
             child: IconButton(
               highlightColor: Colors.transparent,
-              onPressed: widget.task == "add" ? _resetData() : _backupData(),
+              onPressed: () {
+                widget.task == "add" ? _resetProfileData() : _backupData();
+              },
               icon: Icon(Icons.undo_outlined),
             ),
           ),
@@ -253,8 +260,6 @@ class _AddProfilePageState extends State<AddProfilePage> {
                       ),
                     ),
                     onPressed: () async {
-                      var scaffoldMessenger = ScaffoldMessenger.of(context);
-
                       if (scaffoldMessenger.mounted) {
                         scaffoldMessenger.hideCurrentSnackBar();
                       }
@@ -279,6 +284,12 @@ class _AddProfilePageState extends State<AddProfilePage> {
                       //   get values
                       developer.log("User data : $userModel");
 
+                      // user contacts
+                      var userContacts = {
+                        'country': 'nepal',
+                        'contact': phoneController.text.toString(),
+                      };
+
                       // add profile
                       if (widget.task == "add") {
                         String response =
@@ -286,16 +297,25 @@ class _AddProfilePageState extends State<AddProfilePage> {
 
                         // user created
                         if (mounted) {
-                          scaffoldMessenger.showSnackBar(
-                            SnackBar(
-                              behavior: SnackBarBehavior.floating,
-                              content: Text(response == "success"
-                                  ? "Profile created successfully."
-                                  : "Profile couldn't be created."),
-                            ),
-                          );
+                          // insert user contact
+                          String contactResponse = await localDataStorage
+                              .insertUserContact(userContacts);
 
-                          if (response == "success") {
+                          if (mounted) {
+                            if (contactResponse == "success") {
+                              scaffoldMessenger.showSnackBar(
+                                SnackBar(
+                                  behavior: SnackBarBehavior.floating,
+                                  content: Text(response == "success"
+                                      ? "Profile created successfully."
+                                      : "Profile couldn't be created."),
+                                ),
+                              );
+                            }
+                          }
+
+                          if (response == "success" &&
+                              contactResponse == "success") {
                             setState(() {
                               profilePicture = Uint8List(0);
                             });
@@ -307,8 +327,21 @@ class _AddProfilePageState extends State<AddProfilePage> {
                         }
                       } else {
                         // update
+                        // update profile data
                         String response =
                             await localDataStorage.updateUser(userModel);
+
+                        // update user contact
+                        Map<String, dynamic> userContactData = {
+                          'country': 'nepal',
+                          'contact': phoneController.text.toString(),
+                        };
+
+                        String contactResponse =
+                            await localDataStorage.updateUserContact(
+                                widget.backupData['contacts'][0]
+                                    ['user_contact_id'],
+                                userContactData);
 
                         if (context.mounted) {
                           scaffoldMessenger.showSnackBar(

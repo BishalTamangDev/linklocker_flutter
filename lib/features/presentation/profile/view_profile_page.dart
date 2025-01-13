@@ -27,8 +27,12 @@ class _ViewProfilePageState extends State<ViewProfilePage> {
 
   @override
   void initState() {
+    userData = _getInitialData();
     super.initState();
-    userData = widget.profileData;
+  }
+
+  Map<String, dynamic> _getInitialData() {
+    return widget.profileData;
   }
 
   @override
@@ -97,12 +101,14 @@ class _ViewProfilePageState extends State<ViewProfilePage> {
                         vertical: 8.0, horizontal: 8.0),
                     child: Column(
                       children: [
-                        ListTile(
-                          leading: Icon(
-                            Icons.phone_outlined,
-                            color: AppConstants.callIconColor,
+                        ...userData['contacts'].map(
+                          (contact) => ListTile(
+                            leading: Icon(
+                              Icons.phone_outlined,
+                              color: AppConstants.callIconColor,
+                            ),
+                            title: Text("${AppFunctions.getCountryCode(contact['country'])} ${contact['contact']}"),
                           ),
-                          title: Text("-"),
                         ),
                       ],
                     ),

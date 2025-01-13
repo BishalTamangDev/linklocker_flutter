@@ -152,6 +152,7 @@ class _SearchPageState extends State<SearchPage> {
                             Map<String, dynamic> linkWidgetData = {
                               'name': data['name'],
                               'email': data['email'],
+                              'profile_picture': data['profile_picture'],
                               'contacts': data['contacts'],
                             };
 
@@ -167,6 +168,7 @@ class _SearchPageState extends State<SearchPage> {
                                           vertical: 5.0),
                                       child: LinkWidget(
                                         linkWidgetData: linkWidgetData,
+                                        // navCallBack: () {},
                                         navCallBack: () => context
                                             .push('/link/view/', extra: data)
                                             .then((_) => searchByString

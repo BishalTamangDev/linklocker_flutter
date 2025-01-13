@@ -51,7 +51,6 @@ class _AddLinkPageState extends State<AddLinkPage> {
 
   @override
   void dispose() {
-    _resetData();
     super.dispose();
   }
 
@@ -86,7 +85,6 @@ class _AddLinkPageState extends State<AddLinkPage> {
 
   // select profile picture
   Future<void> _pickImage() async {
-    developer.log("Pick image");
     final imagePicker = ImagePicker();
 
     final XFile? image =

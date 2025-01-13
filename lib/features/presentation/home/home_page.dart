@@ -2,6 +2,7 @@ import 'dart:developer' as developer;
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:linklocker/core/constants/app_constants.dart';
 import 'package:linklocker/features/data/models/contact_model.dart';
 import 'package:linklocker/features/data/models/link_model.dart';
 import 'package:linklocker/features/data/models/user_model.dart';
@@ -10,7 +11,12 @@ import 'package:linklocker/features/presentation/home/widgets/custom_drawer_widg
 import 'package:linklocker/features/presentation/home/widgets/empty_links_widget.dart';
 import 'package:linklocker/features/presentation/home/widgets/fetching_links_widget.dart';
 import 'package:linklocker/features/presentation/home/widgets/link_widget.dart';
-import 'package:linklocker/features/presentation/home/widgets/user_profile_card.dart';
+import 'package:linklocker/features/presentation/home/widgets/profile_card/loading_profile_card_widget.dart';
+import 'package:linklocker/features/presentation/home/widgets/profile_card/profile_card_error_widget.dart';
+import 'package:linklocker/features/presentation/home/widgets/profile_card/profile_card_not_set_widget.dart';
+import 'package:qr_flutter/qr_flutter.dart';
+
+import '../../../core/constants/app_functions.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -25,34 +31,35 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   var userModel = UserModel();
   var localDataSource = LocalDataSource.getInstance();
 
+  // variables
+  late Future<Map<String, dynamic>> _userData;
+
   // future data
   late Future<List<Map<String, dynamic>>> _linkList;
-  late Future<List<Map<String, dynamic>>> _contactLists;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
 
     //   fetch link list
     _linkList = localDataSource.getLinks();
 
-    //   fetch all contacts
-    _contactLists = localDataSource.getAllContacts();
+    //   fetch user data
+    _userData = localDataSource.getUser();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  // functions
+  _refreshUserData() async {
+    setState(() {
+      _userData = localDataSource.getUser();
+    });
   }
 
   // refresh link list
   _refreshLinkList() {
     setState(() {
       _linkList = localDataSource.getLinks();
-    });
-    _refreshContactLists();
-  }
-
-  // refresh contact list
-  _refreshContactLists() {
-    setState(() {
-      _contactLists = localDataSource.getAllContacts();
     });
   }
 
@@ -62,10 +69,13 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     if (state == AppLifecycleState.resumed) {
       setState(() {
         hide = false;
+        _refreshUserData();
+        _refreshLinkList();
       });
     } else if (state == AppLifecycleState.paused ||
         state == AppLifecycleState.hidden ||
         state == AppLifecycleState.inactive) {
+      developer.log("Resume to refresh!");
       setState(() {
         hide = true;
       });
@@ -197,7 +207,132 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             // user profile card
-                            UserProfileCard(),
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(16.0),
+                              child: Container(
+                                color: Theme.of(context).colorScheme.surface,
+                                child: FutureBuilder(
+                                  future: _userData,
+                                  builder: (context, snapshot) {
+                                    if (snapshot.connectionState ==
+                                        ConnectionState.done) {
+                                      if (snapshot.hasError) {
+                                        return ProfileCardErrorWidget(
+                                          callback: _refreshUserData(),
+                                        );
+                                      } else {
+                                        if (snapshot.data!['user_id'] == null) {
+                                          return ProfileCardNotSetWidget(
+                                            callback: () {
+                                              context.push('/profile/add').then(
+                                                  (_) => _refreshUserData());
+                                            },
+                                          );
+                                        } else {
+                                          var userData = snapshot.data!;
+
+                                          userModel.setId =
+                                              userData['user_id'] ?? 0;
+                                          userModel.setName =
+                                              userData['name'] ?? "";
+                                          userModel.setEmail =
+                                              userData['email'] ?? "";
+                                          userModel.setProfilePicture =
+                                              userData['profile_picture'];
+
+                                          var profileData = {
+                                            'user_id': userModel.getId,
+                                            'name': userModel.getName,
+                                            'email': userModel.getEmail,
+                                            'profile_picture':
+                                                userModel.getProfilePicture,
+                                            'contacts': userData['contacts'],
+                                          };
+
+                                          var qrData = {
+                                            'contacts': userData['contacts'],
+                                            'email_address': userModel.getEmail,
+                                            'name': userModel.getName,
+                                          };
+
+                                          return Column(
+                                            spacing: 12.0,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              const SizedBox(),
+                                              ListTile(
+                                                leading: Hero(
+                                                  tag: 'profile_picture',
+                                                  child: CircleAvatar(
+                                                    radius: 32.0,
+                                                    backgroundColor:
+                                                        Theme.of(context)
+                                                            .colorScheme
+                                                            .surface,
+                                                    backgroundImage: profileData[
+                                                                'profile_picture']
+                                                            .isEmpty
+                                                        ? AssetImage(AppConstants
+                                                            .defaultUserImage)
+                                                        : MemoryImage(profileData[
+                                                            'profile_picture']),
+                                                  ),
+                                                ),
+                                                title: Text(
+                                                  AppFunctions
+                                                      .getCapitalizedWords(
+                                                          userData['name']),
+                                                ),
+                                                subtitle: Opacity(
+                                                  opacity: 0.6,
+                                                  child: Text(
+                                                    "My Profile",
+                                                    style: Theme.of(context)
+                                                        .textTheme
+                                                        .bodyLarge,
+                                                  ),
+                                                ),
+                                                trailing: userData['user_id'] ==
+                                                        null
+                                                    ? null
+                                                    : IconButton(
+                                                        onPressed: () {
+                                                          showUserQrCode(
+                                                              qrData);
+                                                        },
+                                                        icon: Icon(Icons.share),
+                                                      ),
+                                                onTap: () {
+                                                  if (userData['user_id'] ==
+                                                      null) {
+                                                    context
+                                                        .push('/profile/add')
+                                                        .then((_) async {
+                                                      await _refreshUserData();
+                                                    });
+                                                  } else {
+                                                    // view profile
+                                                    context
+                                                        .push('/profile/view',
+                                                            extra: profileData)
+                                                        .then((_) =>
+                                                            _refreshUserData());
+                                                  }
+                                                },
+                                              ),
+                                              const SizedBox(),
+                                            ],
+                                          );
+                                        }
+                                      }
+                                    } else {
+                                      return LoadingProfileCardWidget();
+                                    }
+                                  },
+                                ),
+                              ),
+                            ),
 
                             Padding(
                               padding:
@@ -293,6 +428,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                                 OutlinedButton(
                                   onPressed: () async {
                                     _refreshLinkList();
+                                    _refreshUserData();
                                   },
                                   child: const Text("Refresh"),
                                 ),
@@ -300,7 +436,12 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                                 // reset user table
                                 OutlinedButton(
                                   onPressed: () async {
-                                    await localDataSource.resetUserTable();
+                                    bool response =
+                                        await localDataSource.resetUserTable();
+
+                                    if (response) {
+                                      _refreshUserData();
+                                    }
                                   },
                                   child: const Text("Reset User Table"),
                                 ),
@@ -310,7 +451,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                                   onPressed: () async {
                                     await localDataSource.resetLinkTable();
 
-                                    if (context.mounted) {
+                                    if (mounted) {
                                       _refreshLinkList();
                                     }
                                   },
@@ -321,7 +462,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                                 OutlinedButton(
                                   onPressed: () async {
                                     await localDataSource.resetContactTable();
-                                    _refreshContactLists();
                                   },
                                   child: const Text("Reset Contact Table"),
                                 ),
@@ -330,6 +470,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                                 OutlinedButton(
                                   onPressed: () async {
                                     await localDataSource.resetDb();
+                                    _refreshUserData();
+                                    _refreshLinkList();
                                   },
                                   child: const Text("Reset Database"),
                                 ),
@@ -378,6 +520,40 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
           ),
         );
       },
+    );
+  }
+
+  // user qr code
+  void showUserQrCode(Map<String, dynamic> qrData) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        content: Column(
+          spacing: 16.0,
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text(AppFunctions.getCapitalizedWords(qrData['name'])),
+            SizedBox(
+              width: MediaQuery.of(context).size.width / 2.5,
+              height: MediaQuery.of(context).size.width / 2.5,
+              child: Padding(
+                padding: const EdgeInsets.all(3.0),
+                child: QrImageView(
+                  data: qrData.toString(),
+                  version: QrVersions.auto,
+                  size: 200.0,
+                  backgroundColor: Colors.white,
+                ),
+              ),
+            ),
+            Opacity(
+              opacity: 0.6,
+              child: const Text("Scan the QR code to add this contact."),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
