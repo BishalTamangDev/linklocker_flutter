@@ -6,6 +6,7 @@ import 'package:linklocker/core/constants/app_constants.dart';
 import 'package:linklocker/core/constants/app_functions.dart';
 import 'package:linklocker/features/data/source/local/local_data_source.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:share_plus/share_plus.dart';
 
 class ViewLinkPage extends StatefulWidget {
   const ViewLinkPage({super.key, required this.link});
@@ -383,7 +384,17 @@ class _ViewLinkPageState extends State<ViewLinkPage> {
               //   share
               InkWell(
                 onTap: () {
-                  developer.log("Share contact");
+                  var name =
+                      AppFunctions.getCapitalizedWords(widget.link['name']);
+
+                  var contactMap = widget.link['contacts'][0];
+
+                  var code = AppFunctions.getCountryCode(
+                      widget.link['contacts'][0]['country']);
+
+                  var shareData = "$name: $code ${contactMap['contact']}";
+
+                  Share.share(shareData, subject: "qwerty");
                 },
                 splashColor: colorScheme.surface,
                 highlightColor: colorScheme.surface,
@@ -404,7 +415,8 @@ class _ViewLinkPageState extends State<ViewLinkPage> {
   void showQrCode() {
     var qrData = {
       'name': widget.link['name'],
-      'contact': widget.link['contacts'],
+      'contact':
+          "${AppFunctions.getCountryCode(widget.link['contacts'][0]['country'])}  ${widget.link['contacts'][0]['contact']}",
       'email': widget.link['email'],
     };
     showDialog(
