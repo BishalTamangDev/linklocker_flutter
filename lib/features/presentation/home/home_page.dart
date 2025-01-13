@@ -11,12 +11,12 @@ import 'package:linklocker/features/presentation/home/widgets/custom_drawer_widg
 import 'package:linklocker/features/presentation/home/widgets/empty_links_widget.dart';
 import 'package:linklocker/features/presentation/home/widgets/fetching_links_widget.dart';
 import 'package:linklocker/features/presentation/home/widgets/link_widget.dart';
-import 'package:linklocker/features/presentation/home/widgets/profile_card/loading_profile_card_widget.dart';
-import 'package:linklocker/features/presentation/home/widgets/profile_card/profile_card_error_widget.dart';
-import 'package:linklocker/features/presentation/home/widgets/profile_card/profile_card_not_set_widget.dart';
+import 'package:linklocker/features/presentation/profile/profile_card/loading_profile_card_widget.dart';
+import 'package:linklocker/features/presentation/profile/profile_card/profile_card_error_widget.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../../core/constants/app_functions.dart';
+import '../profile/profile_card/profile_card_not_set_widget.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -218,7 +218,9 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                                         ConnectionState.done) {
                                       if (snapshot.hasError) {
                                         return ProfileCardErrorWidget(
-                                          callback: _refreshUserData(),
+                                          callback: () {
+                                            _refreshUserData();
+                                          },
                                         );
                                       } else {
                                         if (snapshot.data!['user_id'] == null) {
