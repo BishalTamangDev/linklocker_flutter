@@ -299,6 +299,7 @@ class _AddLinkPageState extends State<AddLinkPage> {
                                   Text("Birthday"),
                                   InkWell(
                                     onTap: () async {
+                                      FocusScope.of(context).unfocus();
                                       final DateTime? pickedDate =
                                           await showDatePicker(
                                         context: context,

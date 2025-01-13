@@ -3,7 +3,6 @@ import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:linklocker/core/constants/app_constants.dart';
-import 'package:linklocker/features/data/models/link_model.dart';
 import 'package:linklocker/features/data/models/user_model.dart';
 import 'package:linklocker/features/data/source/local/local_data_source.dart';
 import 'package:linklocker/features/presentation/home/widgets/custom_drawer_widget.dart';
@@ -34,14 +33,15 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   late Future<Map<String, dynamic>> _userData;
 
   // future data
-  late Future<List<Map<String, dynamic>>> _linkList;
+  late Future<List<Map<String, dynamic>>> _linkList, _contactList;
 
   @override
   void initState() {
     super.initState();
 
     //   fetch link list
-    _linkList = localDataSource.getLinks();
+    _linkList = localDataSource.getGroupedLinks();
+    _contactList = localDataSource.getAllContacts();
 
     //   fetch user data
     _userData = localDataSource.getUser();
@@ -58,7 +58,14 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   // refresh link list
   _refreshLinkList() {
     setState(() {
-      _linkList = localDataSource.getLinks();
+      _linkList = localDataSource.getGroupedLinks();
+    });
+  }
+
+  // refresh contact list
+  _refreshContactList() {
+    setState(() {
+      _contactList = localDataSource.getAllContacts();
     });
   }
 
@@ -70,6 +77,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         hide = false;
         _refreshUserData();
         _refreshLinkList();
+        _refreshContactList();
       });
     } else if (state == AppLifecycleState.paused ||
         state == AppLifecycleState.hidden ||
@@ -176,16 +184,20 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     IconButton(
-                                      onPressed: () => context
-                                          .push('/link/add')
-                                          .then((_) => _refreshLinkList()),
+                                      onPressed: () =>
+                                          context.push('/link/add').then((_) {
+                                        _refreshLinkList();
+                                        _refreshContactList();
+                                      }),
                                       iconSize: 26.0,
                                       icon: Icon(Icons.add),
                                     ),
                                     IconButton(
-                                      onPressed: () => context
-                                          .push('/search')
-                                          .then((_) => _refreshLinkList()),
+                                      onPressed: () =>
+                                          context.push('/search').then((_) {
+                                        _refreshLinkList();
+                                        _refreshContactList();
+                                      }),
                                       icon: Icon(Icons.search_outlined),
                                     ),
                                   ],
@@ -335,12 +347,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                               ),
                             ),
 
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 4.0),
-                              child: const Text("Links"),
-                            ),
-
                             // link lists :: actual
                             FutureBuilder(
                               future: _linkList,
@@ -355,59 +361,98 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                                     } else {
                                       developer
                                           .log("All data :: ${snapshot.data}");
-                                      return ClipRRect(
-                                        borderRadius:
-                                            BorderRadius.circular(16.0),
-                                        child: ListView.separated(
-                                          separatorBuilder: (context, index) =>
-                                              Divider(height: 1.0),
-                                          shrinkWrap: true,
-                                          padding: EdgeInsets.zero,
-                                          physics:
-                                              const NeverScrollableScrollPhysics(),
-                                          itemCount: snapshot.data!.length,
-                                          itemBuilder: (context, index) {
-                                            // map data
-                                            var data = snapshot.data![index];
+                                      return Column(
+                                        spacing: 16.0,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          ...snapshot.data!.map(
+                                            (group) => Column(
+                                              spacing: 12.0,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Padding(
+                                                  padding: const EdgeInsets
+                                                      .symmetric(
+                                                      horizontal: 4.0),
+                                                  child: Text(
+                                                    group['title']
+                                                        .toString()
+                                                        .toUpperCase(),
+                                                  ),
+                                                ),
+                                                ClipRRect(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          12.0),
+                                                  child: Container(
+                                                    color: colorScheme.surface,
+                                                    child: ListView.separated(
+                                                      padding: EdgeInsets.zero,
+                                                      separatorBuilder:
+                                                          (context, index) =>
+                                                              Divider(
+                                                                  height: 1.0),
+                                                      shrinkWrap: true,
+                                                      physics:
+                                                          const NeverScrollableScrollPhysics(),
+                                                      itemCount:
+                                                          group['links'].length,
+                                                      itemBuilder:
+                                                          (context, index) {
+                                                        // final
+                                                        var linkWidgetData = {
+                                                          'link_id':
+                                                              group['links']
+                                                                      [index]
+                                                                  ['link_id'],
+                                                          'name': group['links']
+                                                              [index]['name'],
+                                                          'email':
+                                                              group['links']
+                                                                      [index]
+                                                                  ['email'],
+                                                          'contacts':
+                                                              group['links']
+                                                                      [index]
+                                                                  ['contacts'],
+                                                          'profile_picture': group[
+                                                                      'links']
+                                                                  [index][
+                                                              'profile_picture'],
+                                                        };
 
-                                            var linkModel = LinkModel();
-
-                                            linkModel.linkId = data['link_id'];
-                                            linkModel.name = data['name'];
-                                            linkModel.category =
-                                                data['category'];
-                                            linkModel.emailAddress =
-                                                data['email'];
-                                            linkModel.profilePicture =
-                                                data['profile_picture'];
-
-                                            var contacts = data['contacts'];
-
-                                            return Container(
-                                              color: colorScheme.surface,
-                                              child: LinkWidget(
-                                                linkWidgetData: {
-                                                  'name': linkModel.name,
-                                                  'email':
-                                                      linkModel.emailAddress,
-                                                  'contacts': contacts,
-                                                  'profile_picture':
-                                                      linkModel.profilePicture,
-                                                },
-                                                navCallBack: () => context
-                                                    .push(
-                                                      '/link/view',
-                                                      extra: data,
-                                                    )
-                                                    .then((_) =>
-                                                        _refreshLinkList()),
-                                                callCallBack: () =>
-                                                    showCallBottomSheet(
-                                                        contacts),
-                                              ),
-                                            );
-                                          },
-                                        ),
+                                                        return LinkWidget(
+                                                          linkWidgetData:
+                                                              linkWidgetData,
+                                                          navCallBack: () =>
+                                                              context
+                                                                  .push(
+                                                                    '/link/view',
+                                                                    extra: group[
+                                                                            'links']
+                                                                        [index],
+                                                                  )
+                                                                  .then((_) =>
+                                                                      _refreshLinkList()),
+                                                          callCallBack: () =>
+                                                              showCallBottomSheet(
+                                                                  group['links']
+                                                                          [
+                                                                          index]
+                                                                      [
+                                                                      'contacts']),
+                                                        );
+                                                      },
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          const SizedBox(height: 5.0),
+                                        ],
                                       );
                                     }
                                   }
@@ -429,6 +474,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                                   onPressed: () async {
                                     _refreshLinkList();
                                     _refreshUserData();
+                                    _refreshContactList();
                                   },
                                   child: const Text("Refresh"),
                                 ),
@@ -497,7 +543,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       builder: (context) {
         return SizedBox(
           width: MediaQuery.of(context).size.width,
-          // height: mediaQuery.size.height / 3,
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: SingleChildScrollView(
@@ -507,9 +552,12 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                 children: [
                   ...contacts.map(
                     (contact) => ListTile(
-                      title: Text(contact['contact']),
+                      title: Text(
+                          "${AppFunctions.getCountryCode(contact['country'])} ${contact['contact']}"),
                       trailing: OutlinedButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          developer.log("Call now...");
+                        },
                         child: const Text("Call Now"),
                       ),
                     ),

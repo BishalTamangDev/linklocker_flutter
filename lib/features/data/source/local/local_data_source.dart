@@ -143,14 +143,6 @@ class LocalDataSource {
 
     data['contacts'] = mutableContacts;
 
-    developer.log(
-        "User details -> id :: ${data['user_id']}, name :: ${data['name']}, email :: ${data['email']} ");
-    developer.log("User contacts :: ${data['contacts']}");
-
-    // developer.log(data['profile_picture'] == null
-    //     ? "Profile Picture :: No"
-    //     : "Profile Picture :: Yes");
-
     return data;
   }
 
@@ -300,8 +292,6 @@ class LocalDataSource {
 
   // get all links
   Future<List<Map<String, dynamic>>> getLinks() async {
-    // await Future.delayed(const Duration(seconds: 3));
-
     Database tempDb = await getDb();
 
     List<Map<String, dynamic>> data = await tempDb.query(linkTblName);
@@ -319,6 +309,73 @@ class LocalDataSource {
     }
 
     return mutableData;
+  }
+
+  // filter and return contacts
+  List<Map<String, dynamic>> filterContacts(
+      List<Map<String, dynamic>> contacts, int linkId) {
+    List<Map<String, dynamic>> data = [];
+
+    for (var contact in contacts) {
+      if (contact['link_id'] == linkId) {
+        data.add(contact);
+      }
+    }
+
+    return data;
+  }
+
+  //   get grouped links
+  Future<List<Map<String, dynamic>>> getGroupedLinks() async {
+    // database
+    Database tempDb = await getDb();
+
+    // final data to return
+    List<Map<String, dynamic>> groupedData = [], finalMutableData = [];
+
+    // get links in ascending order
+    List<Map<String, dynamic>> data =
+        await tempDb.query(linkTblName, orderBy: "name ASC");
+
+    // check for the possible groups
+    List<String> groups = [];
+    for (Map<String, dynamic> datum in data) {
+      if (!groups.contains(datum['name'][0])) {
+        groups.add(datum['name'][0]);
+      }
+    }
+
+    // get all contacts
+    List<Map<String, dynamic>> allContactList = await getAllContacts();
+
+    // convert data into mutable data
+    List<Map<String, dynamic>> mutableData = data
+        .map(
+          (datum) => {...datum},
+        )
+        .toList();
+
+    // get contacts
+    for (Map<String, dynamic> mutableDatum in mutableData) {
+      mutableDatum['contacts'] =
+          filterContacts(allContactList, mutableDatum['link_id']);
+      // mutableDatum['contacts'] = await getContacts(mutableDatum['link_id']);
+      finalMutableData.add(mutableDatum);
+    }
+
+    for (String group in groups) {
+      List<Map<String, dynamic>> groupList = [];
+      for (Map<String, dynamic> mutableDatum in finalMutableData) {
+        if (mutableDatum['name'][0] == group) {
+          groupList.add(mutableDatum);
+        }
+      }
+      groupedData.add({
+        'title': group,
+        'links': groupList,
+      });
+    }
+    return groupedData;
   }
 
 // get link
@@ -466,6 +523,8 @@ class LocalDataSource {
       where: "link_id = ?",
       whereArgs: [linkId],
     );
+
+    developer.log("Contact :: $data");
 
     return data;
   }
