@@ -74,9 +74,10 @@ class _AddLinkPageState extends State<AddLinkPage> {
       emailController.text = widget.linkData['email'];
       noteController.text = widget.linkData['note'];
       category = widget.linkData['category'];
-      birthday = widget.linkData['date_of_birth'] != null
-          ? DateTime.parse(widget.linkData['date_of_birth'])
-          : null;
+
+      birthday = widget.linkData['date_of_birth'] == ""
+          ? null
+          : DateTime.parse(widget.linkData['date_of_birth']);
 
       profilePicture = widget.linkData['profile_picture'];
 
@@ -411,17 +412,15 @@ class _AddLinkPageState extends State<AddLinkPage> {
                       // link data
                       var linkData = {
                         'name': nameController.text.isNotEmpty
-                            ? nameController.text.toString()
+                            ? nameController.text.toString().toLowerCase()
                             : "unknown",
                         'category': category,
                         'date_of_birth':
                             birthday != null ? birthday.toString() : "",
-                        'email': emailController.text.toString(),
-                        'note': noteController.text.toString(),
+                        'email': emailController.text.toString().toLowerCase(),
+                        'note': noteController.text.toString().toLowerCase(),
                         'profile_picture': profilePicture,
                       };
-
-                      developer.log("Link data: $linkData");
 
                       if (widget.task == "add") {
                         // add link
@@ -447,9 +446,26 @@ class _AddLinkPageState extends State<AddLinkPage> {
                           }
                         }
                       } else {
-                        developer.log("Update link");
-                        // response = await localDataStorage.updateContact(linkData);
-                        return;
+                        // link data
+                        var linkId = widget.linkData['link_id'];
+
+                        // contact data
+                        var contactId =
+                            widget.linkData['contacts'][0]['contact_id'];
+                        var contactData = {
+                          'country': 'nepal',
+                          'contact': phoneController.text.toString(),
+                        };
+
+                        response =
+                            await localDataStorage.updateLink(linkId, linkData);
+
+                        if (mounted) {
+                          if (response == "success") {
+                            response = await localDataStorage.updateContact(
+                                contactId, contactData);
+                          }
+                        }
                       }
 
                       if (context.mounted) {

@@ -28,6 +28,27 @@ class _ViewLinkPageState extends State<ViewLinkPage> {
     super.initState();
   }
 
+  _refreshLinkData() async {
+    Map<String, dynamic> tempData =
+        await localDataSource.getLink(widget.link['link_id']);
+
+    List<Map<String, dynamic>> contacts =
+        await localDataSource.getContacts(widget.link['link_id']);
+
+    Map<String, dynamic> finalLinkData = Map.from(tempData);
+    finalLinkData['contacts'] = contacts;
+
+    developer.log("Refresh link data!");
+    developer.log("temp data :: $tempData");
+    developer.log("contacts :: $contacts");
+
+    if (mounted) {
+      setState(() {
+        data = finalLinkData;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     var mediaQuery = MediaQuery.of(context);
@@ -365,19 +386,27 @@ class _ViewLinkPageState extends State<ViewLinkPage> {
                 child: Column(
                   spacing: 6.0,
                   mainAxisSize: MainAxisSize.min,
-                  children: [Icon(Icons.qr_code), const Text("QR Code")],
+                  children: [
+                    Icon(Icons.qr_code),
+                    const Text("QR Code"),
+                  ],
                 ),
               ),
 
               //   edit
               InkWell(
-                onTap: () => context.push('/link/edit', extra: widget.link),
+                onTap: () => context
+                    .push('/link/edit', extra: widget.link)
+                    .then((_) => _refreshLinkData()),
                 splashColor: colorScheme.surface,
                 highlightColor: colorScheme.surface,
                 child: Column(
                   spacing: 6.0,
                   mainAxisSize: MainAxisSize.min,
-                  children: [Icon(Icons.edit), const Text("Edit")],
+                  children: [
+                    Icon(Icons.edit),
+                    const Text("Edit"),
+                  ],
                 ),
               ),
 
