@@ -3,7 +3,6 @@ import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:linklocker/core/constants/app_constants.dart';
-import 'package:linklocker/features/data/models/contact_model.dart';
 import 'package:linklocker/features/data/models/link_model.dart';
 import 'package:linklocker/features/data/models/user_model.dart';
 import 'package:linklocker/features/data/source/local/local_data_source.dart';
@@ -372,7 +371,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                                             var data = snapshot.data![index];
 
                                             var linkModel = LinkModel();
-                                            var contactModel = ContactModel();
 
                                             linkModel.linkId = data['link_id'];
                                             linkModel.name = data['name'];

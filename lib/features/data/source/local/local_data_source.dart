@@ -1,6 +1,7 @@
 import 'dart:developer' as developer;
 import 'dart:io';
 
+import 'package:linklocker/core/constants/app_constants.dart';
 import 'package:linklocker/features/data/models/user_model.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
@@ -337,6 +338,34 @@ class LocalDataSource {
     }
 
     return data;
+  }
+
+//   get categorized links
+  Future<List<Map<String, dynamic>>> getCategorizedLinks() async {
+    Database tempDb = await getDb();
+
+    // get all links
+    var links = await getLinks();
+
+    List<Map<String, dynamic>> finalData = [];
+
+    for (var category in AppConstants.categoryList) {
+      int count = 0;
+      for (var link in links) {
+        if (category == link['category']) {
+          count++;
+        }
+      }
+
+      finalData.add(
+        {
+          'category': category,
+          'count': count,
+        },
+      );
+    }
+
+    return finalData;
   }
 
 // delete link

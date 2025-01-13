@@ -69,18 +69,20 @@ class _AddLinkPageState extends State<AddLinkPage> {
 
   // backup data
   _backupData() {
-    nameController.text = widget.linkData['name'];
-    emailController.text = widget.linkData['email'];
-    noteController.text = widget.linkData['note'];
-    category = widget.linkData['category'];
-    birthday = widget.linkData['date_of_birth'] != null
-        ? DateTime.parse(widget.linkData['date_of_birth'])
-        : null;
+    setState(() {
+      nameController.text = widget.linkData['name'];
+      emailController.text = widget.linkData['email'];
+      noteController.text = widget.linkData['note'];
+      category = widget.linkData['category'];
+      birthday = widget.linkData['date_of_birth'] != null
+          ? DateTime.parse(widget.linkData['date_of_birth'])
+          : null;
 
-    profilePicture = widget.linkData['profile_picture'];
+      profilePicture = widget.linkData['profile_picture'];
 
-    //   contacts
-    phoneController.text = widget.linkData['contacts'][0]['contact'];
+      //   contacts
+      phoneController.text = widget.linkData['contacts'][0]['contact'];
+    });
   }
 
   // select profile picture
@@ -121,6 +123,17 @@ class _AddLinkPageState extends State<AddLinkPage> {
           },
           icon: Icon(Icons.arrow_back_ios_new_rounded),
         ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 16.0),
+            child: IconButton(
+              onPressed: _backupData,
+              splashColor: Colors.transparent,
+              highlightColor: Colors.transparent,
+              icon: const Icon(Icons.undo),
+            ),
+          ),
+        ],
         title: Text(widget.task == "add" ? "Add New Link" : "Edit Link"),
       ),
       body: SingleChildScrollView(
@@ -156,11 +169,23 @@ class _AddLinkPageState extends State<AddLinkPage> {
                     ),
                   ),
 
-                  Center(
-                    child: const Text("Profile Picture"),
-                  ),
+                  profilePicture.isNotEmpty
+                      ? OutlinedButton(
+                          onPressed: () {
+                            setState(() {
+                              profilePicture = Uint8List(0);
+                            });
+                          },
+                          child: const Text("Remove Profile Picture"),
+                        )
+                      : SizedBox(
+                          height: 48.0,
+                          child: Center(
+                            child: const Text("Profile Picture"),
+                          ),
+                        ),
 
-                  const SizedBox(),
+                  // const SizedBox(),
 
                   //   name
                   CustomTextFieldWidget(
@@ -390,8 +415,8 @@ class _AddLinkPageState extends State<AddLinkPage> {
                         'category': category,
                         'date_of_birth':
                             birthday != null ? birthday.toString() : "",
-                        'email': emailController.text.toString() ?? "",
-                        'note': noteController.text.toString() ?? "",
+                        'email': emailController.text.toString(),
+                        'note': noteController.text.toString(),
                         'profile_picture': profilePicture,
                       };
 
