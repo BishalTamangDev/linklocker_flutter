@@ -12,6 +12,7 @@ import 'package:linklocker/features/presentation/home/widgets/link_widget.dart';
 import 'package:linklocker/features/presentation/profile/profile_card/loading_profile_card_widget.dart';
 import 'package:linklocker/features/presentation/profile/profile_card/profile_card_error_widget.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/constants/app_functions.dart';
 import '../profile/profile_card/profile_card_not_set_widget.dart';
@@ -84,7 +85,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         state == AppLifecycleState.inactive) {
       developer.log("Resume to refresh!");
       setState(() {
-        hide = true;
+        hide = false;
       });
     }
   }
@@ -311,8 +312,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                                                     ? null
                                                     : IconButton(
                                                         onPressed: () {
-                                                          showUserQrCode(
-                                                              qrData);
+                                                          AppFunctions
+                                                              .showUserQrCode(
+                                                                  context,
+                                                                  qrData);
                                                         },
                                                         icon: Icon(Icons.share),
                                                       ),
@@ -423,6 +426,14 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                                                               'profile_picture'],
                                                         };
 
+                                                        List<
+                                                                Map<String,
+                                                                    dynamic>>
+                                                            contacts =
+                                                            group['links']
+                                                                    [index]
+                                                                ['contacts'];
+
                                                         return LinkWidget(
                                                           linkWidgetData:
                                                               linkWidgetData,
@@ -436,13 +447,25 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                                                                   )
                                                                   .then((_) =>
                                                                       _refreshLinkList()),
-                                                          callCallBack: () =>
-                                                              showCallBottomSheet(
+                                                          callCallBack: () {
+                                                            // launch bottom sheet if link has only one contacts
+
+                                                            if (contacts
+                                                                    .length ==
+                                                                1) {
+                                                              AppFunctions
+                                                                  .openDialer(
+                                                                      "${AppFunctions.getCountryCode(contacts[0]['country'])} ${contacts[0]['contact']}");
+                                                            } else {
+                                                              AppFunctions.showCallBottomSheet(
+                                                                  context,
                                                                   group['links']
                                                                           [
                                                                           index]
                                                                       [
-                                                                      'contacts']),
+                                                                      'contacts']);
+                                                            }
+                                                          },
                                                         );
                                                       },
                                                     ),
@@ -532,77 +555,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               },
             ),
           );
-  }
-
-  // bottom sheet call
-  showCallBottomSheet(List<Map<String, dynamic>> contacts) {
-    showModalBottomSheet(
-      context: context,
-      useSafeArea: true,
-      showDragHandle: true,
-      builder: (context) {
-        return SizedBox(
-          width: MediaQuery.of(context).size.width,
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: SingleChildScrollView(
-              child: Column(
-                spacing: 1.0,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  ...contacts.map(
-                    (contact) => ListTile(
-                      title: Text(
-                          "${AppFunctions.getCountryCode(contact['country'])} ${contact['contact']}"),
-                      trailing: OutlinedButton(
-                        onPressed: () {
-                          developer.log("Call now...");
-                        },
-                        child: const Text("Call Now"),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  // user qr code
-  void showUserQrCode(Map<String, dynamic> qrData) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        content: Column(
-          spacing: 16.0,
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Text(AppFunctions.getCapitalizedWords(qrData['name'])),
-            SizedBox(
-              width: MediaQuery.of(context).size.width / 2.5,
-              height: MediaQuery.of(context).size.width / 2.5,
-              child: Padding(
-                padding: const EdgeInsets.all(3.0),
-                child: QrImageView(
-                  data: qrData.toString(),
-                  version: QrVersions.auto,
-                  size: 200.0,
-                  backgroundColor: Colors.white,
-                ),
-              ),
-            ),
-            Opacity(
-              opacity: 0.6,
-              child: const Text("Scan the QR code to add this contact."),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 }
 

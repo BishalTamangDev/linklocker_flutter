@@ -455,6 +455,7 @@ class LocalDataSource {
     data = await tempDb.query(
       linkTblName,
       where: "name LIKE ?",
+      orderBy: "name ASC",
       whereArgs: ["%$title%"],
     );
 
@@ -549,11 +550,16 @@ class LocalDataSource {
   }
 
   // update contact
-  Future<String> updateContact(int id, dynamic data) async {
+  Future<String> updateContact(int contactId, dynamic data) async {
     Database tempDb = await getDb();
 
     String response = await tempDb
-        .update(contactTblName, data)
+        .update(
+          contactTblName,
+          data,
+          where: "contact_id = ?",
+          whereArgs: [contactId],
+        )
         .then((onValue) => "success")
         .catchError((error) => error);
 
@@ -600,6 +606,7 @@ class LocalDataSource {
     List<Map<String, dynamic>> contacts = await tempDb.query(
       contactTblName,
       where: "contact LIKE ?",
+      orderBy: "contact ASC",
       whereArgs: ["%$contact%"],
     );
 

@@ -1,7 +1,8 @@
 import 'dart:math';
-
+import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:linklocker/core/constants/app_functions.dart';
 import 'package:linklocker/features/data/source/local/local_data_source.dart';
 import 'package:linklocker/features/presentation/home/widgets/link_widget.dart';
 import 'package:linklocker/features/presentation/search/widgets/no_data_widget.dart';
@@ -168,7 +169,6 @@ class _SearchPageState extends State<SearchPage> {
                                           vertical: 5.0),
                                       child: LinkWidget(
                                         linkWidgetData: linkWidgetData,
-                                        // navCallBack: () {},
                                         navCallBack: () => context
                                             .push('/link/view/', extra: data)
                                             .then((_) => searchByString
@@ -178,7 +178,18 @@ class _SearchPageState extends State<SearchPage> {
                                                 : _searchContact(
                                                     searchController.text
                                                         .toString())),
-                                        callCallBack: () {},
+                                        callCallBack: () async {
+                                          if (linkWidgetData['contacts']
+                                                  .length ==
+                                              1) {
+                                            String number =
+                                                "${AppFunctions.getCountryCode(linkWidgetData['contacts'][0]['country'])} ${linkWidgetData['contacts'][0]['contact']}";
+
+                                            AppFunctions.openDialer(number);
+                                          } else {
+                                            AppFunctions.showCallBottomSheet(context, linkWidgetData['contacts']);
+                                          }
+                                        },
                                       ),
                                     ),
                                   ),

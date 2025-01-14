@@ -133,15 +133,20 @@ class _ViewLinkPageState extends State<ViewLinkPage> {
                             : SizedBox(),
                         ...data['contacts'].map(
                           (contact) => ListTile(
-                            onTap: () {
-                              developer.log("Call now");
-                            },
                             leading: Icon(
                               Icons.phone_outlined,
                               color: Colors.green,
                             ),
                             title: Text(
                                 "${AppFunctions.getCountryCode(contact['country'])} ${contact['contact']}"),
+                            trailing: TextButton(
+                              onPressed: () {
+                                var data =
+                                    "${AppFunctions.getCountryCode(contact['country'])} ${contact['contact']}";
+                                AppFunctions.openDialer(data);
+                              },
+                              child: const Text("call Now"),
+                            ),
                           ),
                         ),
                       ],
@@ -380,7 +385,17 @@ class _ViewLinkPageState extends State<ViewLinkPage> {
             children: [
               // contact qr code
               InkWell(
-                onTap: showQrCode,
+                onTap: () {
+                  var qrContacts = data['contacts'];
+                  developer.log("temp :: ${qrContacts[0]}");
+                  Map<String, dynamic> qrData = {
+                    'name': data['name'],
+                    'contact':
+                        "${AppFunctions.getCountryCode(qrContacts[0]['country'])} ${qrContacts[0]['contact']}",
+                  };
+                  developer.log("QR data :: $qrData");
+                  AppFunctions.showUserQrCode(context, qrData);
+                },
                 splashColor: colorScheme.surface, // Custom splash color
                 highlightColor: colorScheme.surface,
                 child: Column(
@@ -435,45 +450,6 @@ class _ViewLinkPageState extends State<ViewLinkPage> {
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-
-  // show qr code
-  void showQrCode() {
-    var qrData = {
-      'name': widget.link['name'],
-      'contact':
-          "${AppFunctions.getCountryCode(widget.link['contacts'][0]['country'])}  ${widget.link['contacts'][0]['contact']}",
-      'email': widget.link['email'],
-    };
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        content: Column(
-          spacing: 4.0,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(AppFunctions.getCapitalizedWords(qrData['name'])),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(16.0),
-              child: SizedBox(
-                width: MediaQuery.of(context).size.width / 2.5,
-                height: MediaQuery.of(context).size.width / 2.5,
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: QrImageView(
-                    data: qrData.toString(),
-                    version: QrVersions.auto,
-                    size: 200.0,
-                    backgroundColor: Colors.white,
-                  ),
-                ),
-              ),
-            ),
-            Text("Scan the QR code above."),
-          ],
         ),
       ),
     );
