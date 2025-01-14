@@ -62,13 +62,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     });
   }
 
-  // refresh contact list
-  _refreshContactList() {
-    setState(() {
-      _contactList = localDataSource.getAllContacts();
-    });
-  }
-
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
@@ -183,19 +176,17 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                                   children: [
                                     IconButton(
                                       onPressed: () =>
-                                          context.push('/link/add').then((_) {
-                                        _refreshLinkList();
-                                        _refreshContactList();
-                                      }),
+                                          context.push('/link/add').then(
+                                                (_) => _refreshLinkList(),
+                                              ),
                                       iconSize: 26.0,
                                       icon: Icon(Icons.add),
                                     ),
                                     IconButton(
                                       onPressed: () =>
-                                          context.push('/search').then((_) {
-                                        _refreshLinkList();
-                                        _refreshContactList();
-                                      }),
+                                          context.push('/search').then(
+                                                (_) => _refreshLinkList(),
+                                              ),
                                       icon: Icon(Icons.search_outlined),
                                     ),
                                   ],
@@ -443,8 +434,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                                                                             'links']
                                                                         [index],
                                                                   )
-                                                                  .then((_) =>
-                                                                      _refreshLinkList()),
+                                                                  .then(
+                                                                    (val) =>
+                                                                        _refreshLinkList(),
+                                                                  ),
                                                           callCallBack: () {
                                                             // launch bottom sheet if link has only one contacts
 
@@ -497,7 +490,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                                         onPressed: () async {
                                           _refreshLinkList();
                                           _refreshUserData();
-                                          _refreshContactList();
                                         },
                                         child: const Text("Refresh"),
                                       ),

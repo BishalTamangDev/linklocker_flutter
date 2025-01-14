@@ -246,7 +246,7 @@ class _AddProfilePageState extends State<AddProfilePage> {
                         borderRadius: BorderRadius.circular(32.0),
                       ),
                     ),
-                    onPressed: () => Navigator.pop(context),
+                    onPressed: () => context.pop(),
                     child: const Text("Cancel"),
                   ),
                 ),

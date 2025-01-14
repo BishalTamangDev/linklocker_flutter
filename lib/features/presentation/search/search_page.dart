@@ -104,7 +104,7 @@ class _SearchPageState extends State<SearchPage> {
           ),
         ),
         leading: IconButton(
-          onPressed: () => context.pop(context),
+          onPressed: () => context.pop(),
           icon: Icon(Icons.arrow_back_ios_new_rounded),
         ),
         backgroundColor: Theme.of(context).canvasColor,

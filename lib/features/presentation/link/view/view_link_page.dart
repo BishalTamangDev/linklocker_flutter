@@ -19,6 +19,7 @@ class ViewLinkPage extends StatefulWidget {
 
 class _ViewLinkPageState extends State<ViewLinkPage> {
   // variables
+  bool dataUpdated = false;
   Map<String, dynamic> data = {};
   var localDataSource = LocalDataSource.getInstance();
 
@@ -64,7 +65,7 @@ class _ViewLinkPageState extends State<ViewLinkPage> {
           backgroundColor: colorScheme.surface,
           child: InkWell(
             highlightColor: Colors.red,
-            onTap: () => context.pop(),
+            onTap: () => context.pop(dataUpdated),
             child: Icon(Icons.arrow_back_ios_new_rounded),
           ),
         ),
@@ -283,7 +284,6 @@ class _ViewLinkPageState extends State<ViewLinkPage> {
                                       developer
                                           .log("Link id :: ${data['link_id']}");
 
-                                      // context.pop();
                                       String linkDelete = await localDataSource
                                           .deleteLink(data['link_id']);
                                       String contactDelete = "";
@@ -295,7 +295,10 @@ class _ViewLinkPageState extends State<ViewLinkPage> {
                                       }
 
                                       if (context.mounted) {
-                                        context.pop();
+                                        setState(() {
+                                          dataUpdated = true;
+                                        });
+                                        context.pop(dataUpdated);
 
                                         var scaffoldMessenger =
                                             ScaffoldMessenger.of(context);
@@ -410,9 +413,17 @@ class _ViewLinkPageState extends State<ViewLinkPage> {
 
               //   edit
               InkWell(
-                onTap: () => context
-                    .push('/link/edit', extra: widget.link)
-                    .then((_) => _refreshLinkData()),
+                onTap: () =>
+                    context.push('/link/edit', extra: widget.link).then(
+                  (returnValue) {
+                    _refreshLinkData();
+                    if (returnValue == true) {
+                      setState(() {
+                        dataUpdated = true;
+                      });
+                    }
+                  },
+                ),
                 splashColor: colorScheme.surface,
                 highlightColor: colorScheme.surface,
                 child: Column(

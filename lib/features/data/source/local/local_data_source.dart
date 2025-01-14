@@ -327,7 +327,6 @@ class LocalDataSource {
 
   //   get grouped links
   Future<List<Map<String, dynamic>>> getGroupedLinks() async {
-    await Future.delayed(const Duration(seconds: 1));
     // database
     Database tempDb = await getDb();
 

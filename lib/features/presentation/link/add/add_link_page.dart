@@ -124,9 +124,7 @@ class _AddLinkPageState extends State<AddLinkPage> {
         leading: IconButton(
           splashColor: Colors.transparent,
           highlightColor: Colors.transparent,
-          onPressed: () {
-            context.pop();
-          },
+          onPressed: () => context.pop(),
           icon: Icon(Icons.arrow_back_ios_new_rounded),
         ),
         actions: [
@@ -379,7 +377,7 @@ class _AddLinkPageState extends State<AddLinkPage> {
                         borderRadius: BorderRadius.circular(32.0),
                       ),
                     ),
-                    onPressed: () => Navigator.pop(context),
+                    onPressed: () => context.pop(),
                     child: const Text("Cancel"),
                   ),
                 ),
@@ -444,8 +442,8 @@ class _AddLinkPageState extends State<AddLinkPage> {
 
                           if (context.mounted) {
                             if (contactId != 0) {
-                              response = "success";
                               FocusScope.of(context).unfocus();
+                              response = "success";
                               _resetData();
                             }
                           }
