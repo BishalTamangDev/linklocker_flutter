@@ -97,9 +97,14 @@ class _AddLinkPageState extends State<AddLinkPage> {
       //   get bytes
       var bytes = await image.readAsBytes();
 
-      setState(() {
-        profilePicture = bytes;
-      });
+      // compress image
+      Uint8List compressedImage = await AppFunctions.compressImage(bytes);
+
+      if (mounted) {
+        setState(() {
+          profilePicture = compressedImage;
+        });
+      }
     }
   }
 

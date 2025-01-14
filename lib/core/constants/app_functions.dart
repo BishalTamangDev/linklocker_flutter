@@ -2,6 +2,7 @@ import 'dart:developer' as developer;
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:linklocker/core/constants/app_constants.dart';
@@ -164,5 +165,17 @@ class AppFunctions {
         );
       },
     );
+  }
+
+  // compress Uint8List and get another Uint8List.
+  static Future<Uint8List> compressImage(Uint8List list) async {
+    var result = await FlutterImageCompress.compressWithList(
+      list,
+      minHeight: 1920,
+      minWidth: 1080,
+      quality: 10,
+      rotate: 0,
+    );
+    return result;
   }
 }

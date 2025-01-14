@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:linklocker/core/constants/app_constants.dart';
+import 'package:linklocker/core/constants/app_functions.dart';
 import 'package:linklocker/features/data/models/user_model.dart';
 import 'package:linklocker/features/data/source/local/local_data_source.dart';
 import 'package:linklocker/shared/widgets/custom_text_field_widget.dart';
@@ -69,14 +70,16 @@ class _AddProfilePageState extends State<AddProfilePage> {
           await imagePicker.pickImage(source: ImageSource.gallery);
 
       if (image != null) {
-        developer.log("Image path :: ${image.path}");
-        final Uint8List bytes = await image.readAsBytes();
+        Uint8List bytes = await image.readAsBytes();
 
-        developer.log("Image bytes :: $bytes");
+        // compress image
+        Uint8List compressedImage = await AppFunctions.compressImage(bytes);
 
-        setState(() {
-          profilePicture = bytes;
-        });
+        if (mounted) {
+          setState(() {
+            profilePicture = compressedImage;
+          });
+        }
       }
     } catch (e) {
       developer.log("Error occurred!");
@@ -280,9 +283,6 @@ class _AddProfilePageState extends State<AddProfilePage> {
                       userModel.setEmail =
                           emailController.text.toString().trim();
                       userModel.setProfilePicture = profilePicture;
-
-                      //   get values
-                      developer.log("User data : $userModel");
 
                       // user contacts
                       var userContacts = {
