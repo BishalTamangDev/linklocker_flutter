@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:linklocker/core/constants/app_constants.dart';
 import 'package:linklocker/core/constants/app_functions.dart';
 import 'package:linklocker/features/data/source/local/local_data_source.dart';
+import 'package:share_plus/share_plus.dart';
 
 class ViewProfilePage extends StatefulWidget {
   const ViewProfilePage({super.key, required this.profileData});
@@ -107,7 +108,8 @@ class _ViewProfilePageState extends State<ViewProfilePage> {
                               Icons.phone_outlined,
                               color: AppConstants.callIconColor,
                             ),
-                            title: Text("${AppFunctions.getCountryCode(contact['country'])} ${contact['contact']}"),
+                            title: Text(
+                                "${AppFunctions.getCountryCode(contact['country'])} ${contact['contact']}"),
                           ),
                         ),
                       ],
@@ -158,7 +160,14 @@ class _ViewProfilePageState extends State<ViewProfilePage> {
               // contact qr code
               InkWell(
                 onTap: () {
-                  developer.log("Show qr code of the contact");
+                  Map<String, dynamic> qrData = {
+                    'name': userData['name'],
+                  };
+
+                  qrData['contacts'] =
+                      "${AppFunctions.getCountryCode(userData['contacts'][0]['country'])} ${userData['contacts'][0]['contact']}";
+
+                  AppFunctions.showUserQrCode(context, qrData);
                 },
                 splashColor: colorScheme.surface, // Custom splash color
                 highlightColor: colorScheme.surface,
@@ -190,7 +199,11 @@ class _ViewProfilePageState extends State<ViewProfilePage> {
               //   share
               InkWell(
                 onTap: () {
-                  developer.log("Share contact");
+                  String shareName = AppFunctions.getCapitalizedWords(userData['name']);
+                  String shareContactCode = AppFunctions.getCountryCode(userData['contacts'][0]['country']);
+                  String shareContactContact = AppFunctions.getCountryCode(userData['contacts'][0]['contact']);
+                  String shareData = "$shareName, $shareContactCode $shareContactContact";
+                  Share.share(shareData);
                 },
                 splashColor: colorScheme.surface,
                 highlightColor: colorScheme.surface,
