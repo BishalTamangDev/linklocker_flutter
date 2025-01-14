@@ -24,6 +24,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   // variables
+  bool developerMode = false;
   bool hide = false;
   var userModel = UserModel();
   var localDataSource = LocalDataSource.getInstance();
@@ -74,14 +75,12 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     if (state == AppLifecycleState.resumed) {
       setState(() {
         hide = false;
-        _refreshUserData();
+        // _refreshUserData();
         _refreshLinkList();
-        _refreshContactList();
       });
     } else if (state == AppLifecycleState.paused ||
         state == AppLifecycleState.hidden ||
         state == AppLifecycleState.inactive) {
-      developer.log("Resume to refresh!");
       setState(() {
         hide = false;
       });
@@ -261,10 +260,13 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                                             'contacts': userData['contacts'],
                                           };
 
+                                          var contact = userData['contacts'][0];
+
                                           var qrData = {
-                                            'contacts': userData['contacts'],
                                             'email_address': userModel.getEmail,
                                             'name': userModel.getName,
+                                            'contact':
+                                                "${AppFunctions.getCountryCode(contact['country'])} ${contact['contact']}",
                                           };
 
                                           return Column(
@@ -360,8 +362,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                                     if (snapshot.data!.isEmpty) {
                                       return EmptyLinksWidget();
                                     } else {
-                                      developer
-                                          .log("All data :: ${snapshot.data}");
                                       return Column(
                                         spacing: 16.0,
                                         crossAxisAlignment:
@@ -486,64 +486,69 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                             const SizedBox(),
 
                             // reset tables
-                            Wrap(
-                              spacing: 10.0,
-                              // runSpacing: 10.0,
-                              children: [
-                                // refresh
-                                OutlinedButton(
-                                  onPressed: () async {
-                                    _refreshLinkList();
-                                    _refreshUserData();
-                                    _refreshContactList();
-                                  },
-                                  child: const Text("Refresh"),
-                                ),
+                            !developerMode
+                                ? SizedBox()
+                                : Wrap(
+                                    spacing: 10.0,
+                                    // runSpacing: 10.0,
+                                    children: [
+                                      // refresh
+                                      OutlinedButton(
+                                        onPressed: () async {
+                                          _refreshLinkList();
+                                          _refreshUserData();
+                                          _refreshContactList();
+                                        },
+                                        child: const Text("Refresh"),
+                                      ),
 
-                                // reset user table
-                                OutlinedButton(
-                                  onPressed: () async {
-                                    bool response =
-                                        await localDataSource.resetUserTable();
+                                      // reset user table
+                                      OutlinedButton(
+                                        onPressed: () async {
+                                          bool response = await localDataSource
+                                              .resetUserTable();
 
-                                    if (response) {
-                                      _refreshUserData();
-                                    }
-                                  },
-                                  child: const Text("Reset User Table"),
-                                ),
+                                          if (response) {
+                                            _refreshUserData();
+                                          }
+                                        },
+                                        child: const Text("Reset User Table"),
+                                      ),
 
-                                // reset link table
-                                OutlinedButton(
-                                  onPressed: () async {
-                                    await localDataSource.resetLinkTable();
+                                      // reset link table
+                                      OutlinedButton(
+                                        onPressed: () async {
+                                          await localDataSource
+                                              .resetLinkTable();
 
-                                    if (mounted) {
-                                      _refreshLinkList();
-                                    }
-                                  },
-                                  child: const Text("Reset Link Table"),
-                                ),
+                                          if (mounted) {
+                                            _refreshLinkList();
+                                          }
+                                        },
+                                        child: const Text("Reset Link Table"),
+                                      ),
 
-                                // reset contact table
-                                OutlinedButton(
-                                  onPressed: () async {
-                                    await localDataSource.resetContactTable();
-                                  },
-                                  child: const Text("Reset Contact Table"),
-                                ),
+                                      // reset contact table
+                                      OutlinedButton(
+                                        onPressed: () async {
+                                          await localDataSource
+                                              .resetContactTable();
+                                        },
+                                        child:
+                                            const Text("Reset Contact Table"),
+                                      ),
 
-                                //   reset database
-                                OutlinedButton(
-                                  onPressed: () async {
-                                    await localDataSource.resetDb();
-                                    _refreshUserData();
-                                    _refreshLinkList();
-                                  },
-                                  child: const Text("Reset Database"),
-                                ),
-                              ],
-                            ),
+                                      //   reset database
+                                      OutlinedButton(
+                                        onPressed: () async {
+                                          await localDataSource.resetDb();
+                                          _refreshUserData();
+                                          _refreshLinkList();
+                                        },
+                                        child: const Text("Reset Database"),
+                                      ),
+                                    ],
+                                  ),
                           ],
                         ),
                       ),

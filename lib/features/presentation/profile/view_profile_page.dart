@@ -149,68 +149,75 @@ class _ViewProfilePageState extends State<ViewProfilePage> {
 
       // bottom actions
       bottomNavigationBar: Container(
-        color: themeContext.canvasColor,
+        color: colorScheme.surface,
         width: mediaQuery.size.width,
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Row(
             mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               // contact qr code
-              InkWell(
-                onTap: () {
-                  Map<String, dynamic> qrData = {
-                    'name': userData['name'],
-                  };
+              Expanded(
+                child: InkWell(
+                  onTap: () {
+                    Map<String, dynamic> qrData = {
+                      'name': userData['name'],
+                      'email_address': userData['email'],
+                    };
 
-                  qrData['contacts'] =
-                      "${AppFunctions.getCountryCode(userData['contacts'][0]['country'])} ${userData['contacts'][0]['contact']}";
+                    qrData['contact'] =
+                        "${AppFunctions.getCountryCode(userData['contacts'][0]['country'])} ${userData['contacts'][0]['contact']}";
 
-                  AppFunctions.showUserQrCode(context, qrData);
-                },
-                splashColor: colorScheme.surface, // Custom splash color
-                highlightColor: colorScheme.surface,
-                child: Column(
-                  spacing: 6.0,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [Icon(Icons.qr_code), const Text("QR Code")],
+                    AppFunctions.showUserQrCode(context, qrData);
+                  },
+                  splashColor: colorScheme.surface, // Custom splash color
+                  highlightColor: colorScheme.surface,
+                  child: Column(
+                    spacing: 6.0,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [Icon(Icons.qr_code), const Text("QR Code")],
+                  ),
                 ),
               ),
 
               //   edit
-              InkWell(
-                onTap: () =>
-                    context.push('/profile/edit', extra: userData).then(
-                          (_) => _refreshUserData(),
-                        ),
-                splashColor: colorScheme.surface,
-                highlightColor: colorScheme.surface,
-                child: Column(
-                  spacing: 6.0,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.edit),
-                    const Text("Edit"),
-                  ],
+              Expanded(
+                child: InkWell(
+                  onTap: () =>
+                      context.push('/profile/edit', extra: userData).then(
+                            (_) => _refreshUserData(),
+                          ),
+                  splashColor: colorScheme.surface,
+                  highlightColor: colorScheme.surface,
+                  child: Column(
+                    spacing: 6.0,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.edit),
+                      const Text("Edit"),
+                    ],
+                  ),
                 ),
               ),
 
               //   share
-              InkWell(
-                onTap: () {
-                  String shareName = AppFunctions.getCapitalizedWords(userData['name']);
-                  String shareContactCode = AppFunctions.getCountryCode(userData['contacts'][0]['country']);
-                  String shareContactContact = AppFunctions.getCountryCode(userData['contacts'][0]['contact']);
-                  String shareData = "$shareName, $shareContactCode $shareContactContact";
-                  Share.share(shareData);
-                },
-                splashColor: colorScheme.surface,
-                highlightColor: colorScheme.surface,
-                child: Column(
-                  spacing: 6.0,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [Icon(Icons.share), const Text("Share")],
+              Expanded(
+                child: InkWell(
+                  onTap: () {
+                    String shareName =
+                        AppFunctions.getCapitalizedWords(userData['name']);
+                    String shareContact =
+                        "${AppFunctions.getCountryCode(userData['contacts'][0]['country'])} ${userData['contacts'][0]['contact']}";
+                    String shareData = "$shareName, $shareContact";
+                    Share.share(shareData);
+                  },
+                  splashColor: colorScheme.surface,
+                  highlightColor: colorScheme.surface,
+                  child: Column(
+                    spacing: 6.0,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [Icon(Icons.share), const Text("Share")],
+                  ),
                 ),
               ),
             ],

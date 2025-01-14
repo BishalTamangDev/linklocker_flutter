@@ -375,7 +375,7 @@ class _ViewLinkPageState extends State<ViewLinkPage> {
 
       // bottom actions
       bottomNavigationBar: Container(
-        color: themeContext.canvasColor,
+        color: colorScheme.surface,
         width: mediaQuery.size.width,
         child: Padding(
           padding: const EdgeInsets.all(16.0),
