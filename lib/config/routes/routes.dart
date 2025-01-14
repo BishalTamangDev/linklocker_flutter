@@ -31,6 +31,8 @@ class AppRoute {
           return CustomTransitionPage(
             child: ViewProfilePage(profileData: data),
             transitionsBuilder: immediateTransitionBuilder,
+            reverseTransitionDuration: const Duration(milliseconds: 500),
+            transitionDuration: const Duration(milliseconds: 500),
           );
         },
         routes: [
@@ -41,6 +43,8 @@ class AppRoute {
               return CustomTransitionPage(
                 child: ViewProfilePage(profileData: data),
                 transitionsBuilder: immediateTransitionBuilder,
+                reverseTransitionDuration: const Duration(milliseconds: 500),
+                transitionDuration: const Duration(milliseconds: 500),
               );
             },
           ),
@@ -49,6 +53,8 @@ class AppRoute {
             pageBuilder: (context, state) => CustomTransitionPage(
               child: AddProfilePage(task: 'add'),
               transitionsBuilder: slideUpTransitionBuilder,
+              reverseTransitionDuration: const Duration(milliseconds: 500),
+              transitionDuration: const Duration(milliseconds: 500),
             ),
           ),
           GoRoute(
@@ -58,6 +64,8 @@ class AppRoute {
               return CustomTransitionPage(
                 child: AddProfilePage(task: 'edit', profileData: profileData),
                 transitionsBuilder: slideUpTransitionBuilder,
+                reverseTransitionDuration: const Duration(milliseconds: 500),
+                transitionDuration: const Duration(milliseconds: 500),
               );
             },
           ),
@@ -78,7 +86,9 @@ class AppRoute {
                 child: ViewLinkPage(
                   link: link,
                 ),
-                transitionsBuilder: immediateTransitionBuilder,
+                transitionsBuilder: slideLeftTransitionBuilder,
+                reverseTransitionDuration: const Duration(milliseconds: 500),
+                transitionDuration: const Duration(milliseconds: 500),
               );
             },
           ),
@@ -86,7 +96,9 @@ class AppRoute {
             path: '/add',
             pageBuilder: (context, state) => CustomTransitionPage(
               child: const AddLinkPage(),
-              transitionsBuilder: immediateTransitionBuilder,
+              transitionsBuilder: slideLeftTransitionBuilder,
+              reverseTransitionDuration: const Duration(milliseconds: 500),
+              transitionDuration: const Duration(milliseconds: 500),
             ),
           ),
           GoRoute(
@@ -95,7 +107,9 @@ class AppRoute {
               var linkData = state.extra as Map<String, dynamic>;
               return CustomTransitionPage(
                 child: AddLinkPage(task: "edit", data: linkData),
-                transitionsBuilder: immediateTransitionBuilder,
+                transitionsBuilder: slideLeftTransitionBuilder,
+                reverseTransitionDuration: const Duration(milliseconds: 500),
+                transitionDuration: const Duration(milliseconds: 500),
               );
             },
           ),
@@ -105,10 +119,14 @@ class AppRoute {
       // search
       GoRoute(
         path: '/search',
-        pageBuilder: (context, state) => CustomTransitionPage(
-          child: SearchPage(),
-          transitionsBuilder: slideLeftTransitionBuilder,
-        ),
+        pageBuilder: (context, state) {
+          return CustomTransitionPage(
+            child: SearchPage(),
+            reverseTransitionDuration: const Duration(milliseconds: 500),
+            transitionDuration: const Duration(milliseconds: 500),
+            transitionsBuilder: slideLeftTransitionBuilder,
+          );
+        },
       ),
     ],
 
