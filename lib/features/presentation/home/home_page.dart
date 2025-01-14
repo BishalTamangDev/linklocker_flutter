@@ -11,8 +11,6 @@ import 'package:linklocker/features/presentation/home/widgets/fetching_links_wid
 import 'package:linklocker/features/presentation/home/widgets/link_widget.dart';
 import 'package:linklocker/features/presentation/profile/profile_card/loading_profile_card_widget.dart';
 import 'package:linklocker/features/presentation/profile/profile_card/profile_card_error_widget.dart';
-import 'package:qr_flutter/qr_flutter.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/constants/app_functions.dart';
 import '../profile/profile_card/profile_card_not_set_widget.dart';
