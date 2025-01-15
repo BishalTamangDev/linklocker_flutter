@@ -174,6 +174,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                                 Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
+                                    // add
                                     IconButton(
                                       onPressed: () =>
                                           context.push('/link/add').then(
@@ -182,6 +183,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                                       iconSize: 26.0,
                                       icon: Icon(Icons.add),
                                     ),
+
+                                    // search
                                     IconButton(
                                       onPressed: () =>
                                           context.push('/search').then(
