@@ -19,7 +19,6 @@ class ViewLinkPage extends StatefulWidget {
 
 class _ViewLinkPageState extends State<ViewLinkPage> {
   // variables
-  bool dataUpdated = false;
   Map<String, dynamic> data = {};
   var localDataSource = LocalDataSource.getInstance();
 
@@ -65,7 +64,7 @@ class _ViewLinkPageState extends State<ViewLinkPage> {
           backgroundColor: colorScheme.surface,
           child: InkWell(
             highlightColor: Colors.red,
-            onTap: () => context.pop(dataUpdated),
+            onTap: () => context.pop(),
             child: Icon(Icons.arrow_back_ios_new_rounded),
           ),
         ),
@@ -295,10 +294,7 @@ class _ViewLinkPageState extends State<ViewLinkPage> {
                                       }
 
                                       if (context.mounted) {
-                                        setState(() {
-                                          dataUpdated = true;
-                                        });
-                                        context.pop(dataUpdated);
+                                        context.pop();
 
                                         var scaffoldMessenger =
                                             ScaffoldMessenger.of(context);
@@ -413,17 +409,9 @@ class _ViewLinkPageState extends State<ViewLinkPage> {
 
               //   edit
               InkWell(
-                onTap: () =>
-                    context.push('/link/edit', extra: widget.link).then(
-                  (returnValue) {
-                    _refreshLinkData();
-                    if (returnValue == true) {
-                      setState(() {
-                        dataUpdated = true;
-                      });
-                    }
-                  },
-                ),
+                onTap: () => context
+                    .push('/link/edit', extra: data)
+                    .then((_) => _refreshLinkData()),
                 splashColor: colorScheme.surface,
                 highlightColor: colorScheme.surface,
                 child: Column(

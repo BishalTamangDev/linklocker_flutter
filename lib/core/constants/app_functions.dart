@@ -16,14 +16,12 @@ class AppFunctions {
 
   // country code
   static String getCountryCode(String country) {
-    String code = "";
+    String code = "+977";
 
-    switch (country) {
-      case 'nepal':
-        code = "+977";
-        break;
-      default:
-        code = "";
+    for (var countryCode in AppConstants.countryCodes) {
+      if(countryCode['country'] == country) {
+        code = countryCode['code'];
+      }
     }
 
     return code;

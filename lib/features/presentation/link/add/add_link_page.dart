@@ -39,6 +39,7 @@ class _AddLinkPageState extends State<AddLinkPage> {
   var phoneController = TextEditingController();
   var emailController = TextEditingController();
   var noteController = TextEditingController();
+  String country = "nepal";
 
   @override
   void initState() {
@@ -63,6 +64,7 @@ class _AddLinkPageState extends State<AddLinkPage> {
       noteController.clear();
       birthday = null;
       category = "other";
+      country = "nepal";
       profilePicture = Uint8List(0);
     });
   }
@@ -82,6 +84,7 @@ class _AddLinkPageState extends State<AddLinkPage> {
       profilePicture = widget.linkData['profile_picture'];
 
       //   contacts
+      country = widget.linkData['contacts'][0]['country'];
       phoneController.text = widget.linkData['contacts'][0]['contact'];
     });
   }
@@ -131,7 +134,7 @@ class _AddLinkPageState extends State<AddLinkPage> {
           Padding(
             padding: const EdgeInsets.only(right: 16.0),
             child: IconButton(
-              onPressed: _backupData,
+              onPressed: widget.task == "add" ? _resetData : _backupData,
               splashColor: Colors.transparent,
               highlightColor: Colors.transparent,
               icon: const Icon(Icons.undo),
@@ -153,7 +156,7 @@ class _AddLinkPageState extends State<AddLinkPage> {
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  const SizedBox(height: 32.0),
+                  const SizedBox(height: 0.0),
 
                   //   profile picture
                   InkWell(
@@ -199,17 +202,6 @@ class _AddLinkPageState extends State<AddLinkPage> {
                     hintText: "Name",
                     leadingIcon: Icons.person,
                     leadingIconColor: Colors.red,
-                  ),
-
-                  //   phone number
-                  CustomTextFieldWidget(
-                    context: context,
-                    autofocus: false,
-                    controller: phoneController,
-                    hintText: "Phone Number",
-                    leadingIcon: Icons.call_outlined,
-                    leadingIconColor: Colors.green,
-                    textInputType: TextInputType.number,
                   ),
 
                   // category
@@ -260,6 +252,126 @@ class _AddLinkPageState extends State<AddLinkPage> {
                         ),
                       ),
                     ),
+                  ),
+
+                  //   phone number
+                  // CustomTextFieldWidget(
+                  //   context: context,
+                  //   autofocus: false,
+                  //   controller: phoneController,
+                  //   hintText: "Phone Number",
+                  //   leadingIcon: Icons.call_outlined,
+                  //   leadingIconColor: Colors.green,
+                  //   textInputType: TextInputType.number,
+                  // ),
+
+                  // phone number
+                  Row(
+                    spacing: 10.0,
+                    children: [
+                      // call icon, country code & contact
+                      Expanded(
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(8.0),
+                          child: Container(
+                            color: colorScheme.surface,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16.0,
+                              ),
+                              child: Row(
+                                spacing: 10.0,
+                                children: [
+                                  // call icon
+                                  Icon(
+                                    Icons.call,
+                                    color: AppConstants.callIconColor,
+                                  ),
+
+                                  // country code
+                                  DropdownButton(
+                                    value: country,
+                                    icon: Icon(Icons.keyboard_arrow_down),
+                                    underline: SizedBox(),
+                                    onChanged: (newValue) {
+                                      setState(() {
+                                        country = newValue.toString();
+                                      });
+                                    },
+                                    items: [
+                                      ...AppConstants.countryCodes.map(
+                                        (countryCode) => DropdownMenuItem(
+                                          value: countryCode['country'],
+                                          child: Text(
+                                            AppFunctions.getCapitalizedWords(
+                                                countryCode['country']),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+
+                                  //   contact
+                                  Expanded(
+                                    child: TextField(
+                                      controller: phoneController,
+                                      decoration: InputDecoration(
+                                        hintText: "Phone number",
+                                        border: InputBorder.none,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      // ClipRRect(
+                      //   borderRadius: BorderRadius.circular(8.0),
+                      //   child: InkWell(
+                      //     borderRadius: BorderRadius.circular(8.0),
+                      //     onTap: () {
+                      //       developer.log("Add more contact");
+                      //       setState(() {});
+                      //     },
+                      //     child: Container(
+                      //       color: colorScheme.surface,
+                      //       child: Padding(
+                      //         padding: const EdgeInsets.all(12.0),
+                      //         child: Icon(
+                      //           Icons.add,
+                      //           color: Colors.green,
+                      //         ),
+                      //       ),
+                      //     ),
+                      //   ),
+                      // ),
+
+                      // delete contact
+                      // Row(
+                      //   children: [
+                      //     const SizedBox(width: 8.0),
+                      //     ClipRRect(
+                      //       borderRadius: BorderRadius.circular(8.0),
+                      //       child: InkWell(
+                      //         borderRadius: BorderRadius.circular(8.0),
+                      //         onTap: () {},
+                      //         child: Container(
+                      //           color: colorScheme.surface,
+                      //           child: Padding(
+                      //             padding: const EdgeInsets.all(12.0),
+                      //             child: Icon(
+                      //               Icons.delete_outline,
+                      //               color: Colors.red,
+                      //             ),
+                      //           ),
+                      //         ),
+                      //       ),
+                      //     ),
+                      //   ],
+                      // ),
+                    ],
                   ),
 
                   //   email address
@@ -433,7 +545,7 @@ class _AddLinkPageState extends State<AddLinkPage> {
                         if (linkId != 0) {
                           // contact data
                           Map<String, dynamic> contactData = {
-                            'country': 'nepal',
+                            'country': country,
                             'contact': phoneController.text.toString(),
                           };
 
@@ -456,7 +568,7 @@ class _AddLinkPageState extends State<AddLinkPage> {
                         var contactId =
                             widget.linkData['contacts'][0]['contact_id'];
                         var contactData = {
-                          'country': 'nepal',
+                          'country': country,
                           'contact': phoneController.text.toString(),
                         };
 
@@ -484,6 +596,12 @@ class _AddLinkPageState extends State<AddLinkPage> {
                                     : "Link couldn't be updated."),
                           ),
                         );
+
+                        if(widget.task == "edit") {
+                          if(response == "success") {
+                            context.pop();
+                          }
+                        }
                       }
                     },
                     child: Text(widget.task == "add" ? "Save" : "Update"),

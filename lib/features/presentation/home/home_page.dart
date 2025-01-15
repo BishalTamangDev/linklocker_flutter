@@ -24,7 +24,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   // variables
-  bool developerMode = false;
+  bool developerMode = true;
   bool hide = false;
   var userModel = UserModel();
   var localDataSource = LocalDataSource.getInstance();
