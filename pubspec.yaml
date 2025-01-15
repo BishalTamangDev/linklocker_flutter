@@ -47,6 +47,7 @@ dependencies:
 
   #  image compressor
   flutter_image_compress: ^2.4.0
+  mobile_scanner: ^6.0.2
 
 # launcher icon
 flutter_launcher_icons:

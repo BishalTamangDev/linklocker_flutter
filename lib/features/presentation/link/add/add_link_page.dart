@@ -164,36 +164,26 @@ class _AddLinkPageState extends State<AddLinkPage> {
                       showDialog(
                         context: context,
                         builder: (context) => AlertDialog(
-                          contentPadding: EdgeInsets.only(
-                            top: 16.0,
-                            bottom: 8.0,
-                            left: 8.0,
-                            right: 8.0,
-                          ),
+                          contentPadding: EdgeInsets.zero,
                           content: Column(
                             mainAxisSize: MainAxisSize.min,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 16.0),
+                                padding: const EdgeInsets.only(
+                                  left: 16.0,
+                                  top: 16.0,
+                                  bottom: 8.0,
+                                ),
                                 child: Opacity(
                                   opacity: 0.6,
                                   child: Text("Select the image source",
                                       style: textTheme.bodyMedium),
                                 ),
                               ),
-
                               const SizedBox(
                                 height: 8.0,
                               ),
-                              // Row(
-                              //   children: [
-                              //     Icon(Icons.photo_outlined),
-                              //     Text("Gallery"),
-                              //   ],
-                              // ),
-                              // Icon(Icons.camera_alt_outlined),
                               ListTile(
                                 title: const Text("Gallery"),
                                 leading: Icon(Icons.photo_outlined),
@@ -203,7 +193,7 @@ class _AddLinkPageState extends State<AddLinkPage> {
                                 },
                               ),
                               ListTile(
-                                title: const Text("Gallery"),
+                                title: const Text("Camera"),
                                 leading: Icon(Icons.camera_alt_outlined),
                                 onTap: () {
                                   _pickImage(ImageSource.camera);

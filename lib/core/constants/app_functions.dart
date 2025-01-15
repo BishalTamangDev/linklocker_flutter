@@ -19,7 +19,7 @@ class AppFunctions {
     String code = "+977";
 
     for (var countryCode in AppConstants.countryCodes) {
-      if(countryCode['country'] == country) {
+      if (countryCode['country'] == country) {
         code = countryCode['code'];
       }
     }
@@ -175,5 +175,19 @@ class AppFunctions {
       rotate: 0,
     );
     return result;
+  }
+
+  static bool checkQrValidity(Map<String, dynamic> linkData) {
+    bool status = true;
+
+    developer.log("Link data :: $linkData");
+
+    // if (linkData['name'] == null ||
+    //     linkData['contact']['country'] == null ||
+    //     linkData['contact']['number'] == null) {
+    //   status = false;
+    // }
+
+    return status;
   }
 }

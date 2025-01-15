@@ -174,6 +174,13 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                                 Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
+                                    // scan qr code
+                                    IconButton(
+                                      onPressed: () => context.push('/qr_scanner/home'),
+                                      padding: EdgeInsets.zero,
+                                      icon: Icon(Icons.qr_code, size: 20.0),
+                                    ),
+
                                     // add
                                     IconButton(
                                       onPressed: () =>
