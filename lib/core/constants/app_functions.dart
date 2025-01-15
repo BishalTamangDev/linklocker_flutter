@@ -118,7 +118,7 @@ class AppFunctions {
             Opacity(
               opacity: 0.6,
               child: Text(
-                "Scan the QR code above.",
+                "Scan the QR code above to add this contact.",
                 style: Theme.of(context).textTheme.labelLarge,
               ),
             ),

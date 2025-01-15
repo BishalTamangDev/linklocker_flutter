@@ -2,6 +2,7 @@ import 'dart:developer' as developer;
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:linklocker/core/constants/app_constants.dart';
 import 'package:linklocker/core/constants/app_functions.dart';
 import 'package:linklocker/features/data/source/local/local_data_source.dart';
@@ -82,7 +83,7 @@ class _ViewLinkPageState extends State<ViewLinkPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              const SizedBox(),
+              const SizedBox(height: 68.0),
 
               //   profile picture
               Center(
@@ -390,6 +391,8 @@ class _ViewLinkPageState extends State<ViewLinkPage> {
                   developer.log("temp :: ${qrContacts[0]}");
                   Map<String, dynamic> qrData = {
                     'name': data['name'],
+                    'email_address': data['email'],
+                    'date_of_birth': DateFormat('yyyy-MM-dd').format(DateTime.parse(data['date_of_birth'])).toString(),
                     'contact':
                         "${AppFunctions.getCountryCode(qrContacts[0]['country'])} ${qrContacts[0]['contact']}",
                   };

@@ -254,8 +254,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                                           var contact = userData['contacts'][0];
 
                                           var qrData = {
-                                            'email_address': userModel.getEmail,
                                             'name': userModel.getName,
+                                            'email_address': userModel.getEmail,
                                             'contact':
                                                 "${AppFunctions.getCountryCode(contact['country'])} ${contact['contact']}",
                                           };
@@ -308,7 +308,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                                                                   context,
                                                                   qrData);
                                                         },
-                                                        icon: Icon(Icons.qr_code),
+                                                        icon:
+                                                            Icon(Icons.qr_code),
                                                       ),
                                                 onTap: () {
                                                   if (userData['user_id'] ==
