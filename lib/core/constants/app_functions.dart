@@ -60,11 +60,11 @@ class AppFunctions {
   }
 
   // image picker
-  static dynamic pickImage() async {
+  static dynamic pickImage(ImageSource imageSource) async {
     final ImagePicker imagePicker = ImagePicker();
     XFile? image;
     try {
-      image = await imagePicker.pickImage(source: ImageSource.gallery);
+      image = await imagePicker.pickImage(source: imageSource);
 
       if (image != null) {
         developer.log('File path: ${image.path}');
