@@ -254,17 +254,6 @@ class _AddLinkPageState extends State<AddLinkPage> {
                     ),
                   ),
 
-                  //   phone number
-                  // CustomTextFieldWidget(
-                  //   context: context,
-                  //   autofocus: false,
-                  //   controller: phoneController,
-                  //   hintText: "Phone Number",
-                  //   leadingIcon: Icons.call_outlined,
-                  //   leadingIconColor: Colors.green,
-                  //   textInputType: TextInputType.number,
-                  // ),
-
                   // phone number
                   Row(
                     spacing: 10.0,
@@ -272,12 +261,13 @@ class _AddLinkPageState extends State<AddLinkPage> {
                       // call icon, country code & contact
                       Expanded(
                         child: ClipRRect(
-                          borderRadius: BorderRadius.circular(8.0),
+                          borderRadius: BorderRadius.circular(16.0),
                           child: Container(
                             color: colorScheme.surface,
                             child: Padding(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 16.0,
+                                vertical: 8.0,
                               ),
                               child: Row(
                                 spacing: 10.0,
@@ -315,6 +305,7 @@ class _AddLinkPageState extends State<AddLinkPage> {
                                   Expanded(
                                     child: TextField(
                                       controller: phoneController,
+                                      keyboardType: TextInputType.number,
                                       decoration: InputDecoration(
                                         hintText: "Phone number",
                                         border: InputBorder.none,
@@ -420,6 +411,8 @@ class _AddLinkPageState extends State<AddLinkPage> {
                                           await showDatePicker(
                                         context: context,
                                         initialDate: birthday,
+                                        keyboardType:
+                                            TextInputType.numberWithOptions(),
                                         firstDate:
                                             DateTime(DateTime.now().year - 50),
                                         lastDate: DateTime.now(),
@@ -450,14 +443,41 @@ class _AddLinkPageState extends State<AddLinkPage> {
                   ),
 
                   // note
-                  CustomTextFieldWidget(
-                    context: context,
-                    autofocus: false,
-                    controller: noteController,
-                    hintText: "Note",
-                    leadingIcon: Icons.note_alt_outlined,
-                    leadingIconColor: Colors.grey,
-                    maxLine: 6,
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(16.0),
+                    child: Container(
+                      color: colorScheme.surface,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10.0,
+                          vertical: 8.0,
+                        ),
+                        child: Row(
+                          spacing: 16.0,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(top: 10.0),
+                              child: Icon(
+                                Icons.note_alt_outlined,
+                                color: AppConstants.noteIconColor,
+                              ),
+                            ),
+                            Expanded(
+                              child: TextField(
+                                maxLines: 6,
+                                controller: noteController,
+                                decoration: InputDecoration(
+                                  hintText:
+                                      "Write something about this person...",
+                                  border: InputBorder.none,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
 
                   const SizedBox(),
@@ -597,8 +617,8 @@ class _AddLinkPageState extends State<AddLinkPage> {
                           ),
                         );
 
-                        if(widget.task == "edit") {
-                          if(response == "success") {
+                        if (widget.task == "edit") {
+                          if (response == "success") {
                             context.pop();
                           }
                         }

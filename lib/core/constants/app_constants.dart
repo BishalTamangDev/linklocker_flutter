@@ -7,6 +7,8 @@ class AppConstants {
   // default user image
   static final String defaultUserImage = "assets/images/blank_user.png";
 
+  static final String defaultCountry = "nepal";
+
 //   colors
   static Color primaryColor = Colors.blue;
   static Color callIconColor = Colors.green;

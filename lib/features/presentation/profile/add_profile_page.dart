@@ -29,6 +29,7 @@ class _AddProfilePageState extends State<AddProfilePage> {
   // variables
   // late Map<String, dynamic> _userData;
   bool _isDisposed = false;
+  String country = AppConstants.defaultCountry;
 
   // user model
   UserModel userModel = UserModel();
@@ -48,6 +49,7 @@ class _AddProfilePageState extends State<AddProfilePage> {
       nameController.text = widget.backupData['name'];
       emailController.text = widget.backupData['email'];
       profilePicture = widget.backupData['profile_picture'];
+      country = widget.backupData['contacts'][0]['country'];
       phoneController.text = widget.backupData['contacts'][0]['contact'];
     });
   }
@@ -58,6 +60,7 @@ class _AddProfilePageState extends State<AddProfilePage> {
       nameController.clear();
       phoneController.clear();
       emailController.clear();
+      country = AppConstants.defaultCountry;
       profilePicture = Uint8List(0);
     });
   }
@@ -137,94 +140,192 @@ class _AddProfilePageState extends State<AddProfilePage> {
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: Column(
-            spacing: 20.0,
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            spacing: 16.0,
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Column(
-                spacing: 16.0,
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 16.0),
+              const SizedBox(
+                height: 48.0,
+              ),
 
-                  //   profile picture
-                  InkWell(
-                    splashColor: Colors.transparent,
-                    highlightColor: Colors.transparent,
-                    onTap: _pickImage,
-                    child: CircleAvatar(
-                      radius: 80.0,
-                      backgroundColor: colorScheme.surface,
-                      backgroundImage: profilePicture.isNotEmpty
-                          ? MemoryImage(profilePicture)
-                          : AssetImage(AppConstants.defaultUserImage),
-                      child: Icon(
-                        Icons.image_outlined,
-                        size: 28.0,
+              //   profile picture
+              Center(
+                child: InkWell(
+                  splashColor: Colors.transparent,
+                  highlightColor: Colors.transparent,
+                  onTap: _pickImage,
+                  child: CircleAvatar(
+                    radius: 80.0,
+                    backgroundColor: colorScheme.surface,
+                    backgroundImage: profilePicture.isNotEmpty
+                        ? MemoryImage(profilePicture)
+                        : AssetImage(AppConstants.defaultUserImage),
+                    child: Icon(
+                      Icons.image_outlined,
+                      size: 28.0,
+                    ),
+                  ),
+                ),
+              ),
+
+              profilePicture.isEmpty
+                  ? SizedBox(
+                      height: 48.0,
+                      child: Center(
+                        child: Opacity(
+                          opacity: 0.6,
+                          child: Text("Select profile picture"),
+                        ),
+                      ),
+                    )
+                  : Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        OutlinedButton(
+                          onPressed: () {
+                            setState(() {
+                              profilePicture = Uint8List(0);
+                            });
+                          },
+                          child: const Text("Remove Profile Picture"),
+                        ),
+                      ],
+                    ),
+
+              //   name
+              CustomTextFieldWidget(
+                context: context,
+                autofocus: false,
+                controller: nameController,
+                hintText: "Name",
+                leadingIcon: Icons.person,
+                leadingIconColor: Colors.red,
+              ),
+
+              // phone number
+              Row(
+                spacing: 10.0,
+                children: [
+                  // call icon, country code & contact
+                  Expanded(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(16.0),
+                      child: Container(
+                        color: colorScheme.surface,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16.0,
+                            vertical: 8.0,
+                          ),
+                          child: Row(
+                            spacing: 10.0,
+                            children: [
+                              // call icon
+                              Icon(
+                                Icons.call,
+                                color: AppConstants.callIconColor,
+                              ),
+
+                              // country code
+                              DropdownButton(
+                                value: country,
+                                icon: Icon(Icons.keyboard_arrow_down),
+                                underline: SizedBox(),
+                                onChanged: (newValue) {
+                                  setState(() {
+                                    country = newValue.toString();
+                                  });
+                                },
+                                items: [
+                                  ...AppConstants.countryCodes.map(
+                                    (countryCode) => DropdownMenuItem(
+                                      value: countryCode['country'],
+                                      child: Text(
+                                        AppFunctions.getCapitalizedWords(
+                                            countryCode['country']),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+
+                              //   contact
+                              Expanded(
+                                child: TextField(
+                                  controller: phoneController,
+                                  keyboardType: TextInputType.number,
+                                  decoration: InputDecoration(
+                                    hintText: "Phone number",
+                                    border: InputBorder.none,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                     ),
                   ),
+                  // ClipRRect(
+                  //   borderRadius: BorderRadius.circular(8.0),
+                  //   child: InkWell(
+                  //     borderRadius: BorderRadius.circular(8.0),
+                  //     onTap: () {
+                  //       developer.log("Add more contact");
+                  //       setState(() {});
+                  //     },
+                  //     child: Container(
+                  //       color: colorScheme.surface,
+                  //       child: Padding(
+                  //         padding: const EdgeInsets.all(12.0),
+                  //         child: Icon(
+                  //           Icons.add,
+                  //           color: Colors.green,
+                  //         ),
+                  //       ),
+                  //     ),
+                  //   ),
+                  // ),
 
-                  profilePicture.isEmpty
-                      ? SizedBox(
-                          height: 48.0,
-                          child: Center(
-                            child: Opacity(
-                              opacity: 0.6,
-                              child: Text("Select profile picture"),
-                            ),
-                          ),
-                        )
-                      : Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            OutlinedButton(
-                              onPressed: () {
-                                setState(() {
-                                  profilePicture = Uint8List(0);
-                                });
-                              },
-                              child: const Text("Remove Profile Picture"),
-                            ),
-                          ],
-                        ),
-
-                  //   name
-                  CustomTextFieldWidget(
-                    context: context,
-                    autofocus: false,
-                    controller: nameController,
-                    hintText: "Name",
-                    leadingIcon: Icons.person,
-                    leadingIconColor: Colors.red,
-                  ),
-
-                  //   phone number
-                  CustomTextFieldWidget(
-                    context: context,
-                    autofocus: false,
-                    controller: phoneController,
-                    hintText: "Phone Number",
-                    leadingIcon: Icons.call_outlined,
-                    leadingIconColor: Colors.green,
-                    textInputType: TextInputType.numberWithOptions(),
-                  ),
-
-                  //   email address
-                  CustomTextFieldWidget(
-                    context: context,
-                    autofocus: false,
-                    controller: emailController,
-                    hintText: "Email Address",
-                    leadingIcon: Icons.email_outlined,
-                    leadingIconColor: Colors.orangeAccent,
-                    textInputType: TextInputType.emailAddress,
-                  ),
-
-                  const SizedBox(),
+                  // delete contact
+                  // Row(
+                  //   children: [
+                  //     const SizedBox(width: 8.0),
+                  //     ClipRRect(
+                  //       borderRadius: BorderRadius.circular(8.0),
+                  //       child: InkWell(
+                  //         borderRadius: BorderRadius.circular(8.0),
+                  //         onTap: () {},
+                  //         child: Container(
+                  //           color: colorScheme.surface,
+                  //           child: Padding(
+                  //             padding: const EdgeInsets.all(12.0),
+                  //             child: Icon(
+                  //               Icons.delete_outline,
+                  //               color: Colors.red,
+                  //             ),
+                  //           ),
+                  //         ),
+                  //       ),
+                  //     ),
+                  //   ],
+                  // ),
                 ],
               ),
+
+              //   email address
+              CustomTextFieldWidget(
+                context: context,
+                autofocus: false,
+                controller: emailController,
+                hintText: "Email Address",
+                leadingIcon: Icons.email_outlined,
+                leadingIconColor: Colors.orangeAccent,
+                textInputType: TextInputType.emailAddress,
+              ),
+
+              const SizedBox(),
             ],
           ),
         ),
@@ -279,14 +380,15 @@ class _AddProfilePageState extends State<AddProfilePage> {
                       }
 
                       // user model
-                      userModel.setName = nameController.text.toString().trim();
+                      userModel.setName =
+                          nameController.text.toString().trim().toLowerCase();
                       userModel.setEmail =
-                          emailController.text.toString().trim();
+                          emailController.text.toString().trim().toLowerCase();
                       userModel.setProfilePicture = profilePicture;
 
                       // user contacts
                       var userContacts = {
-                        'country': 'nepal',
+                        'country': country,
                         'contact': phoneController.text.toString(),
                       };
 
@@ -331,17 +433,11 @@ class _AddProfilePageState extends State<AddProfilePage> {
                         String response =
                             await localDataStorage.updateUser(userModel);
 
-                        // update user contact
-                        Map<String, dynamic> userContactData = {
-                          'country': 'nepal',
-                          'contact': phoneController.text.toString(),
-                        };
-
                         String contactResponse =
                             await localDataStorage.updateUserContact(
-                                widget.backupData['contacts'][0]
-                                    ['user_contact_id'],
-                                userContactData);
+                          widget.backupData['contacts'][0]['user_contact_id'],
+                          userContacts,
+                        );
 
                         if (context.mounted) {
                           scaffoldMessenger.showSnackBar(

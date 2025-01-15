@@ -80,8 +80,9 @@ class _ViewLinkPageState extends State<ViewLinkPage> {
           child: Column(
             spacing: 16.0,
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              const SizedBox(height: 64.0),
+              const SizedBox(),
 
               //   profile picture
               Center(

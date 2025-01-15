@@ -308,7 +308,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                                                                   context,
                                                                   qrData);
                                                         },
-                                                        icon: Icon(Icons.share),
+                                                        icon: Icon(Icons.qr_code),
                                                       ),
                                                 onTap: () {
                                                   if (userData['user_id'] ==
