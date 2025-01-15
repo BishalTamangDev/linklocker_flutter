@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:developer' as developer;
 import 'dart:typed_data';
 
@@ -6,7 +7,6 @@ import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:linklocker/core/constants/app_constants.dart';
-import 'package:path/path.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -97,18 +97,24 @@ class AppFunctions {
       context: context,
       builder: (context) => AlertDialog(
         content: Column(
-          spacing: 16.0,
+          spacing: 12.0,
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Text(AppFunctions.getCapitalizedWords(qrData['name'] ?? "Unknown")),
+            Text(
+              qrData['name'],
+              style: Theme.of(context)
+                  .textTheme
+                  .titleLarge!
+                  .copyWith(fontWeight: FontWeight.bold),
+            ),
             SizedBox(
               width: MediaQuery.of(context).size.width / 2.5,
               height: MediaQuery.of(context).size.width / 2.5,
               child: Padding(
                 padding: const EdgeInsets.all(3.0),
                 child: QrImageView(
-                  data: qrData.toString(),
+                  data: jsonEncode(qrData),
                   version: QrVersions.auto,
                   size: 200.0,
                   backgroundColor: Colors.white,
@@ -182,11 +188,11 @@ class AppFunctions {
 
     developer.log("Link data :: $linkData");
 
-    // if (linkData['name'] == null ||
-    //     linkData['contact']['country'] == null ||
-    //     linkData['contact']['number'] == null) {
-    //   status = false;
-    // }
+    if (linkData['name'] == null ||
+        linkData['contact']['country'] == null ||
+        linkData['contact']['number'] == null) {
+      status = false;
+    }
 
     return status;
   }

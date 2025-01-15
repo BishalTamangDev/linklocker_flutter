@@ -389,12 +389,15 @@ class _ViewLinkPageState extends State<ViewLinkPage> {
                 onTap: () {
                   var qrContacts = data['contacts'];
                   developer.log("temp :: ${qrContacts[0]}");
+
                   Map<String, dynamic> qrData = {
-                    'name': data['name'],
-                    'email_address': data['email'],
-                    'date_of_birth': DateFormat('yyyy-MM-dd').format(DateTime.parse(data['date_of_birth'])).toString(),
-                    'contact':
-                        "${AppFunctions.getCountryCode(qrContacts[0]['country'])} ${qrContacts[0]['contact']}",
+                    "name": AppFunctions.getCapitalizedWords(data['name']).trim(),
+                    "email_address": data['email'].toString().trim(),
+                    "contact": {
+                      "country": AppFunctions.getCapitalizedWords(
+                          qrContacts[0]['country']).trim(),
+                      "number": qrContacts[0]['contact'],
+                    },
                   };
                   developer.log("QR data :: $qrData");
                   AppFunctions.showUserQrCode(context, qrData);

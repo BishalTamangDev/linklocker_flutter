@@ -176,19 +176,11 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                                   children: [
                                     // scan qr code
                                     IconButton(
-                                      onPressed: () => context.push('/qr_scanner/home'),
-                                      padding: EdgeInsets.zero,
-                                      icon: Icon(Icons.qr_code, size: 20.0),
-                                    ),
-
-                                    // add
-                                    IconButton(
                                       onPressed: () =>
-                                          context.push('/link/add').then(
-                                                (_) => _refreshLinkList(),
-                                              ),
-                                      iconSize: 26.0,
-                                      icon: Icon(Icons.add),
+                                          context.push('/qr_scanner/home'),
+                                      padding: EdgeInsets.zero,
+                                      icon: Icon(Icons.qr_code_scanner,
+                                          size: 20.0),
                                     ),
 
                                     // search
@@ -246,7 +238,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                                           userModel.setId =
                                               userData['user_id'] ?? 0;
                                           userModel.setName =
-                                              userData['name'] ?? "";
+                                              userData['name'] ?? "Unknown";
                                           userModel.setEmail =
                                               userData['email'] ?? "";
                                           userModel.setProfilePicture =
@@ -263,12 +255,20 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
                                           var contact = userData['contacts'][0];
 
-                                          var qrData = {
-                                            'name': userModel.getName,
-                                            'email_address': userModel.getEmail,
-                                            'contact':
-                                                "${AppFunctions.getCountryCode(contact['country'])} ${contact['contact']}",
+                                          Map<String, dynamic> qrData = {
+                                            "name": AppFunctions
+                                                .getCapitalizedWords(
+                                                    userModel.getName),
+                                            "email_address": userModel.getEmail,
+                                            "contact": {
+                                              "country": AppFunctions
+                                                  .getCapitalizedWords(
+                                                      contact['country']),
+                                              "number": contact['contact'],
+                                            },
                                           };
+
+                                          developer.log("qr data :: $qrData");
 
                                           return Column(
                                             spacing: 12.0,
@@ -312,12 +312,11 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                                                         null
                                                     ? null
                                                     : IconButton(
-                                                        onPressed: () {
-                                                          AppFunctions
-                                                              .showUserQrCode(
-                                                                  context,
-                                                                  qrData);
-                                                        },
+                                                        onPressed: () =>
+                                                            AppFunctions
+                                                                .showUserQrCode(
+                                                                    context,
+                                                                    qrData),
                                                         icon:
                                                             Icon(Icons.qr_code),
                                                       ),
@@ -559,6 +558,16 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                   ],
                 );
               },
+            ),
+            floatingActionButton: FloatingActionButton(
+              onPressed: () => context.push('/link/add').then(
+                    (_) => _refreshLinkList(),
+                  ),
+              backgroundColor: Theme.of(context).primaryColor,
+              child: Icon(
+                Icons.add,
+                color: Theme.of(context).colorScheme.onPrimary,
+              ),
             ),
           );
   }

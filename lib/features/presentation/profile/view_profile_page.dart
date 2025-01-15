@@ -161,12 +161,16 @@ class _ViewProfilePageState extends State<ViewProfilePage> {
                 child: InkWell(
                   onTap: () {
                     Map<String, dynamic> qrData = {
-                      'name': userData['name'],
-                      'email_address': userData['email'],
+                      'name': AppFunctions.getCapitalizedWords(userData['name'])
+                          .trim(),
+                      'email_address': userData['email'].toString().trim(),
+                      'contact': {
+                        "country": AppFunctions.getCapitalizedWords(
+                                userData['contacts'][0]['country'])
+                            .trim(),
+                        "number": userData['contacts'][0]['contact'],
+                      },
                     };
-
-                    qrData['contact'] =
-                        "${AppFunctions.getCountryCode(userData['contacts'][0]['country'])} ${userData['contacts'][0]['contact']}";
 
                     AppFunctions.showUserQrCode(context, qrData);
                   },
