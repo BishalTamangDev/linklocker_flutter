@@ -496,7 +496,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                             const SizedBox(),
 
                             // reset tables
-                            developerMode
+                            !developerMode
                                 ? SizedBox(
                                     height: 44.0,
                                   )
