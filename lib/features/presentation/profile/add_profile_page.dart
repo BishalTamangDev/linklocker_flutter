@@ -66,11 +66,11 @@ class _AddProfilePageState extends State<AddProfilePage> {
   }
 
   // image picker
-  Future<void> _pickImage() async {
+  Future<void> _pickImage(ImageSource imageSource) async {
     try {
       final imagePicker = ImagePicker();
       final XFile? image =
-          await imagePicker.pickImage(source: ImageSource.gallery);
+          await imagePicker.pickImage(source: imageSource);
 
       if (image != null) {
         Uint8List bytes = await image.readAsBytes();
@@ -154,7 +154,52 @@ class _AddProfilePageState extends State<AddProfilePage> {
                 child: InkWell(
                   splashColor: Colors.transparent,
                   highlightColor: Colors.transparent,
-                  onTap: _pickImage,
+                  onTap: () {
+                    //   show image source
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        contentPadding: EdgeInsets.zero,
+                        content: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(
+                                left: 16.0,
+                                top: 16.0,
+                                bottom: 8.0,
+                              ),
+                              child: Opacity(
+                                opacity: 0.6,
+                                child: Text("Select the image source",
+                                    style: textTheme.bodyMedium),
+                              ),
+                            ),
+                            const SizedBox(
+                              height: 8.0,
+                            ),
+                            ListTile(
+                              title: const Text("Gallery"),
+                              leading: Icon(Icons.photo_outlined),
+                              onTap: () {
+                                _pickImage(ImageSource.gallery);
+                                context.pop();
+                              },
+                            ),
+                            ListTile(
+                              title: const Text("Camera"),
+                              leading: Icon(Icons.camera_alt_outlined),
+                              onTap: () {
+                                _pickImage(ImageSource.camera);
+                                context.pop();
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
                   child: CircleAvatar(
                     radius: 80.0,
                     backgroundColor: colorScheme.surface,

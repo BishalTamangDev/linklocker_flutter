@@ -6,6 +6,8 @@ import 'package:linklocker/features/presentation/link/view/view_link_page.dart';
 import 'package:linklocker/features/presentation/page_not_found_page.dart';
 import 'package:linklocker/features/presentation/profile/add_profile_page.dart';
 import 'package:linklocker/features/presentation/profile/view_profile_page.dart';
+import 'package:linklocker/features/presentation/qr_scanner/qr_scanner_home_page.dart';
+import 'package:linklocker/features/presentation/qr_scanner/qr_scanner_result_page.dart';
 import 'package:linklocker/features/presentation/search/search_page.dart';
 
 class AppRoute {
@@ -113,6 +115,21 @@ class AppRoute {
               );
             },
           ),
+          GoRoute(
+            path: '/qr_add',
+            pageBuilder: (context, state) {
+              var qrData = state.extra as Map<String, dynamic>;
+              return CustomTransitionPage(
+                child: AddLinkPage(
+                  task: "qr_add",
+                  dataSecond: qrData,
+                ),
+                transitionsBuilder: slideLeftTransitionBuilder,
+                reverseTransitionDuration: const Duration(milliseconds: 500),
+                transitionDuration: const Duration(milliseconds: 500),
+              );
+            },
+          ),
         ],
       ),
 
@@ -127,6 +144,37 @@ class AppRoute {
             transitionsBuilder: slideLeftTransitionBuilder,
           );
         },
+      ),
+
+      //   qr scanner
+      GoRoute(
+        path: '/qr_scanner',
+        builder: (context, state) => PageNotFoundPage(),
+        routes: [
+          GoRoute(
+            path: '/home',
+            pageBuilder: (context, state) {
+              return CustomTransitionPage(
+                child: QrScannerHomePage(),
+                transitionsBuilder: slideLeftTransitionBuilder,
+                transitionDuration: const Duration(milliseconds: 500),
+                reverseTransitionDuration: const Duration(milliseconds: 500),
+              );
+            },
+          ),
+          GoRoute(
+            path: '/result',
+            pageBuilder: (context, state) {
+              var qrData = state.extra as Map<String, dynamic>;
+              return CustomTransitionPage(
+                child: QrScannerResultPage(qrData: qrData),
+                transitionsBuilder: slideLeftTransitionBuilder,
+                transitionDuration: const Duration(milliseconds: 500),
+                reverseTransitionDuration: const Duration(milliseconds: 500),
+              );
+            },
+          ),
+        ],
       ),
     ],
 

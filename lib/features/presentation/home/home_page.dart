@@ -24,7 +24,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   // variables
-  bool developerMode = true;
+  bool developerMode = false;
   bool hide = false;
   var userModel = UserModel();
   var localDataSource = LocalDataSource.getInstance();
@@ -174,14 +174,14 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                                 Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    // add
+                                    // scan qr code
                                     IconButton(
-                                      onPressed: () =>
-                                          context.push('/link/add').then(
-                                                (_) => _refreshLinkList(),
-                                              ),
-                                      iconSize: 26.0,
-                                      icon: Icon(Icons.add),
+                                      onPressed: () => context
+                                          .push('/qr_scanner/home')
+                                          .then((_) => _refreshLinkList()),
+                                      padding: EdgeInsets.zero,
+                                      icon: Icon(Icons.qr_code_scanner,
+                                          size: 20.0),
                                     ),
 
                                     // search
@@ -239,7 +239,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                                           userModel.setId =
                                               userData['user_id'] ?? 0;
                                           userModel.setName =
-                                              userData['name'] ?? "";
+                                              userData['name'] ?? "Unknown";
                                           userModel.setEmail =
                                               userData['email'] ?? "";
                                           userModel.setProfilePicture =
@@ -256,12 +256,26 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
                                           var contact = userData['contacts'][0];
 
-                                          var qrData = {
-                                            'name': userModel.getName,
-                                            'email_address': userModel.getEmail,
-                                            'contact':
-                                                "${AppFunctions.getCountryCode(contact['country'])} ${contact['contact']}",
+                                          Map<String, dynamic> qrData = {
+                                            "name": AppFunctions
+                                                    .getCapitalizedWords(
+                                                        userModel.getName)
+                                                .trim()
+                                                .toUpperCase(),
+                                            "email_address": userModel.getEmail
+                                                .toString()
+                                                .trim(),
+                                            "contact": {
+                                              "country": AppFunctions
+                                                  .getCapitalizedWords(
+                                                      contact['country']),
+                                              "number": contact['contact']
+                                                  .toString()
+                                                  .trim(),
+                                            },
                                           };
+
+                                          developer.log("qr data :: $qrData");
 
                                           return Column(
                                             spacing: 12.0,
@@ -305,12 +319,11 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                                                         null
                                                     ? null
                                                     : IconButton(
-                                                        onPressed: () {
-                                                          AppFunctions
-                                                              .showUserQrCode(
-                                                                  context,
-                                                                  qrData);
-                                                        },
+                                                        onPressed: () =>
+                                                            AppFunctions
+                                                                .showUserQrCode(
+                                                                    context,
+                                                                    qrData),
                                                         icon:
                                                             Icon(Icons.qr_code),
                                                       ),
@@ -483,66 +496,76 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                             const SizedBox(),
 
                             // reset tables
-                            !developerMode
-                                ? SizedBox()
-                                : Wrap(
-                                    spacing: 10.0,
-                                    // runSpacing: 10.0,
+                            developerMode
+                                ? SizedBox(
+                                    height: 44.0,
+                                  )
+                                : Column(
                                     children: [
-                                      // refresh
-                                      OutlinedButton(
-                                        onPressed: () async {
-                                          _refreshLinkList();
-                                          _refreshUserData();
-                                        },
-                                        child: const Text("Refresh"),
+                                      Wrap(
+                                        spacing: 10.0,
+                                        // runSpacing: 10.0,
+                                        children: [
+                                          // refresh
+                                          OutlinedButton(
+                                            onPressed: () async {
+                                              _refreshLinkList();
+                                              _refreshUserData();
+                                            },
+                                            child: const Text("Refresh"),
+                                          ),
+
+                                          // reset user table
+                                          OutlinedButton(
+                                            onPressed: () async {
+                                              bool response =
+                                                  await localDataSource
+                                                      .resetUserTable();
+
+                                              if (response) {
+                                                _refreshUserData();
+                                              }
+                                            },
+                                            child:
+                                                const Text("Reset User Table"),
+                                          ),
+
+                                          // reset link table
+                                          OutlinedButton(
+                                            onPressed: () async {
+                                              await localDataSource
+                                                  .resetLinkTable();
+
+                                              if (mounted) {
+                                                _refreshLinkList();
+                                              }
+                                            },
+                                            child:
+                                                const Text("Reset Link Table"),
+                                          ),
+
+                                          // reset contact table
+                                          OutlinedButton(
+                                            onPressed: () async {
+                                              await localDataSource
+                                                  .resetContactTable();
+                                            },
+                                            child: const Text(
+                                                "Reset Contact Table"),
+                                          ),
+
+                                          //   reset database
+                                          OutlinedButton(
+                                            onPressed: () async {
+                                              await localDataSource.resetDb();
+                                              _refreshUserData();
+                                              _refreshLinkList();
+                                            },
+                                            child: const Text("Reset Database"),
+                                          ),
+                                        ],
                                       ),
-
-                                      // reset user table
-                                      OutlinedButton(
-                                        onPressed: () async {
-                                          bool response = await localDataSource
-                                              .resetUserTable();
-
-                                          if (response) {
-                                            _refreshUserData();
-                                          }
-                                        },
-                                        child: const Text("Reset User Table"),
-                                      ),
-
-                                      // reset link table
-                                      OutlinedButton(
-                                        onPressed: () async {
-                                          await localDataSource
-                                              .resetLinkTable();
-
-                                          if (mounted) {
-                                            _refreshLinkList();
-                                          }
-                                        },
-                                        child: const Text("Reset Link Table"),
-                                      ),
-
-                                      // reset contact table
-                                      OutlinedButton(
-                                        onPressed: () async {
-                                          await localDataSource
-                                              .resetContactTable();
-                                        },
-                                        child:
-                                            const Text("Reset Contact Table"),
-                                      ),
-
-                                      //   reset database
-                                      OutlinedButton(
-                                        onPressed: () async {
-                                          await localDataSource.resetDb();
-                                          _refreshUserData();
-                                          _refreshLinkList();
-                                        },
-                                        child: const Text("Reset Database"),
-                                      ),
+                                      const SizedBox(height: 54.0),
                                     ],
                                   ),
                           ],
@@ -552,6 +575,16 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                   ],
                 );
               },
+            ),
+            floatingActionButton: FloatingActionButton(
+              onPressed: () => context.push('/link/add').then(
+                    (_) => _refreshLinkList(),
+                  ),
+              backgroundColor: Theme.of(context).primaryColor,
+              child: Icon(
+                Icons.add,
+                color: Theme.of(context).colorScheme.onPrimary,
+              ),
             ),
           );
   }
