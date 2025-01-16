@@ -1,4 +1,4 @@
-![Application Icon](https://github.com/BishalTamangDev/linklocker_flutter/blob/main/assets/icons/ic_launcher.png)
+<img src="https://github.com/BishalTamangDev/linklocker_flutter/blob/main/assets/icons/ic_launcher.png" alt="Application Icon" width="50" height="50">
 
 ### Application Name :: LinkLocker
 > "Save Contacts Locally"
@@ -25,4 +25,3 @@
 10. share_plus
 11. sqflite
 12. url_launcher
-  
