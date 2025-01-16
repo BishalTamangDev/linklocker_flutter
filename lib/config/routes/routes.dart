@@ -33,8 +33,6 @@ class AppRoute {
           return CustomTransitionPage(
             child: ViewProfilePage(profileData: data),
             transitionsBuilder: immediateTransitionBuilder,
-            reverseTransitionDuration: const Duration(milliseconds: 500),
-            transitionDuration: const Duration(milliseconds: 500),
           );
         },
         routes: [
@@ -45,8 +43,6 @@ class AppRoute {
               return CustomTransitionPage(
                 child: ViewProfilePage(profileData: data),
                 transitionsBuilder: immediateTransitionBuilder,
-                reverseTransitionDuration: const Duration(milliseconds: 500),
-                transitionDuration: const Duration(milliseconds: 500),
               );
             },
           ),
@@ -55,8 +51,6 @@ class AppRoute {
             pageBuilder: (context, state) => CustomTransitionPage(
               child: AddProfilePage(task: 'add'),
               transitionsBuilder: slideUpTransitionBuilder,
-              reverseTransitionDuration: const Duration(milliseconds: 500),
-              transitionDuration: const Duration(milliseconds: 500),
             ),
           ),
           GoRoute(
@@ -66,8 +60,6 @@ class AppRoute {
               return CustomTransitionPage(
                 child: AddProfilePage(task: 'edit', profileData: profileData),
                 transitionsBuilder: slideUpTransitionBuilder,
-                reverseTransitionDuration: const Duration(milliseconds: 500),
-                transitionDuration: const Duration(milliseconds: 500),
               );
             },
           ),
@@ -89,8 +81,6 @@ class AppRoute {
                   link: link,
                 ),
                 transitionsBuilder: slideLeftTransitionBuilder,
-                reverseTransitionDuration: const Duration(milliseconds: 500),
-                transitionDuration: const Duration(milliseconds: 500),
               );
             },
           ),
@@ -99,8 +89,6 @@ class AppRoute {
             pageBuilder: (context, state) => CustomTransitionPage(
               child: const AddLinkPage(),
               transitionsBuilder: slideLeftTransitionBuilder,
-              reverseTransitionDuration: const Duration(milliseconds: 500),
-              transitionDuration: const Duration(milliseconds: 500),
             ),
           ),
           GoRoute(
@@ -110,8 +98,6 @@ class AppRoute {
               return CustomTransitionPage(
                 child: AddLinkPage(task: "edit", data: linkData),
                 transitionsBuilder: slideLeftTransitionBuilder,
-                reverseTransitionDuration: const Duration(milliseconds: 500),
-                transitionDuration: const Duration(milliseconds: 500),
               );
             },
           ),
@@ -125,8 +111,6 @@ class AppRoute {
                   dataSecond: qrData,
                 ),
                 transitionsBuilder: slideLeftTransitionBuilder,
-                reverseTransitionDuration: const Duration(milliseconds: 500),
-                transitionDuration: const Duration(milliseconds: 500),
               );
             },
           ),
@@ -139,8 +123,6 @@ class AppRoute {
         pageBuilder: (context, state) {
           return CustomTransitionPage(
             child: SearchPage(),
-            reverseTransitionDuration: const Duration(milliseconds: 500),
-            transitionDuration: const Duration(milliseconds: 500),
             transitionsBuilder: slideLeftTransitionBuilder,
           );
         },
@@ -157,8 +139,6 @@ class AppRoute {
               return CustomTransitionPage(
                 child: QrScannerHomePage(),
                 transitionsBuilder: slideLeftTransitionBuilder,
-                transitionDuration: const Duration(milliseconds: 500),
-                reverseTransitionDuration: const Duration(milliseconds: 500),
               );
             },
           ),
@@ -169,8 +149,6 @@ class AppRoute {
               return CustomTransitionPage(
                 child: QrScannerResultPage(qrData: qrData),
                 transitionsBuilder: slideLeftTransitionBuilder,
-                transitionDuration: const Duration(milliseconds: 500),
-                reverseTransitionDuration: const Duration(milliseconds: 500),
               );
             },
           ),

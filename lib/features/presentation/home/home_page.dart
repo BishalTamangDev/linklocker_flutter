@@ -69,7 +69,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       setState(() {
         hide = false;
         // _refreshUserData();
-        _refreshLinkList();
+        // _refreshLinkList();
       });
     } else if (state == AppLifecycleState.paused ||
         state == AppLifecycleState.hidden ||
@@ -284,22 +284,19 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                                             children: [
                                               const SizedBox(),
                                               ListTile(
-                                                leading: Hero(
-                                                  tag: 'profile_picture',
-                                                  child: CircleAvatar(
-                                                    radius: 32.0,
-                                                    backgroundColor:
-                                                        Theme.of(context)
-                                                            .colorScheme
-                                                            .surface,
-                                                    backgroundImage: profileData[
-                                                                'profile_picture']
-                                                            .isEmpty
-                                                        ? AssetImage(AppConstants
-                                                            .defaultUserImage)
-                                                        : MemoryImage(profileData[
-                                                            'profile_picture']),
-                                                  ),
+                                                leading: CircleAvatar(
+                                                  radius: 32.0,
+                                                  backgroundColor:
+                                                      Theme.of(context)
+                                                          .colorScheme
+                                                          .surface,
+                                                  backgroundImage: profileData[
+                                                              'profile_picture']
+                                                          .isEmpty
+                                                      ? AssetImage(AppConstants
+                                                          .defaultUserImage)
+                                                      : MemoryImage(profileData[
+                                                          'profile_picture']),
                                                 ),
                                                 title: Text(
                                                   AppFunctions
