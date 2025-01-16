@@ -115,6 +115,21 @@ class AppRoute {
               );
             },
           ),
+          GoRoute(
+            path: '/qr_add',
+            pageBuilder: (context, state) {
+              var qrData = state.extra as Map<String, dynamic>;
+              return CustomTransitionPage(
+                child: AddLinkPage(
+                  task: "qr_add",
+                  dataSecond: qrData,
+                ),
+                transitionsBuilder: slideLeftTransitionBuilder,
+                reverseTransitionDuration: const Duration(milliseconds: 500),
+                transitionDuration: const Duration(milliseconds: 500),
+              );
+            },
+          ),
         ],
       ),
 

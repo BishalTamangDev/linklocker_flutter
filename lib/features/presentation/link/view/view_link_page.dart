@@ -391,12 +391,14 @@ class _ViewLinkPageState extends State<ViewLinkPage> {
                   developer.log("temp :: ${qrContacts[0]}");
 
                   Map<String, dynamic> qrData = {
-                    "name": AppFunctions.getCapitalizedWords(data['name']).trim(),
+                    "name":
+                        AppFunctions.getCapitalizedWords(data['name']).trim(),
                     "email_address": data['email'].toString().trim(),
                     "contact": {
                       "country": AppFunctions.getCapitalizedWords(
-                          qrContacts[0]['country']).trim(),
-                      "number": qrContacts[0]['contact'],
+                              qrContacts[0]['country'])
+                          .trim(),
+                      "number": qrContacts[0]['contact'].toString().trim(),
                     },
                   };
                   developer.log("QR data :: $qrData");

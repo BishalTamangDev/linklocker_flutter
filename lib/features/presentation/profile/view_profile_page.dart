@@ -168,7 +168,7 @@ class _ViewProfilePageState extends State<ViewProfilePage> {
                         "country": AppFunctions.getCapitalizedWords(
                                 userData['contacts'][0]['country'])
                             .trim(),
-                        "number": userData['contacts'][0]['contact'],
+                        "number": userData['contacts'][0]['contact'].toString().trim(),
                       },
                     };
 

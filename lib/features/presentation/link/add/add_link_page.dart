@@ -15,12 +15,15 @@ class AddLinkPage extends StatefulWidget {
     super.key,
     this.task = "add",
     Map<String, dynamic>? data,
-  }) : linkData = data ?? const {'id': 0};
+    Map<String, dynamic>? dataSecond,
+  })  : linkData = data ?? const {'id': 0},
+        qrData = dataSecond ?? const {'id': 0};
 
   final String task;
 
   // final int id;
   final Map<String, dynamic> linkData;
+  final Map<String, dynamic> qrData;
 
   @override
   State<AddLinkPage> createState() => _AddLinkPageState();
@@ -47,6 +50,8 @@ class _AddLinkPageState extends State<AddLinkPage> {
 
     if (widget.task == "edit") {
       _backupData();
+    } else if (widget.task == "qr_add") {
+      _backupQrData();
     }
   }
 
@@ -86,6 +91,19 @@ class _AddLinkPageState extends State<AddLinkPage> {
       //   contacts
       country = widget.linkData['contacts'][0]['country'];
       phoneController.text = widget.linkData['contacts'][0]['contact'];
+    });
+  }
+
+  _backupQrData() {
+    developer.log("Backup qr data :: ${widget.qrData}");
+    setState(() {
+      nameController.text =
+          widget.qrData['name'].toString().trim().toLowerCase();
+      emailController.text = widget.qrData['email_address'] ?? "";
+      country =
+          widget.qrData['contact']['country'].toString().trim().toLowerCase();
+      phoneController.text =
+          widget.qrData['contact']['number'].toString().trim();
     });
   }
 
@@ -133,14 +151,26 @@ class _AddLinkPageState extends State<AddLinkPage> {
           Padding(
             padding: const EdgeInsets.only(right: 16.0),
             child: IconButton(
-              onPressed: widget.task == "add" ? _resetData : _backupData,
+              onPressed: () {
+                if (widget.task == "edit") {
+                  _backupData();
+                } else if (widget.task == "qr_add") {
+                  _backupQrData();
+                } else {
+                  _resetData();
+                }
+              },
               splashColor: Colors.transparent,
               highlightColor: Colors.transparent,
               icon: const Icon(Icons.undo),
             ),
           ),
         ],
-        title: Text(widget.task == "add" ? "Add New Link" : "Edit Link"),
+        title: Text(widget.task == "add"
+            ? "Add New Link"
+            : widget.task == "edit"
+                ? "Edit Link"
+                : "Adding from Qr Scan"),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -601,7 +631,7 @@ class _AddLinkPageState extends State<AddLinkPage> {
                         'profile_picture': profilePicture,
                       };
 
-                      if (widget.task == "add") {
+                      if (widget.task == "add" || widget.task == "qr_add") {
                         // add link
                         int linkId =
                             await localDataStorage.insertLink(linkData);
@@ -651,7 +681,8 @@ class _AddLinkPageState extends State<AddLinkPage> {
                         scaffoldMessenger.showSnackBar(
                           SnackBar(
                             behavior: SnackBarBehavior.floating,
-                            content: widget.task == "add"
+                            content: widget.task == "add" ||
+                                    widget.task == "qr_add"
                                 ? Text(response == "success"
                                     ? "Link added successfully."
                                     : "Link couldn't be added.")
@@ -661,14 +692,16 @@ class _AddLinkPageState extends State<AddLinkPage> {
                           ),
                         );
 
-                        if (widget.task == "edit") {
+                        if (widget.task == "edit" || widget.task == "qr_add") {
                           if (response == "success") {
                             context.pop();
                           }
                         }
                       }
                     },
-                    child: Text(widget.task == "add" ? "Save" : "Update"),
+                    child: Text(widget.task == "add" || widget.task == "qr_add"
+                        ? "Add"
+                        : "Update"),
                   ),
                 ),
               ),

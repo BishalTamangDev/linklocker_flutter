@@ -107,7 +107,7 @@ class _QrScannerHomePageState extends State<QrScannerHomePage> {
                                 });
 
                                 context
-                                    .push('/qr_scanner/result', extra: jsonData)
+                                    .push('/link/qr_add', extra: jsonData)
                                     .then((_) => _resumeScanning());
                               } else {
                                 mobileScannerController.start();
