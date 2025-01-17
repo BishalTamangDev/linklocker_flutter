@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:linklocker/core/constants/app_constants.dart';
 import 'package:linklocker/data/models/user_model.dart';
 import 'package:linklocker/data/source/local/local_data_source.dart';
-import 'package:linklocker/pages/home/widgets/custom_drawer_widget.dart';
+import 'package:linklocker/pages/home/widgets/chart_widget.dart';
 import 'package:linklocker/pages/home/widgets/empty_links_widget.dart';
 import 'package:linklocker/pages/home/widgets/fetching_links_widget.dart';
 import 'package:linklocker/pages/home/widgets/link_widget.dart';
@@ -62,6 +62,14 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     });
   }
 
+  // navigate to setting
+  navigateToSetting() {
+    if (mounted) {
+      // context.pop();
+      context.push('/setting');
+    }
+  }
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
@@ -108,7 +116,38 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
             ),
           )
         : Scaffold(
-            drawer: CustomDrawerWidget(),
+            drawer: Drawer(
+              elevation: 0,
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.only(
+                    top: 64.0,
+                    left: 32.0,
+                    right: 32.0,
+                    bottom: 32.0,
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    spacing: 64.0,
+                    children: [
+                      ChartWidget(),
+
+                      //   setting
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton(
+                          onPressed: () {
+                            context.pop();
+                            context.push('/setting');
+                          },
+                          child: const Text("Setting"),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
             backgroundColor: themeContext.canvasColor,
             body: Builder(
               builder: (context) {

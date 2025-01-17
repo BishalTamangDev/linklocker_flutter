@@ -55,7 +55,7 @@ class AppFunctions {
   static Color getCategoryColor(String title) {
     Map<String, dynamic> categoryMap = AppConstants.categoryColor.firstWhere(
         (map) => map.containsKey(title),
-        orElse: () => {title: Colors.grey});
+        orElse: () => {title: Colors.black});
     return categoryMap[title];
   }
 
@@ -67,9 +67,9 @@ class AppFunctions {
       image = await imagePicker.pickImage(source: imageSource);
 
       if (image != null) {
-        developer.log('File path: ${image.path}');
+        // developer.log('File path: ${image.path}');
         Uint8List bytes = await image.readAsBytes();
-        developer.log('File size in bytes: ${bytes.length}');
+        // developer.log('File size in bytes: ${bytes.length}');
         return bytes;
       }
     } catch (e) {

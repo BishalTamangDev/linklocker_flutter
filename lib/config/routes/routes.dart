@@ -154,6 +154,12 @@ class AppRoute {
           ),
         ],
       ),
+
+      //   setting
+      GoRoute(
+        path: '/setting',
+        builder: (context, index) => PageNotFoundPage(),
+      ),
     ],
 
     // error page

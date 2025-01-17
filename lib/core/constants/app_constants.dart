@@ -34,7 +34,7 @@ class AppConstants {
     {'relative': Colors.orange},
     {'coworker': Colors.blue},
     {'teacher': Colors.deepPurple},
-    {'other': Colors.grey},
+    {'other': Colors.brown},
   ];
 
 //   country codes

@@ -15,7 +15,7 @@ class DrawerCategoryWidget extends StatelessWidget {
         Container(
           height: 16.0,
           width: 16.0,
-          color: AppFunctions.getCategoryColor(categoryData['title']),
+          color: AppFunctions.getCategoryColor(categoryData['title'].toString().toLowerCase()),
         ),
         Expanded(
           child: Text(
