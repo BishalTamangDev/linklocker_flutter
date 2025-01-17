@@ -6,8 +6,8 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:linklocker/core/constants/app_constants.dart';
 import 'package:linklocker/core/constants/app_functions.dart';
-import 'package:linklocker/features/data/models/user_model.dart';
-import 'package:linklocker/features/data/source/local/local_data_source.dart';
+import 'package:linklocker/data/models/user_model.dart';
+import 'package:linklocker/data/source/local/local_data_source.dart';
 import 'package:linklocker/shared/widgets/custom_text_field_widget.dart';
 
 class AddLinkPage extends StatefulWidget {

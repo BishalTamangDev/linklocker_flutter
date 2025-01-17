@@ -1,7 +1,6 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:linklocker/features/presentation/home/widgets/link_widget.dart';
 
 class FetchingLinksWidget extends StatelessWidget {
   const FetchingLinksWidget({super.key});

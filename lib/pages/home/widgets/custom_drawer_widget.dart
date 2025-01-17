@@ -1,12 +1,11 @@
-import 'dart:math';
 import 'dart:developer' as developer;
 
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:linklocker/core/constants/app_constants.dart';
 import 'package:linklocker/core/constants/app_functions.dart';
-import 'package:linklocker/features/data/source/local/local_data_source.dart';
-import 'package:linklocker/features/presentation/home/widgets/drawer_category_widget.dart';
+import 'package:linklocker/data/source/local/local_data_source.dart';
+import 'package:linklocker/pages/home/widgets/drawer_category_widget.dart';
 
 class CustomDrawerWidget extends StatefulWidget {
   const CustomDrawerWidget({super.key});
@@ -125,14 +124,7 @@ class _CustomDrawerWidgetState extends State<CustomDrawerWidget> {
                                       (chartData) {
                                         double value = double.parse(
                                             "${chartData['count']}");
-                                        double radius = 5.0;
-
-                                        if (value > 5) {
-                                          radius = (value < 40)
-                                              ? double.parse(
-                                                  "${chartData['count']}")
-                                              : 40.0;
-                                        }
+                                        double radius = 12.0;
 
                                         String title =
                                             AppFunctions.getCapitalizedWords(

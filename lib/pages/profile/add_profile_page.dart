@@ -6,8 +6,8 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:linklocker/core/constants/app_constants.dart';
 import 'package:linklocker/core/constants/app_functions.dart';
-import 'package:linklocker/features/data/models/user_model.dart';
-import 'package:linklocker/features/data/source/local/local_data_source.dart';
+import 'package:linklocker/data/models/user_model.dart';
+import 'package:linklocker/data/source/local/local_data_source.dart';
 import 'package:linklocker/shared/widgets/custom_text_field_widget.dart';
 
 class AddProfilePage extends StatefulWidget {
@@ -69,8 +69,7 @@ class _AddProfilePageState extends State<AddProfilePage> {
   Future<void> _pickImage(ImageSource imageSource) async {
     try {
       final imagePicker = ImagePicker();
-      final XFile? image =
-          await imagePicker.pickImage(source: imageSource);
+      final XFile? image = await imagePicker.pickImage(source: imageSource);
 
       if (image != null) {
         Uint8List bytes = await image.readAsBytes();

@@ -3,11 +3,11 @@ import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:linklocker/core/constants/app_functions.dart';
-import 'package:linklocker/features/data/source/local/local_data_source.dart';
-import 'package:linklocker/features/presentation/home/widgets/link_widget.dart';
-import 'package:linklocker/features/presentation/search/widgets/no_data_widget.dart';
-import 'package:linklocker/features/presentation/search/widgets/search_error_widget.dart';
-import 'package:linklocker/features/presentation/search/widgets/searching_widget.dart';
+import 'package:linklocker/data/source/local/local_data_source.dart';
+import 'package:linklocker/pages/home/widgets/link_widget.dart';
+import 'package:linklocker/pages/search/widgets/no_data_widget.dart';
+import 'package:linklocker/pages/search/widgets/search_error_widget.dart';
+import 'package:linklocker/pages/search/widgets/searching_widget.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
@@ -187,7 +187,9 @@ class _SearchPageState extends State<SearchPage> {
 
                                             AppFunctions.openDialer(number);
                                           } else {
-                                            AppFunctions.showCallBottomSheet(context, linkWidgetData['contacts']);
+                                            AppFunctions.showCallBottomSheet(
+                                                context,
+                                                linkWidgetData['contacts']);
                                           }
                                         },
                                       ),

@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:linklocker/features/presentation/home/home_page.dart';
-import 'package:linklocker/features/presentation/link/add/add_link_page.dart';
-import 'package:linklocker/features/presentation/link/view/view_link_page.dart';
-import 'package:linklocker/features/presentation/page_not_found_page.dart';
-import 'package:linklocker/features/presentation/profile/add_profile_page.dart';
-import 'package:linklocker/features/presentation/profile/view_profile_page.dart';
-import 'package:linklocker/features/presentation/qr_scanner/qr_scanner_home_page.dart';
-import 'package:linklocker/features/presentation/qr_scanner/qr_scanner_result_page.dart';
-import 'package:linklocker/features/presentation/search/search_page.dart';
+import 'package:linklocker/pages/home/home_page.dart';
+import 'package:linklocker/pages/link/add/add_link_page.dart';
+import 'package:linklocker/pages/link/view/view_link_page.dart';
+import 'package:linklocker/pages/page_not_found_page.dart';
+import 'package:linklocker/pages/profile/add_profile_page.dart';
+import 'package:linklocker/pages/profile/view_profile_page.dart';
+import 'package:linklocker/pages/qr_scanner/qr_scanner_home_page.dart';
+import 'package:linklocker/pages/qr_scanner/qr_scanner_result_page.dart';
+import 'package:linklocker/pages/search/search_page.dart';
 
 class AppRoute {
   static final GoRouter routes = GoRouter(
