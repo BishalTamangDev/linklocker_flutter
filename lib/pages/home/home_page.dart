@@ -24,7 +24,6 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   // variables
-  bool developerMode = false;
   bool hide = false;
   var userModel = UserModel();
   var localDataSource = LocalDataSource.getInstance();
@@ -60,14 +59,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     setState(() {
       _linkList = localDataSource.getGroupedLinks();
     });
-  }
-
-  // navigate to setting
-  navigateToSetting() {
-    if (mounted) {
-      // context.pop();
-      context.push('/setting');
-    }
   }
 
   @override
@@ -138,7 +129,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                         child: OutlinedButton(
                           onPressed: () {
                             context.pop();
-                            context.push('/setting');
+                            context.push('/setting').then((_) {
+                              _refreshUserData();
+                              _refreshLinkList();
+                            });
                           },
                           child: const Text("Setting"),
                         ),
@@ -530,80 +524,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                             ),
 
                             const SizedBox(),
-
-                            // reset tables
-                            !developerMode
-                                ? SizedBox(
-                                    height: 44.0,
-                                  )
-                                : Column(
-                                    children: [
-                                      Wrap(
-                                        spacing: 10.0,
-                                        // runSpacing: 10.0,
-                                        children: [
-                                          // refresh
-                                          OutlinedButton(
-                                            onPressed: () async {
-                                              _refreshLinkList();
-                                              _refreshUserData();
-                                            },
-                                            child: const Text("Refresh"),
-                                          ),
-
-                                          // reset user table
-                                          OutlinedButton(
-                                            onPressed: () async {
-                                              bool response =
-                                                  await localDataSource
-                                                      .resetUserTable();
-
-                                              if (response) {
-                                                _refreshUserData();
-                                              }
-                                            },
-                                            child:
-                                                const Text("Reset User Table"),
-                                          ),
-
-                                          // reset link table
-                                          OutlinedButton(
-                                            onPressed: () async {
-                                              await localDataSource
-                                                  .resetLinkTable();
-
-                                              if (mounted) {
-                                                _refreshLinkList();
-                                              }
-                                            },
-                                            child:
-                                                const Text("Reset Link Table"),
-                                          ),
-
-                                          // reset contact table
-                                          OutlinedButton(
-                                            onPressed: () async {
-                                              await localDataSource
-                                                  .resetContactTable();
-                                            },
-                                            child: const Text(
-                                                "Reset Contact Table"),
-                                          ),
-
-                                          //   reset database
-                                          OutlinedButton(
-                                            onPressed: () async {
-                                              await localDataSource.resetDb();
-                                              _refreshUserData();
-                                              _refreshLinkList();
-                                            },
-                                            child: const Text("Reset Database"),
-                                          ),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 54.0),
-                                    ],
-                                  ),
                           ],
                         ),
                       ),

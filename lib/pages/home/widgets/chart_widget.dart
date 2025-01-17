@@ -19,8 +19,8 @@ class _ChartWidgetState extends State<ChartWidget> {
 
   @override
   void initState() {
-    super.initState();
     _chartData = LocalDataSource.getInstance().getCategorizedLinks();
+    super.initState();
   }
 
   @override
@@ -176,15 +176,6 @@ class _ChartWidgetState extends State<ChartWidget> {
                                     },
                                   ),
                                 ),
-                                // ...AppConstants.categoryList.map(
-                                //   (category) => DrawerCategoryWidget(
-                                //     categoryData: {
-                                //       'title': AppFunctions.getCapitalizedWords(
-                                //           category),
-                                //       'count': 0,
-                                //     },
-                                //   ),
-                                // ),
                               ],
                             ),
                           ],

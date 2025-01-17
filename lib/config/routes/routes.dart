@@ -9,6 +9,7 @@ import 'package:linklocker/pages/profile/view_profile_page.dart';
 import 'package:linklocker/pages/qr_scanner/qr_scanner_home_page.dart';
 import 'package:linklocker/pages/qr_scanner/qr_scanner_result_page.dart';
 import 'package:linklocker/pages/search/search_page.dart';
+import 'package:linklocker/pages/setting/setting_home_page.dart';
 
 class AppRoute {
   static final GoRouter routes = GoRouter(
@@ -158,7 +159,10 @@ class AppRoute {
       //   setting
       GoRoute(
         path: '/setting',
-        builder: (context, index) => PageNotFoundPage(),
+        pageBuilder: (context, state) => CustomTransitionPage(
+          child: SettingHomePage(),
+          transitionsBuilder: slideLeftTransitionBuilder,
+        ),
       ),
     ],
 
