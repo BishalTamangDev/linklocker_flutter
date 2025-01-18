@@ -640,7 +640,7 @@ class _AddLinkPageState extends State<AddLinkPage> {
                           // contact data
                           Map<String, dynamic> contactData = {
                             'country': country,
-                            'contact': phoneController.text.toString(),
+                            'contact': phoneController.text.toString() ?? "",
                           };
 
                           int contactId = await localDataStorage.insertContact(
