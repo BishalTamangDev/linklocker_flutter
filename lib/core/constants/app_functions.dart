@@ -10,6 +10,89 @@ import 'package:linklocker/core/constants/app_constants.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+enum LinkCategory {
+  businessPartner,
+  client,
+  coworker,
+  doctor,
+  emergency,
+  family,
+  friend,
+  investor,
+  lawyer,
+  relative,
+  serviceProvider,
+  student,
+  teacher,
+  other;
+
+  String get label {
+    switch (this) {
+      case LinkCategory.businessPartner:
+        return "Business Partner";
+      case LinkCategory.client:
+        return "Client";
+      case LinkCategory.coworker:
+        return "Coworker";
+      case LinkCategory.doctor:
+        return "Doctor";
+      case LinkCategory.emergency:
+        return "Emergency";
+      case LinkCategory.family:
+        return "Family";
+      case LinkCategory.friend:
+        return "Friend";
+      case LinkCategory.investor:
+        return "Investor";
+      case LinkCategory.lawyer:
+        return "Lawyer";
+      case LinkCategory.relative:
+        return "Relative";
+      case LinkCategory.serviceProvider:
+        return "Service Provider";
+      case LinkCategory.student:
+        return "Student";
+      case LinkCategory.teacher:
+        return "Teacher";
+      case LinkCategory.other:
+        return "Other";
+    }
+  }
+
+  Color get color {
+    switch (this) {
+      case LinkCategory.businessPartner:
+        return Colors.pink;
+      case LinkCategory.client:
+        return Colors.indigo;
+      case LinkCategory.coworker:
+        return Colors.purple;
+      case LinkCategory.doctor:
+        return Colors.cyan;
+      case LinkCategory.emergency:
+        return Colors.red;
+      case LinkCategory.family:
+        return Colors.orange;
+      case LinkCategory.friend:
+        return Colors.blue;
+      case LinkCategory.investor:
+        return Colors.lime;
+      case LinkCategory.lawyer:
+        return Colors.deepPurple;
+      case LinkCategory.relative:
+        return Colors.green;
+      case LinkCategory.serviceProvider:
+        return Colors.amber;
+      case LinkCategory.student:
+        return Colors.teal;
+      case LinkCategory.teacher:
+        return Colors.brown;
+      case LinkCategory.other:
+        return Colors.grey;
+    }
+  }
+}
+
 class AppFunctions {
   static String getFormattedDate(DateTime dateTime) =>
       DateFormat('d MMM, yyyy').format(dateTime).toString();
@@ -38,7 +121,7 @@ class AppFunctions {
     return finalWord;
   }
 
-//   capitalize words
+  // capitalize words
   static String getCapitalizedWords(String sentence) {
     String finalString = "";
 
@@ -51,7 +134,7 @@ class AppFunctions {
     return finalString;
   }
 
-//   category color
+  // category color
   static Color getCategoryColor(String title) {
     Map<String, dynamic> categoryMap = AppConstants.categoryColor.firstWhere(
         (map) => map.containsKey(title),
