@@ -1,11 +1,16 @@
 import 'dart:developer' as developer;
 import 'dart:io';
 
+import 'package:dartz/dartz.dart';
 import 'package:linklocker/core/constants/app_constants.dart';
-import 'package:linklocker/data/models/user_model.dart';
+import 'package:linklocker/features/profile/domain/entities/profile_contact_entity.dart';
+import 'package:linklocker/features/profile/domain/entities/profile_entity.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
+
+import '../../../features/profile/data/models/profile_contact_model.dart';
+import '../../../features/profile/data/models/profile_model.dart';
 
 class LocalDataSource {
   // private constructor
@@ -21,13 +26,13 @@ class LocalDataSource {
   final String dbName = "linklocker_db.db";
 
   // table
-  final String userTblName = "user_tbl";
-  final String userContactTblName = "user_contact_tbl";
-  final String linkTblName = "link_tbl";
-  final String contactTblName = "contact_tbl";
+  static final String profileTblName = "user_tbl";
+  static final String userContactTblName = "user_contact_tbl";
+  static final String linkTblName = "link_tbl";
+  static final String contactTblName = "contact_tbl";
 
-// open database & create table
-  Future<Database?> openDb() async {
+  // open database & create table
+  Future<Database?> _initializeDatabase() async {
     int version = 1;
 
     // app data path
@@ -43,7 +48,7 @@ class LocalDataSource {
         // create user table
         bool userTblResponse = await dbPath
             .execute(
-                "CREATE TABLE $userTblName (user_id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, email TEXT, profile_picture BLOB)")
+                "CREATE TABLE $profileTblName (user_id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, email TEXT, profile_picture BLOB)")
             .then((_) => true)
             .catchError((_) => false);
 
@@ -94,14 +99,14 @@ class LocalDataSource {
     );
   }
 
-// get database
-  Future<Database> getDb() async {
-    _db ??= await openDb();
+  // get database
+  Future<Database> getDatabase() async {
+    _db ??= await _initializeDatabase();
     return _db!;
   }
 
-//   reset database
-  Future<void> resetDb() async {
+  // reset database
+  Future<void> resetDatabase() async {
     bool userTableResponse = await resetUserTable();
     bool userContactTableResponse = await resetUserContactTable();
     bool linkTableResponse = await resetLinkTable();
@@ -121,89 +126,153 @@ class LocalDataSource {
         : "Unable to reset contact table.");
   }
 
-//   user table
-//   get user
-  Future<Map<String, dynamic>> getUser() async {
-    Map<String, dynamic> data = {};
+  // user table
+  // fetch profile
+  Future<Either<String, Map<String, dynamic>>> fetchProfile() async {
+    try {
+      Database tempDb = await getDatabase();
 
-    Database tempDb = await getDb();
+      // data to return
+      Map<String, dynamic> data = {};
 
-    // fetch users
-    List<Map<String, dynamic>> users = await tempDb.query(userTblName);
-    var mutableUsers = users.map((user) => {...user}).toList();
+      // fetch users
+      List<Map<String, dynamic>> users = await tempDb.query(profileTblName);
 
-    // fetch user contacts
-    List<Map<String, dynamic>> contacts = await fetchUserContacts();
-    var mutableContacts = contacts.map((contact) => {...contact}).toList();
+      if (users.isEmpty) {
+        return Left("not-set");
+      } else {
+        var mutableUsers = users.map((user) => {...user}).toList();
 
-    // get last user
-    for (var user in mutableUsers) {
-      data = user;
+        // fetch user contacts
+        List<Map<String, dynamic>> contacts =
+            await tempDb.query(userContactTblName);
+        var mutableContacts = contacts.map((contact) => {...contact}).toList();
+
+        // get last user
+        for (var user in mutableUsers) {
+          data = user;
+        }
+
+        data['contacts'] = mutableContacts;
+
+        return Right(data);
+      }
+    } catch (e) {
+      return Left(e.toString());
     }
-
-    data['contacts'] = mutableContacts;
-
-    return data;
   }
 
-  // insert user
-  Future<String> insertUser(UserModel userModel) async {
-    Database tempDb = await getDb();
+  // add profile
+  Future<Either<String, bool>> addProfile(
+    ProfileEntity profileEntity,
+    List<ProfileContactEntity> contacts,
+  ) async {
+    try {
+      Database tempDb = await getDatabase();
 
-    // decode data
-    var data = {
-      'name': userModel.getName,
-      'email': userModel.getEmail,
-      'profile_picture': userModel.getProfilePicture,
-    };
+      // create profile model from entity
+      final ProfileModel profileModel = ProfileModel.fromEntity(profileEntity);
+      final Map<String, dynamic> profileDataToUpload =
+          profileModel.profileDataToUpload;
 
-    await tempDb.delete(userTblName);
+      int profileId = await tempDb.insert(profileTblName, profileDataToUpload);
 
-    String response = await tempDb
-        .insert(userTblName, data)
-        .then((onValue) => "success")
-        .catchError((error) => error.toString());
+      if (profileId > 0) {
+        final ProfileContactModel contactModel =
+            ProfileContactModel.fromEntity(contacts[0]);
 
-    return response;
+        final Map<String, dynamic> contactDataToUpload =
+            contactModel.dataToUpload();
+
+        try {
+          // add contact
+          int contactId =
+              await tempDb.insert(userContactTblName, contactDataToUpload);
+          return Right(profileId > 0 && contactId > 0);
+        } catch (e) {
+          return Left(e.toString());
+        }
+      } else {
+        return Left("An error occurred in adding profile.");
+      }
+    } catch (e) {
+      return Left(e.toString());
+    }
   }
 
-  // update user
-  Future<String> updateUser(UserModel userModel) async {
-    Database tempDb = await getDb();
+  // update profile
+  Future<Either<String, bool>> updateProfile(
+    ProfileEntity profileEntity,
+    List<ProfileContactEntity> contacts,
+  ) async {
+    try {
+      Database tempDb = await getDatabase();
 
-    // decode data
-    var data = {
-      'name': userModel.getName,
-      'email': userModel.getEmail,
-      'profile_picture': userModel.getProfilePicture,
-    };
+      // create profile model from entity
+      final ProfileModel profileModel = ProfileModel.fromEntity(profileEntity);
+      final Map<String, dynamic> profileDataToUpload =
+          profileModel.profileDataToUpload;
 
-    String response = await tempDb
-        .update(userTblName, data)
-        .then((onValue) => "success")
-        .catchError((error) => error);
+      // add profile
+      int profileRowsAffected =
+          await tempDb.update(profileTblName, profileDataToUpload);
 
-    return response;
+      if (profileRowsAffected > 0) {
+        final ProfileContactModel contactModel =
+            ProfileContactModel.fromEntity(contacts[0]);
+
+        final Map<String, dynamic> contactDataToUpload =
+            contactModel.dataToUpload();
+
+        try {
+          // add contact
+          int contactRowsAffected =
+              await tempDb.update(userContactTblName, contactDataToUpload);
+          return Right(profileRowsAffected > 0 && contactRowsAffected > 0);
+        } catch (e) {
+          return Left(e.toString());
+        }
+      } else {
+        return Left("An error occurred in updating profile.");
+      }
+    } catch (e) {
+      return Left(e.toString());
+    }
   }
 
-//   delete user
+  // delete profile
+  Future<Either<String, bool>> deleteProfile() async {
+    try {
+      Database tempDb = await getDatabase();
+      final int rowsAffected = await tempDb.delete(profileTblName);
+
+      if (rowsAffected > 0) {
+        return Right(true);
+      } else {
+        return Left("Profile not found.");
+      }
+    } catch (e) {
+      return Left(e.toString());
+    }
+  }
+
   Future<String> deleteUser() async {
-    Database tempDb = await getDb();
+    Database tempDb = await getDatabase();
 
     String response = await tempDb
-        .delete(userTblName)
+        .delete(profileTblName)
         .then((_) => "success")
         .catchError((error) => error);
 
     return response;
   }
 
-//   reset user table
+  // reset user table
   Future<bool> resetUserTable() async {
-    Database tempDb = await getDb();
+    Database tempDb = await getDatabase();
 
     bool reset = await tempDb
-        .delete(userTblName)
+        .delete(profileTblName)
         .then((_) => true)
         .catchError((_) => false);
 
@@ -213,10 +282,10 @@ class LocalDataSource {
     return reset;
   }
 
-//   user contact
-//   insert user contact
+  // user contact
+  // insert user contact
   Future<String> insertUserContact(Map<String, dynamic> data) async {
-    Database tempDb = await getDb();
+    Database tempDb = await getDatabase();
 
     String response = await tempDb
         .insert(userContactTblName, data)
@@ -226,10 +295,10 @@ class LocalDataSource {
     return response;
   }
 
-//   update user contact
+  // update user contact
   Future<String> updateUserContact(
       int userContactId, Map<String, dynamic> data) async {
-    Database tempDb = await getDb();
+    Database tempDb = await getDatabase();
 
     String response = await tempDb
         .update(
@@ -244,9 +313,9 @@ class LocalDataSource {
     return response;
   }
 
-//   fetch user contacts
+  // fetch user contacts
   Future<List<Map<String, dynamic>>> fetchUserContacts() async {
-    Database tempDb = await getDb();
+    Database tempDb = await getDatabase();
 
     List<Map<String, dynamic>> contacts =
         await tempDb.query(userContactTblName);
@@ -254,9 +323,9 @@ class LocalDataSource {
     return contacts;
   }
 
-//   reset user contact table
+  // reset user contact table
   Future<bool> resetUserContactTable() async {
-    Database tempDb = await getDb();
+    Database tempDb = await getDatabase();
 
     bool reset = await tempDb
         .delete(userContactTblName)
@@ -266,16 +335,16 @@ class LocalDataSource {
     return reset;
   }
 
-//   links
-// insert link
+  // links
+  // insert link
   Future<int> insertLink(Map<String, dynamic> data) async {
-    Database tempDb = await getDb();
+    Database tempDb = await getDatabase();
     return await tempDb.insert(linkTblName, data);
   }
 
-// update link
+  // update link
   Future<String> updateLink(int linkId, dynamic data) async {
-    Database tempDb = await getDb();
+    Database tempDb = await getDatabase();
 
     String response = await tempDb
         .update(
@@ -292,7 +361,7 @@ class LocalDataSource {
 
   // get all links
   Future<List<Map<String, dynamic>>> getLinks() async {
-    Database tempDb = await getDb();
+    Database tempDb = await getDatabase();
 
     List<Map<String, dynamic>> data = await tempDb.query(linkTblName);
 
@@ -325,10 +394,10 @@ class LocalDataSource {
     return data;
   }
 
-  //   get grouped links
+  // get grouped links
   Future<List<Map<String, dynamic>>> getGroupedLinks() async {
     // database
-    Database tempDb = await getDb();
+    Database tempDb = await getDatabase();
 
     // final data to return
     List<Map<String, dynamic>> groupedData = [], finalMutableData = [];
@@ -378,9 +447,9 @@ class LocalDataSource {
     return groupedData;
   }
 
-// get link
+  // get link
   Future<Map<String, dynamic>> getLink(int linkId) async {
-    Database tempDb = await getDb();
+    Database tempDb = await getDatabase();
 
     Map<String, dynamic> data = {};
 
@@ -397,9 +466,9 @@ class LocalDataSource {
     return data;
   }
 
-//   get categorized links
+  // get categorized links
   Future<List<Map<String, dynamic>>> getCategorizedLinks() async {
-    Database tempDb = await getDb();
+    Database tempDb = await getDatabase();
 
     // get all links
     var links = await getLinks();
@@ -425,9 +494,9 @@ class LocalDataSource {
     return finalData;
   }
 
-// delete link
+  // delete link
   Future<String> deleteLink(int linkId) async {
-    Database tempDb = await getDb();
+    Database tempDb = await getDatabase();
 
     String response = await tempDb
         .delete(
@@ -450,7 +519,7 @@ class LocalDataSource {
       return [];
     }
 
-    var tempDb = await getDb();
+    var tempDb = await getDatabase();
 
     data = await tempDb.query(
       linkTblName,
@@ -474,7 +543,7 @@ class LocalDataSource {
 
   //   reset link table
   Future<bool> resetLinkTable() async {
-    Database tempDb = await getDb();
+    Database tempDb = await getDatabase();
 
     bool reset = await tempDb
         .delete(linkTblName)
@@ -487,14 +556,12 @@ class LocalDataSource {
     return reset;
   }
 
-// contacts
-// insert contact
+  // contacts
+  // insert contact
   Future<int> insertContact(int linkId, Map<String, dynamic> data) async {
-    Database tempDb = await getDb();
+    Database tempDb = await getDatabase();
 
     data['link_id'] = linkId;
-
-    developer.log("Contact data :: $data");
 
     int id = await tempDb
         .insert(contactTblName, data)
@@ -506,7 +573,7 @@ class LocalDataSource {
 
   // get all contacts :: temporary
   Future<List<Map<String, dynamic>>> getAllContacts() async {
-    Database tempDb = await getDb();
+    Database tempDb = await getDatabase();
 
     List<Map<String, dynamic>> data = await tempDb.query(contactTblName);
 
@@ -515,7 +582,7 @@ class LocalDataSource {
 
   // get contacts
   Future<List<Map<String, dynamic>>> getContacts(int linkId) async {
-    Database tempDb = await getDb();
+    Database tempDb = await getDatabase();
 
     List<Map<String, dynamic>> data = [];
 
@@ -534,7 +601,7 @@ class LocalDataSource {
   Future<Map<String, dynamic>> getContact(int contactId) async {
     Map<String, dynamic> data = {};
 
-    Database tempDb = await getDb();
+    Database tempDb = await getDatabase();
 
     List<Map<String, dynamic>> contacts = await tempDb.query(
       contactTblName,
@@ -551,7 +618,7 @@ class LocalDataSource {
 
   // update contact
   Future<String> updateContact(int contactId, dynamic data) async {
-    Database tempDb = await getDb();
+    Database tempDb = await getDatabase();
 
     String response = await tempDb
         .update(
@@ -568,7 +635,7 @@ class LocalDataSource {
 
   // delete contact
   Future<String> deleteContact(int contactId) async {
-    Database tempDb = await getDb();
+    Database tempDb = await getDatabase();
 
     String response = await tempDb
         .delete(
@@ -584,7 +651,7 @@ class LocalDataSource {
 
   // delete contacts by link
   Future<String> deleteContacts(int linkId) async {
-    Database tempDb = await getDb();
+    Database tempDb = await getDatabase();
 
     String response = await tempDb
         .delete(
@@ -600,7 +667,7 @@ class LocalDataSource {
 
   // search contacts
   Future<List<Map<String, dynamic>>> searchContact(String contact) async {
-    Database tempDb = await getDb();
+    Database tempDb = await getDatabase();
     List<Map<String, dynamic>> finalData = [];
     // get contacts
     List<Map<String, dynamic>> contacts = await tempDb.query(
@@ -628,9 +695,9 @@ class LocalDataSource {
     return finalData;
   }
 
-  //   reset contact table
+  // reset contact table
   Future<bool> resetContactTable() async {
-    Database tempDb = await getDb();
+    Database tempDb = await getDatabase();
 
     bool reset = await tempDb
         .delete(contactTblName)

@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:linklocker/features/independent_pages/page_not_found_page.dart';
-import 'package:linklocker/features/link/presentation/pages/view_all_links_page.dart';
 import 'package:linklocker/features/link/presentation/pages/add_link_page.dart';
+import 'package:linklocker/features/link/presentation/pages/search_link_page.dart';
+import 'package:linklocker/features/link/presentation/pages/view_all_links_page.dart';
 import 'package:linklocker/features/link/presentation/pages/view_link_page.dart';
 import 'package:linklocker/features/profile/presentation/pages/add_profile_page.dart';
 import 'package:linklocker/features/profile/presentation/pages/view_profile_page.dart';
 import 'package:linklocker/features/scanner/presentation/pages/qr_scanner_home_page.dart';
 import 'package:linklocker/features/scanner/presentation/pages/qr_scanner_result_page.dart';
-import 'package:linklocker/features/link/presentation/pages/search_link_page.dart';
 import 'package:linklocker/features/setting/presentation/pages/setting_page.dart';
 
 class AppRouter {
@@ -80,19 +80,16 @@ class AppRouter {
       GoRoute(
         path: '/profile',
         pageBuilder: (context, state) {
-          var data = state.extra as Map<String, dynamic>;
           return CustomTransitionPage(
-            child: ViewProfilePage(profileData: data),
-            transitionsBuilder: immediateTransitionBuilder,
-          );
+              child: PageNotFoundPage(),
+              transitionsBuilder: immediateTransitionBuilder);
         },
         routes: [
           GoRoute(
             path: '/view',
             pageBuilder: (context, state) {
-              final data = state.extra as Map<String, dynamic>;
               return CustomTransitionPage(
-                child: ViewProfilePage(profileData: data),
+                child: ViewProfilePage(),
                 transitionsBuilder: immediateTransitionBuilder,
               );
             },
@@ -100,19 +97,31 @@ class AppRouter {
           GoRoute(
             path: '/add',
             pageBuilder: (context, state) => CustomTransitionPage(
-              child: AddProfilePage(task: 'add'),
+              child: AddProfilePage(
+                task: 'add',
+              ),
               transitionsBuilder: slideUpTransitionBuilder,
             ),
           ),
           GoRoute(
             path: '/edit',
-            pageBuilder: (context, state) {
-              var profileData = state.extra as Map<String, dynamic>;
-              return CustomTransitionPage(
-                child: AddProfilePage(task: 'edit', profileData: profileData),
-                transitionsBuilder: slideUpTransitionBuilder,
-              );
-            },
+            pageBuilder: (context, state) => CustomTransitionPage(
+              child: AddProfilePage(
+                task: 'edit',
+              ),
+              transitionsBuilder: slideUpTransitionBuilder,
+            ),
+            // pageBuilder: (context, state) {
+            //   var profileData = state.extra as Map<String, dynamic>;
+            //   return CustomTransitionPage(
+            //     child: AddProfilePage(
+            //       task: 'edit',
+            //       profileData: profileData,
+            //       profileEntity: ProfileEntity(),
+            //     ),
+            //     transitionsBuilder: slideUpTransitionBuilder,
+            //   );
+            // },
           ),
         ],
       ),

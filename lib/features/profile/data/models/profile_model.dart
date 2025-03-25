@@ -20,12 +20,12 @@ class ProfileModel extends ProfileEntity {
   }
 
   // from map
-  factory ProfileModel.fromMap(ProfileEntity map) {
+  factory ProfileModel.fromMap(Map<String, dynamic> map) {
     return ProfileModel(
-        id: map.id,
-        name: map.name,
-        email: map.email,
-        profilePicture: map.profilePicture);
+        id: map['id'] ?? 0,
+        name: map['name'] ?? '',
+        email: map['email'] ?? '',
+        profilePicture: map['profile_picture'] ?? Uint8List(0));
   }
 
   // from entity
@@ -35,6 +35,11 @@ class ProfileModel extends ProfileEntity {
         name: profileEntity.name,
         email: profileEntity.email,
         profilePicture: profileEntity.profilePicture);
+  }
+
+  ProfileEntity toEntity() {
+    return ProfileEntity(
+        id: id, name: name, email: email, profilePicture: profilePicture);
   }
 
   // copy with
@@ -47,8 +52,18 @@ class ProfileModel extends ProfileEntity {
         profilePicture: profilePicture ?? this.profilePicture);
   }
 
+  // to string
   @override
   String toString() {
     return "UserModel{id: $id, name: $name, email: $email, profilePicture: $profilePicture}";
+  }
+
+  // get upload data
+  Map<String, dynamic> get profileDataToUpload {
+    return {
+      'name': name ?? '',
+      'email': email ?? '',
+      'profile_picture': profilePicture ?? Uint8List(0),
+    };
   }
 }

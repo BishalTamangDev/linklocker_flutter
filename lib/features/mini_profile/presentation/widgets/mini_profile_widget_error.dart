@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class ProfileCardErrorWidget extends StatelessWidget {
-  const ProfileCardErrorWidget({super.key, required this.callback});
+class MiniProfileWidgetError extends StatelessWidget {
+  const MiniProfileWidgetError({super.key, required this.callback});
 
   final VoidCallback callback;
 

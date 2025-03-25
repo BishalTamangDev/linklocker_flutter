@@ -1,47 +1,56 @@
-import 'dart:developer' as developer;
-
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:linklocker/core/constants/app_constants.dart';
 import 'package:linklocker/core/constants/app_functions.dart';
-import 'package:linklocker/data/source/local/local_data_source.dart';
+import 'package:linklocker/features/mini_profile/presentation/blocs/mini_profile_bloc.dart';
+import 'package:linklocker/features/profile/domain/entities/profile_contact_entity.dart';
+import 'package:linklocker/features/profile/domain/entities/profile_entity.dart';
+import 'package:linklocker/features/profile/presentation/blocs/add_profile/add_profile_bloc.dart';
+import 'package:linklocker/shared/widgets/custom_snackbar_widget.dart';
 import 'package:share_plus/share_plus.dart';
 
-class ViewProfilePage extends StatefulWidget {
-  const ViewProfilePage({super.key, required this.profileData});
+import '../blocs/view_profile/view_profile_bloc.dart';
 
-  final Map<String, dynamic> profileData;
+class ViewProfilePage extends StatefulWidget {
+  const ViewProfilePage({super.key});
 
   @override
   State<ViewProfilePage> createState() => _ViewProfilePageState();
 }
 
 class _ViewProfilePageState extends State<ViewProfilePage> {
-  // variables
-  late Map<String, dynamic> userData;
-
   // functions
-  _refreshUserData() async {
-    userData = await LocalDataSource.getInstance().getUser();
-    setState(() {});
+  _deleteProfile() async {
+    context.pop();
+    context.read<ViewProfileBloc>().add(ViewProfileDeleteProfileEvent());
   }
 
-  @override
-  void initState() {
-    userData = _getInitialData();
-    super.initState();
-  }
-
-  Map<String, dynamic> _getInitialData() {
-    return widget.profileData;
+  // alert dialog
+  void _showDeleteAlert() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Delete Profile'),
+          content: const Text('Are you sure you want to delete your profile?'),
+          actions: [
+            ElevatedButton(
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                onPressed: _deleteProfile,
+                child: const Text("Yes, Delete Now")),
+            OutlinedButton(
+                onPressed: () => context.pop(), child: const Text("Not Now")),
+          ],
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    var mediaQuery = MediaQuery.of(context);
-    var themeContext = Theme.of(context);
     var colorScheme = Theme.of(context).colorScheme;
-    var textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
       appBar: AppBar(
@@ -49,182 +58,257 @@ class _ViewProfilePageState extends State<ViewProfilePage> {
           onPressed: () => context.pop(),
           icon: Icon(Icons.arrow_back_ios_new_rounded),
         ),
-        centerTitle: true,
         elevation: 0,
         backgroundColor: Theme.of(context).canvasColor,
         automaticallyImplyLeading: false,
         title: const Text("My Profile"),
+        actions: [
+          IconButton(
+            splashColor: Colors.transparent,
+            highlightColor: Colors.transparent,
+            onPressed: _showDeleteAlert,
+            icon: const Icon(Icons.delete),
+          )
+        ],
       ),
-      backgroundColor: themeContext.canvasColor,
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            spacing: 16.0,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 32.0),
+      backgroundColor: Theme.of(context).canvasColor,
+      body: BlocConsumer<ViewProfileBloc, ViewProfileState>(
+          listenWhen: (previous, current) => current is ViewProfileActionState,
+          buildWhen: (previous, current) => current is! ViewProfileActionState,
+          listener: (context, state) async {
+            if (state is ViewProfileQrActionState) {
+              AppFunctions.showProfileQrCode(
+                context: context,
+                profileEntity: state.profileEntity,
+                contacts: state.contacts,
+              );
+            } else if (state is ViewProfileContactShareActionState) {
+              SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+              await Share.share(state.shareText);
+            } else if (state is ViewProfileNavigateToEditPageActionState) {
+              context.read<AddProfileBloc>().add(
+                    AddProfileLoadEvent(task: "edit"),
+                  );
+              context.read<MiniProfileBloc>().add(MiniProfileFetchEvent());
+              context.push('/profile/edit');
+            } else if (state is ViewProfileNavigateToHomePageActionState) {
+              // refresh mini profile widget
+              context.read<MiniProfileBloc>().add(MiniProfileFetchEvent());
+              context.pop();
+            } else if (state is ViewProfileSnackBarActionState) {
+              CustomSnackBarWidget.show(
+                  context: context, message: state.message);
+            }
+          },
+          builder: (context, state) {
+            if (state is ViewProfileInitial ||
+                state is ViewProfileLoadingState) {
+              return Center(
+                child: CircularProgressIndicator(),
+              );
+            } else if (state is ViewProfileLoadedState) {
+              ProfileEntity profileEntity = state.profileEntity;
 
-              //   profile picture
-              Center(
-                child: Column(
-                  spacing: 18.0,
-                  children: [
-                    // profile picture
-                    CircleAvatar(
-                        radius: 80.0,
-                        backgroundColor: colorScheme.surface,
-                        backgroundImage:
-                            userData['profile_picture'].isNotEmpty
-                                ? MemoryImage(userData['profile_picture'])
-                                : AssetImage(AppConstants.defaultUserImage)),
-                    Text(
-                        AppFunctions.getCapitalizedWords(
-                          userData['name'],
-                        ),
-                        style: textTheme.headlineSmall),
-                  ],
-                ),
-              ),
+              Map<String, dynamic> sharePlusData = {'name': profileEntity.name};
 
-              const SizedBox(),
+              if (state.contacts.isNotEmpty) {
+                sharePlusData['country'] = state.contacts[0].country;
+                sharePlusData['contact_number'] =
+                    state.contacts[0].contactNumber;
+              }
 
-              //   contacts
-              ClipRRect(
-                borderRadius: BorderRadius.circular(16.0),
-                child: Container(
-                  color: colorScheme.surface,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 8.0, horizontal: 8.0),
-                    child: Column(
-                      children: [
-                        ...userData['contacts'].map(
-                          (contact) => ListTile(
-                            leading: Icon(
-                              Icons.phone_outlined,
-                              color: AppConstants.callIconColor,
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        spacing: 16.0,
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          const SizedBox(height: 16.0),
+
+                          //   profile picture
+                          Column(
+                            spacing: 18.0,
+                            children: [
+                              // profile picture
+                              CircleAvatar(
+                                  radius: 80.0,
+                                  backgroundColor: colorScheme.surface,
+                                  backgroundImage:
+                                      profileEntity.profilePicture!.isNotEmpty
+                                          ? MemoryImage(
+                                              profileEntity.profilePicture!)
+                                          : AssetImage(
+                                              AppConstants.defaultUserImage)),
+                              Text(
+                                  AppFunctions.getCapitalizedWords(
+                                    profileEntity.name!,
+                                  ),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .headlineSmall),
+                            ],
+                          ),
+
+                          // contacts
+                          Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 16.0),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(16.0),
+                              child: Container(
+                                color: colorScheme.surface,
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 8.0, horizontal: 8.0),
+                                  child: Column(
+                                    children: [
+                                      // empty case
+                                      if (state.contacts.isEmpty)
+                                        ListTile(
+                                          title: Opacity(
+                                            opacity: 0.6,
+                                            child: const Text(
+                                              "No contact number found!",
+                                            ),
+                                          ),
+                                        ),
+
+                                      ...state.contacts.map((contact) {
+                                        ProfileContactEntity
+                                            profileContactEntity = contact;
+
+                                        return ListTile(
+                                          leading: Icon(
+                                            Icons.phone_outlined,
+                                            color: AppConstants.callIconColor,
+                                          ),
+                                          title: Text(
+                                              "${AppFunctions.getCountryCode(profileContactEntity.country!)} ${profileContactEntity.contactNumber}"),
+                                        );
+                                      }),
+                                    ],
+                                  ),
+                                ),
+                              ),
                             ),
-                            title: Text(
-                                "${AppFunctions.getCountryCode(contact['country'])} ${contact['contact']}"),
                           ),
-                        ),
-                      ],
+
+                          // email
+                          Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 16.0),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(16.0),
+                              child: Container(
+                                color: colorScheme.surface,
+                                child: Padding(
+                                  padding: EdgeInsets.all(8.0),
+                                  child: Column(
+                                    children: [
+                                      ListTile(
+                                        leading: Icon(
+                                          Icons.email_outlined,
+                                          color: AppConstants.emailIconColor,
+                                        ),
+                                        title: Text(profileEntity.email ?? '-'),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ),
+                  Container(
+                    color: colorScheme.surface,
+                    width: MediaQuery.of(context).size.width,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.max,
+                        children: [
+                          // contact qr code
+                          Expanded(
+                            child: InkWell(
+                              onTap: () => context.read<ViewProfileBloc>().add(
+                                    ViewProfileQrEvent(
+                                      profileEntity: profileEntity,
+                                      contacts: state.contacts,
+                                    ),
+                                  ),
+                              splashColor: colorScheme.surface,
+                              highlightColor: colorScheme.surface,
+                              child: const Column(
+                                spacing: 6.0,
+                                mainAxisSize: MainAxisSize.min,
+                                children: <Widget>[
+                                  Icon(Icons.qr_code),
+                                  Text("QR Code")
+                                ],
+                              ),
+                            ),
+                          ),
 
-              // email
-              ClipRRect(
-                borderRadius: BorderRadius.circular(16.0),
-                child: Container(
-                  color: colorScheme.surface,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 8.0, horizontal: 8.0),
-                    child: Column(
-                      children: [
-                        ListTile(
-                          leading: Icon(
-                            Icons.email_outlined,
-                            color: AppConstants.emailIconColor,
+                          // edit
+                          Expanded(
+                            child: InkWell(
+                              onTap: () => context.read<ViewProfileBloc>().add(
+                                    ViewProfileEditPageNavigateEvent(),
+                                  ),
+                              splashColor: colorScheme.surface,
+                              highlightColor: colorScheme.surface,
+                              child: const Column(
+                                spacing: 6.0,
+                                mainAxisSize: MainAxisSize.min,
+                                children: <Widget>[
+                                  Icon(Icons.edit),
+                                  Text("Edit"),
+                                ],
+                              ),
+                            ),
                           ),
-                          title: Text(
-                            userData['email'] != "" ? userData['email'] : "-",
+
+                          // share
+                          Expanded(
+                            child: InkWell(
+                              onTap: () {
+                                context.read<ViewProfileBloc>().add(
+                                      ViewProfileContactShareEvent(
+                                        data: sharePlusData,
+                                      ),
+                                    );
+                              },
+                              splashColor: colorScheme.surface,
+                              highlightColor: colorScheme.surface,
+                              child: Column(
+                                spacing: 6.0,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.share),
+                                  const Text("Share")
+                                ],
+                              ),
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-
-      // bottom actions
-      bottomNavigationBar: Container(
-        color: colorScheme.surface,
-        width: mediaQuery.size.width,
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Row(
-            mainAxisSize: MainAxisSize.max,
-            children: [
-              // contact qr code
-              Expanded(
-                child: InkWell(
-                  onTap: () {
-                    Map<String, dynamic> qrData = {
-                      'name': AppFunctions.getCapitalizedWords(userData['name'])
-                          .trim(),
-                      'email_address': userData['email'].toString().trim(),
-                      'contact': {
-                        "country": AppFunctions.getCapitalizedWords(
-                                userData['contacts'][0]['country'])
-                            .trim(),
-                        "number": userData['contacts'][0]['contact'].toString().trim(),
-                      },
-                    };
-
-                    AppFunctions.showUserQrCode(context, qrData);
-                  },
-                  splashColor: colorScheme.surface, // Custom splash color
-                  highlightColor: colorScheme.surface,
-                  child: Column(
-                    spacing: 6.0,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [Icon(Icons.qr_code), const Text("QR Code")],
-                  ),
-                ),
-              ),
-
-              //   edit
-              Expanded(
-                child: InkWell(
-                  onTap: () =>
-                      context.push('/profile/edit', extra: userData).then(
-                            (_) => _refreshUserData(),
-                          ),
-                  splashColor: colorScheme.surface,
-                  highlightColor: colorScheme.surface,
-                  child: Column(
-                    spacing: 6.0,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.edit),
-                      const Text("Edit"),
-                    ],
-                  ),
-                ),
-              ),
-
-              //   share
-              Expanded(
-                child: InkWell(
-                  onTap: () {
-                    String shareName =
-                        AppFunctions.getCapitalizedWords(userData['name']);
-                    String shareContact =
-                        "${AppFunctions.getCountryCode(userData['contacts'][0]['country'])} ${userData['contacts'][0]['contact']}";
-                    String shareData = "$shareName, $shareContact";
-                    Share.share(shareData);
-                  },
-                  splashColor: colorScheme.surface,
-                  highlightColor: colorScheme.surface,
-                  child: Column(
-                    spacing: 6.0,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [Icon(Icons.share), const Text("Share")],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
+                  )
+                ],
+              );
+            } else {
+              return Center(
+                child: Text(state.toString()),
+              );
+            }
+          }),
     );
   }
 }

@@ -21,29 +21,6 @@ class LinkModel {
   });
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is LinkModel &&
-          runtimeType == other.runtimeType &&
-          linkId == other.linkId &&
-          name == other.name &&
-          category == other.category &&
-          emailAddress == other.emailAddress &&
-          note == other.note &&
-          dateOfBirth == other.dateOfBirth &&
-          profilePicture == other.profilePicture);
-
-  @override
-  int get hashCode =>
-      linkId.hashCode ^
-      name.hashCode ^
-      category.hashCode ^
-      emailAddress.hashCode ^
-      note.hashCode ^
-      dateOfBirth.hashCode ^
-      profilePicture.hashCode;
-
-  @override
   String toString() {
     return 'LinkModel{' +
         ' linkId: $linkId,' +
@@ -54,26 +31,6 @@ class LinkModel {
         ' dateOfBirth: $dateOfBirth,' +
         ' profilePicture: $profilePicture,' +
         '}';
-  }
-
-  LinkModel copyWith({
-    int? linkId,
-    String? name,
-    String? category,
-    String? emailAddress,
-    String? note,
-    DateTime? dateOfBirth,
-    Uint8List? profilePicture,
-  }) {
-    return LinkModel(
-      linkId: linkId ?? this.linkId,
-      name: name ?? this.name,
-      category: category ?? this.category,
-      emailAddress: emailAddress ?? this.emailAddress,
-      note: note ?? this.note,
-      dateOfBirth: dateOfBirth ?? this.dateOfBirth,
-      profilePicture: profilePicture ?? this.profilePicture,
-    );
   }
 
   Map<String, dynamic> toMap() {

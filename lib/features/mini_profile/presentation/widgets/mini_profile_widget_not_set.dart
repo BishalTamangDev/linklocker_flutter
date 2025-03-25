@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-class ProfileCardNotSetWidget extends StatelessWidget {
-  const ProfileCardNotSetWidget({super.key, required this.callback});
+import '../blocs/mini_profile_bloc.dart';
 
-  final VoidCallback callback;
+class MiniProfileWidgetNotSet extends StatelessWidget {
+  const MiniProfileWidgetNotSet({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +23,9 @@ class ProfileCardNotSetWidget extends StatelessWidget {
               child: const Text("You haven't set your profile yet!"),
             ),
             TextButton(
-              onPressed: callback,
+              onPressed: () => context
+                  .read<MiniProfileBloc>()
+                  .add(MiniProfileAddNavigateEvent()),
               child: const Text("Setup Now"),
             ),
           ],

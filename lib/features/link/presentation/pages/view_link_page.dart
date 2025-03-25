@@ -402,7 +402,7 @@ class _ViewLinkPageState extends State<ViewLinkPage> {
                     },
                   };
                   developer.log("QR data :: $qrData");
-                  AppFunctions.showUserQrCode(context, qrData);
+                  AppFunctions.showUserQrCodeOld(context, qrData);
                 },
                 splashColor: colorScheme.surface, // Custom splash color
                 highlightColor: colorScheme.surface,
