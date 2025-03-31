@@ -1,7 +1,13 @@
 class ProfileContactEntity {
   int? contactId;
+  int? profileId;
   String? country;
-  String? contactNumber;
+  String? number;
 
-  ProfileContactEntity({this.contactId, this.country, this.contactNumber});
+  ProfileContactEntity({
+    this.contactId,
+    this.profileId,
+    this.country,
+    this.number,
+  });
 }

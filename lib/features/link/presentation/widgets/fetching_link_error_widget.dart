@@ -21,6 +21,5 @@ class FetchingLinkErrorWidget extends StatelessWidget {
         ],
       ),
     );
-    ();
   }
 }

@@ -1,27 +1,30 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:linklocker/features/home/presentation/pages/home_page.dart';
 import 'package:linklocker/features/independent_pages/page_not_found_page.dart';
+import 'package:linklocker/features/link/presentation/blocs/link_add/link_add_bloc.dart';
 import 'package:linklocker/features/link/presentation/pages/add_link_page.dart';
 import 'package:linklocker/features/link/presentation/pages/search_link_page.dart';
-import 'package:linklocker/features/link/presentation/pages/view_all_links_page.dart';
 import 'package:linklocker/features/link/presentation/pages/view_link_page.dart';
 import 'package:linklocker/features/profile/presentation/pages/add_profile_page.dart';
 import 'package:linklocker/features/profile/presentation/pages/view_profile_page.dart';
-import 'package:linklocker/features/scanner/presentation/pages/qr_scanner_home_page.dart';
-import 'package:linklocker/features/scanner/presentation/pages/qr_scanner_result_page.dart';
 import 'package:linklocker/features/setting/presentation/pages/setting_page.dart';
+
+import '../../features/link/presentation/blocs/link_view/link_view_bloc.dart';
+import '../../features/qr_add/presentation/pages/qr_add_page.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
-    initialLocation: '/links',
+    initialLocation: '/home',
 
     // routes
     routes: [
       // home
       GoRoute(
-        path: '/links',
+        path: '/home',
         pageBuilder: (context, state) => CustomTransitionPage(
-          child: ViewAllLinksPage(),
+          child: HomePage(),
           transitionsBuilder: immediateTransitionBuilder,
         ),
       ),
@@ -31,15 +34,13 @@ class AppRouter {
         builder: (context, state) => PageNotFoundPage(),
         routes: [
           GoRoute(
-            path: '/view',
+            path: '/view/:id',
             pageBuilder: (context, state) {
-              final Map<String, dynamic> link =
-                  state.extra as Map<String, dynamic>;
+              final int id = int.parse(state.pathParameters['id'] ?? '0');
+              context.read<LinkViewBloc>().add(FetchEvent(linkId: id));
               return CustomTransitionPage(
-                child: ViewLinkPage(
-                  link: link,
-                ),
-                transitionsBuilder: slideLeftTransitionBuilder,
+                child: ViewLinkPage(),
+                transitionsBuilder: immediateTransitionBuilder,
               );
             },
           ),
@@ -47,29 +48,28 @@ class AppRouter {
             path: '/add',
             pageBuilder: (context, state) => CustomTransitionPage(
               child: const AddLinkPage(),
-              transitionsBuilder: slideLeftTransitionBuilder,
+              transitionsBuilder: immediateTransitionBuilder,
             ),
           ),
           GoRoute(
-            path: '/edit',
+            path: '/qr_add',
             pageBuilder: (context, state) {
-              var linkData = state.extra as Map<String, dynamic>;
               return CustomTransitionPage(
-                child: AddLinkPage(task: "edit", data: linkData),
+                child: AddLinkPage(task: "qr_add"),
                 transitionsBuilder: slideLeftTransitionBuilder,
               );
             },
           ),
           GoRoute(
-            path: '/qr_add',
+            path: '/update/:linkId',
             pageBuilder: (context, state) {
-              var qrData = state.extra as Map<String, dynamic>;
+              final int linkId = int.parse(state.pathParameters['linkId']!);
+
+              context.read<LinkAddBloc>().add(LinkLoadEvent(task: 'update', linkId: linkId));
+
               return CustomTransitionPage(
-                child: AddLinkPage(
-                  task: "qr_add",
-                  dataSecond: qrData,
-                ),
-                transitionsBuilder: slideLeftTransitionBuilder,
+                child: const AddLinkPage(task: "update"),
+                transitionsBuilder: immediateTransitionBuilder,
               );
             },
           ),
@@ -81,8 +81,9 @@ class AppRouter {
         path: '/profile',
         pageBuilder: (context, state) {
           return CustomTransitionPage(
-              child: PageNotFoundPage(),
-              transitionsBuilder: immediateTransitionBuilder);
+            child: PageNotFoundPage(),
+            transitionsBuilder: immediateTransitionBuilder,
+          );
         },
         routes: [
           GoRoute(
@@ -97,31 +98,16 @@ class AppRouter {
           GoRoute(
             path: '/add',
             pageBuilder: (context, state) => CustomTransitionPage(
-              child: AddProfilePage(
-                task: 'add',
-              ),
-              transitionsBuilder: slideUpTransitionBuilder,
+              child: AddProfilePage(task: 'add'),
+              transitionsBuilder: immediateTransitionBuilder,
             ),
           ),
           GoRoute(
-            path: '/edit',
+            path: '/update',
             pageBuilder: (context, state) => CustomTransitionPage(
-              child: AddProfilePage(
-                task: 'edit',
-              ),
-              transitionsBuilder: slideUpTransitionBuilder,
+              child: AddProfilePage(task: 'update'),
+              transitionsBuilder: immediateTransitionBuilder,
             ),
-            // pageBuilder: (context, state) {
-            //   var profileData = state.extra as Map<String, dynamic>;
-            //   return CustomTransitionPage(
-            //     child: AddProfilePage(
-            //       task: 'edit',
-            //       profileData: profileData,
-            //       profileEntity: ProfileEntity(),
-            //     ),
-            //     transitionsBuilder: slideUpTransitionBuilder,
-            //   );
-            // },
           ),
         ],
       ),
@@ -146,17 +132,7 @@ class AppRouter {
             path: '/home',
             pageBuilder: (context, state) {
               return CustomTransitionPage(
-                child: QrScannerHomePage(),
-                transitionsBuilder: slideLeftTransitionBuilder,
-              );
-            },
-          ),
-          GoRoute(
-            path: '/result',
-            pageBuilder: (context, state) {
-              var qrData = state.extra as Map<String, dynamic>;
-              return CustomTransitionPage(
-                child: QrScannerResultPage(qrData: qrData),
+                child: QrAddPage(),
                 transitionsBuilder: slideLeftTransitionBuilder,
               );
             },
@@ -164,7 +140,7 @@ class AppRouter {
         ],
       ),
 
-      //   setting
+      // setting
       GoRoute(
         path: '/setting',
         pageBuilder: (context, state) => CustomTransitionPage(
@@ -176,8 +152,9 @@ class AppRouter {
 
     // error page
     errorPageBuilder: (context, state) => CustomTransitionPage(
-        transitionsBuilder: immediateTransitionBuilder,
-        child: PageNotFoundPage()),
+      transitionsBuilder: immediateTransitionBuilder,
+      child: PageNotFoundPage(),
+    ),
   );
 }
 
@@ -188,10 +165,7 @@ Widget immediateTransitionBuilder(
   Widget child,
 ) {
   return SlideTransition(
-    position: Tween(
-      begin: Offset.zero,
-      end: Offset.zero,
-    ).animate(animation),
+    position: Tween(begin: Offset.zero, end: Offset.zero).animate(animation),
     child: child,
   );
 }
@@ -203,10 +177,7 @@ Widget slideLeftTransitionBuilder(
   Widget child,
 ) {
   return SlideTransition(
-    position: Tween(
-      begin: Offset(1, 0),
-      end: Offset.zero,
-    ).animate(animation),
+    position: Tween(begin: Offset(1, 0), end: Offset.zero).animate(animation),
     child: child,
   );
 }
@@ -218,10 +189,7 @@ Widget slideUpTransitionBuilder(
   Widget child,
 ) {
   return SlideTransition(
-    position: Tween(
-      begin: Offset(0, 1),
-      end: Offset.zero,
-    ).animate(animation),
+    position: Tween(begin: Offset(0, 1), end: Offset.zero).animate(animation),
     child: child,
   );
 }

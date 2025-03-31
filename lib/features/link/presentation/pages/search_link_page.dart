@@ -1,14 +1,15 @@
-import 'dart:math';
+import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:linklocker/core/constants/app_functions.dart';
-import 'package:linklocker/data/source/local/local_data_source.dart';
-import 'package:linklocker/features/link/presentation/widgets/no_data_widget.dart';
-import 'package:linklocker/features/link/presentation/widgets/search_error_widget.dart';
-
-import '../widgets/link_widget.dart';
-import '../widgets/searching_widget.dart';
+import 'package:linklocker/features/link/data/models/link_model.dart';
+import 'package:linklocker/features/link/presentation/blocs/link_search/link_search_bloc.dart';
+import 'package:linklocker/features/link/presentation/widgets/link_widget.dart';
+import 'package:linklocker/features/link/presentation/widgets/search_widgets/search_empty_widget.dart';
+import 'package:linklocker/features/link/presentation/widgets/search_widgets/search_error_widget.dart';
+import 'package:linklocker/features/link/presentation/widgets/search_widgets/search_initial_widget.dart';
+import 'package:linklocker/features/link/presentation/widgets/search_widgets/search_searching_widget.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
@@ -19,41 +20,12 @@ class SearchPage extends StatefulWidget {
 
 class _SearchPageState extends State<SearchPage> {
   // variable
-  bool searched = false;
+  Timer? _debounce;
   bool hasText = false;
-  bool searchByString = true;
-  var searchController = TextEditingController();
-  var localDataSource = LocalDataSource.getInstance();
-
-  late Future<List<Map<String, dynamic>>> _links;
-  late Future<List<Map<String, dynamic>>> _contacts;
-
-  @override
-  void initState() {
-    super.initState();
-    _links = localDataSource.searchLink(title: '');
-  }
-
-  // search link
-  _searchLink(String title) async {
-    setState(() {
-      searched = title.isEmpty ? false : true;
-      _links = localDataSource.searchLink(title: title);
-    });
-  }
-
-  // search contact
-  _searchContact(String number) {
-    setState(() {
-      _contacts = localDataSource.searchContact(number);
-      searched = number.isEmpty ? false : true;
-    });
-  }
+  final TextEditingController searchController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
-    var colorScheme = Theme.of(context).colorScheme;
-
     return Scaffold(
       // app bar
       appBar: AppBar(
@@ -61,46 +33,36 @@ class _SearchPageState extends State<SearchPage> {
           autofocus: true,
           controller: searchController,
           onChanged: (newValue) async {
-            newValue = newValue.trim();
-            setState(() {
-              searchByString = true;
-            });
-
-            setState(() {
-              hasText = newValue.isEmpty ? false : true;
-            });
-
-            try {
-              int.parse(newValue);
-              _searchContact(newValue);
+            final searchText = newValue.toString().trim();
+            _debounce?.cancel();
+            _debounce = Timer(const Duration(milliseconds: 300), () {
               setState(() {
-                searchByString = false;
+                hasText = newValue.isNotEmpty ? true : false;
               });
-            } catch (error) {
-              _searchLink(newValue);
-            }
+              if (searchText.isEmpty) {
+                context.read<LinkSearchBloc>().add(LinkSearchInitialEvent());
+              } else {
+                context.read<LinkSearchBloc>().add(LinkSearchSearchEvent(searchText: searchText.toString()));
+              }
+            });
           },
           decoration: InputDecoration(
             border: InputBorder.none,
             hintText: "Search contact",
             suffixIcon: !hasText
                 ? null
-                : Transform.rotate(
-                    angle: pi / 4,
-                    child: InkWell(
-                      hoverColor: Colors.transparent,
-                      splashColor: Colors.transparent,
-                      highlightColor: Colors.transparent,
-                      onTap: () {
-                        setState(() {
-                          //   clear search text
-                          searchController.clear();
-                          hasText = false;
-                          _searchLink("");
-                        });
-                      },
-                      child: Icon(Icons.add),
-                    ),
+                : InkWell(
+                    hoverColor: Colors.transparent,
+                    splashColor: Colors.transparent,
+                    highlightColor: Colors.transparent,
+                    onTap: () {
+                      context.read<LinkSearchBloc>().add(LinkSearchInitialEvent());
+                      setState(() {
+                        searchController.clear();
+                        hasText = false;
+                      });
+                    },
+                    child: const Icon(Icons.close),
                   ),
           ),
         ),
@@ -110,106 +72,47 @@ class _SearchPageState extends State<SearchPage> {
         ),
         backgroundColor: Theme.of(context).canvasColor,
         elevation: 1,
-        shadowColor: colorScheme.surface,
-        actions: [
-          // IconButton(
-          //   onPressed: () {},
-          //   icon: const Icon(Icons.more_vert),
-          // ),
-        ],
+        shadowColor: Theme.of(context).colorScheme.surface,
       ),
 
       backgroundColor: Theme.of(context).canvasColor,
 
-      //   body
-      body: !searched
-          ? Center(
-              child: Opacity(
-                opacity: 0.6,
-                child: Text("Search links by name or contact number."),
-              ),
-            )
-          : FutureBuilder(
-              future: searchByString ? _links : _contacts,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.done) {
-                  if (snapshot.hasError) {
-                    return SearchErrorWidget();
-                  } else {
-                    if (snapshot.data!.isEmpty) {
-                      return NoDataWidget();
-                    } else {
-                      //   has data
-                      return Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: ListView.builder(
-                          shrinkWrap: true,
-                          itemCount: snapshot.data!.length,
-                          itemBuilder: (context, index) {
-                            // link datum
-                            var data = snapshot.data![index];
+      // body
+      body: BlocConsumer<LinkSearchBloc, LinkSearchState>(
+        listenWhen: (previous, current) => current is LinkSearchActionState,
+        buildWhen: (previous, current) => current is! LinkSearchActionState,
+        listener: (context, state) {
+          debugPrint("Action state :: ${state.runtimeType}");
+        },
+        builder: (context, state) {
+          if (state is LinkSearchInitial) {
+            return SearchInitialWidget();
+          } else if (state is LinkSearchSearchingState) {
+            return SearchSearchingWidget();
+          } else if (state is LinkSearchEmptyState) {
+            return SearchEmptyWidget();
+          } else if (state is LinkSearchErrorState) {
+            return SearchErrorWidget();
+          } else if (state is LinkSearchSearchedState) {
+            final links = state.links;
+            return ListView.separated(
+              shrinkWrap: true,
+              itemCount: links.length,
+              itemBuilder: (context, index) {
+                final linkEntity = LinkModel.fromMap(links[index]['profile']).toEntity();
+                final contacts = links[index]['contacts'];
 
-                            int id = data['link_id'];
-
-                            Map<String, dynamic> linkWidgetData = {
-                              'name': data['name'],
-                              'email': data['email'],
-                              'profile_picture': data['profile_picture'],
-                              'contacts': data['contacts'],
-                            };
-
-                            return Column(
-                              children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(12.0),
-                                  child: Container(
-                                    color:
-                                        Theme.of(context).colorScheme.surface,
-                                    child: Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          vertical: 5.0),
-                                      child: LinkWidget(
-                                        linkWidgetData: linkWidgetData,
-                                        navCallBack: () => context
-                                            .push('/link/view/', extra: data)
-                                            .then((_) => searchByString
-                                                ? _searchLink(searchController
-                                                    .text
-                                                    .toString())
-                                                : _searchContact(
-                                                    searchController.text
-                                                        .toString())),
-                                        callCallBack: () async {
-                                          if (linkWidgetData['contacts']
-                                                  .length ==
-                                              1) {
-                                            String number =
-                                                "${AppFunctions.getCountryCode(linkWidgetData['contacts'][0]['country'])} ${linkWidgetData['contacts'][0]['contact']}";
-
-                                            AppFunctions.openDialer(number);
-                                          } else {
-                                            AppFunctions.showCallBottomSheet(
-                                                context,
-                                                linkWidgetData['contacts']);
-                                          }
-                                        },
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(height: 10.0),
-                              ],
-                            );
-                          },
-                        ),
-                      );
-                    }
-                  }
-                } else {
-                  return SearchingWidget();
-                }
+                return LinkWidget(linkEntity: linkEntity, contacts: contacts);
               },
-            ),
+              separatorBuilder: (context, index) => Divider(height: 0),
+            );
+          } else {
+            return Center(
+              child: Text(state.toString()),
+            );
+          }
+        },
+      ),
     );
   }
 }

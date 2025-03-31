@@ -6,8 +6,7 @@ class FetchProfileUseCase {
 
   const FetchProfileUseCase({required this.profileRepository});
 
-  Future<Either<String, Map<String, dynamic>>> call() async {
-    final response = await profileRepository.fetchProfile();
-    return response.fold((failure) => Left(failure), (data) => Right(data));
+  Future<Either<bool, List<Map<String, dynamic>>>> call() async {
+    return await profileRepository.fetchProfile();
   }
 }

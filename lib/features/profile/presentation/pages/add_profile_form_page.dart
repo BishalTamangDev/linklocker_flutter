@@ -5,7 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:linklocker/core/constants/app_constants.dart';
-import 'package:linklocker/core/constants/app_functions.dart';
+import 'package:linklocker/core/functions/app_functions.dart';
 import 'package:linklocker/features/profile/domain/entities/profile_contact_entity.dart';
 import 'package:linklocker/features/profile/domain/entities/profile_entity.dart';
 import 'package:linklocker/shared/widgets/custom_text_field_widget.dart';
@@ -35,21 +35,19 @@ class _AddProfileFormPageState extends State<AddProfileFormPage> {
 
   // controllers
   var nameController = TextEditingController();
-  var contactController = TextEditingController();
+  var numberController = TextEditingController();
   var emailController = TextEditingController();
 
   // backup data function
   _backupData() {
     // profile
-    profilePicture = widget.profileEntity.profilePicture ?? Uint8List(0);
     nameController.text = widget.profileEntity.name ?? '';
     profilePicture = widget.profileEntity.profilePicture ?? Uint8List(0);
-    emailController.text = widget.profileEntity.email ?? '';
+    emailController.text = widget.profileEntity.emailAddress ?? '';
 
     // contact
-    contactController.text = widget.profileContactEntity.contactNumber ?? '';
-    country =
-        widget.profileContactEntity.country ?? AppConstants.defaultCountry;
+    numberController.text = widget.profileContactEntity.number ?? '';
+    country = widget.profileContactEntity.country ?? AppConstants.defaultCountry;
   }
 
   // image picker
@@ -80,23 +78,22 @@ class _AddProfileFormPageState extends State<AddProfileFormPage> {
   Future<void> _proceed() async {
     final addProfileBloc = context.read<AddProfileBloc>();
     // check for data
-    if (nameController.text.trim().isEmpty ||
-        contactController.text.trim().isEmpty) {
+    if (nameController.text.trim().isEmpty || numberController.text.trim().isEmpty) {
       addProfileBloc.add(
-        AddProfileSnackBarEvent(
-            message: "Please enter both contact number and your name."),
+        AddProfileSnackBarEvent(message: "Please enter both contact number and your name."),
       );
     } else {
       final ProfileEntity newProfileEntity = ProfileEntity(
-        id: 0,
+        id: widget.task == "add" ? 0 : widget.profileEntity.id,
         name: nameController.text.toString().trim().toLowerCase(),
-        email: emailController.text.toString().trim(),
+        emailAddress: emailController.text.toString().trim(),
         profilePicture: profilePicture,
       );
 
-      final ProfileContactEntity newContactEntity = ProfileContactEntity(
-        contactId: widget.profileContactEntity.contactId ?? 0,
-        contactNumber: contactController.text.toString().trim(),
+      ProfileContactEntity newContactEntity = ProfileContactEntity(
+        contactId: widget.task == "add" ? 0 : widget.profileContactEntity.contactId,
+        profileId: widget.task == "add" ? 0 : widget.profileContactEntity.profileId,
+        number: numberController.text.toString().trim(),
         country: country,
       );
 
@@ -119,19 +116,16 @@ class _AddProfileFormPageState extends State<AddProfileFormPage> {
   @override
   void initState() {
     super.initState();
-    if (widget.task == "edit") {
+    if (widget.task == "update") {
       _backupData();
+      debugPrint("Get initial data");
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(
-        left: 16.0,
-        right: 16.0,
-        bottom: 16.0,
-      ),
+      padding: const EdgeInsets.only(left: 16.0, right: 16.0, bottom: 16.0),
       child: Column(
         children: [
           Expanded(
@@ -142,9 +136,7 @@ class _AddProfileFormPageState extends State<AddProfileFormPage> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  const SizedBox(
-                    height: 16.0,
-                  ),
+                  const SizedBox(height: 16.0),
 
                   //   profile picture
                   Center(
@@ -154,7 +146,7 @@ class _AddProfileFormPageState extends State<AddProfileFormPage> {
                       onTap: () {
                         FocusScope.of(context).unfocus();
 
-                        //   show image source
+                        // show image source
                         showDialog(
                           context: context,
                           builder: (context) => AlertDialog(
@@ -164,25 +156,16 @@ class _AddProfileFormPageState extends State<AddProfileFormPage> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Padding(
-                                  padding: const EdgeInsets.only(
-                                    left: 16.0,
-                                    top: 16.0,
-                                    bottom: 8.0,
-                                  ),
+                                  padding: const EdgeInsets.only(left: 16.0, top: 16.0, bottom: 8.0),
                                   child: Opacity(
                                     opacity: 0.6,
-                                    child: Text("Select the image source",
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodyMedium),
+                                    child: Text("Select the image source", style: Theme.of(context).textTheme.bodyMedium),
                                   ),
                                 ),
-                                const SizedBox(
-                                  height: 8.0,
-                                ),
+                                const SizedBox(height: 8.0),
                                 ListTile(
                                   title: const Text("Gallery"),
-                                  leading: Icon(Icons.photo_outlined),
+                                  leading: const Icon(Icons.photo_outlined),
                                   onTap: () {
                                     _pickImage(ImageSource.gallery);
                                     context.pop();
@@ -190,7 +173,7 @@ class _AddProfileFormPageState extends State<AddProfileFormPage> {
                                 ),
                                 ListTile(
                                   title: const Text("Camera"),
-                                  leading: Icon(Icons.camera_alt_outlined),
+                                  leading: const Icon(Icons.camera_alt_outlined),
                                   onTap: () {
                                     _pickImage(ImageSource.camera);
                                     context.pop();
@@ -204,13 +187,8 @@ class _AddProfileFormPageState extends State<AddProfileFormPage> {
                       child: CircleAvatar(
                         radius: 80.0,
                         backgroundColor: Theme.of(context).colorScheme.surface,
-                        backgroundImage: profilePicture.isNotEmpty
-                            ? MemoryImage(profilePicture)
-                            : AssetImage(AppConstants.defaultUserImage),
-                        child: Icon(
-                          Icons.image_outlined,
-                          size: 28.0,
-                        ),
+                        backgroundImage: profilePicture.isNotEmpty ? MemoryImage(profilePicture) : AssetImage(AppConstants.defaultUserImage),
+                        child: Icon(Icons.image_outlined, size: 28.0),
                       ),
                     ),
                   ),
@@ -289,7 +267,8 @@ class _AddProfileFormPageState extends State<AddProfileFormPage> {
                                           value: countryCode['country'],
                                           child: Text(
                                             AppFunctions.getCapitalizedWords(
-                                                countryCode['country']),
+                                              countryCode['country'],
+                                            ),
                                           ),
                                         ),
                                       ),
@@ -299,7 +278,7 @@ class _AddProfileFormPageState extends State<AddProfileFormPage> {
                                   // contact
                                   Expanded(
                                     child: TextField(
-                                      controller: contactController,
+                                      controller: numberController,
                                       keyboardType: TextInputType.number,
                                       decoration: InputDecoration(
                                         hintText: "Contact number",

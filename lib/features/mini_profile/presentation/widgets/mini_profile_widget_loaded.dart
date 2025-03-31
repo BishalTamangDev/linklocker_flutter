@@ -5,7 +5,7 @@ import 'package:linklocker/features/profile/domain/entities/profile_contact_enti
 import 'package:linklocker/features/profile/domain/entities/profile_entity.dart';
 
 import '../../../../core/constants/app_constants.dart';
-import '../../../../core/constants/app_functions.dart';
+import '../../../../core/functions/app_functions.dart';
 
 class MiniProfileWidgetLoaded extends StatelessWidget {
   const MiniProfileWidgetLoaded({
@@ -23,35 +23,22 @@ class MiniProfileWidgetLoaded extends StatelessWidget {
       leading: CircleAvatar(
         radius: 32.0,
         backgroundColor: Theme.of(context).colorScheme.surface,
-        backgroundImage: profileEntity.profilePicture!.isNotEmpty
-            ? MemoryImage(profileEntity.profilePicture!)
-            : AssetImage(AppConstants.defaultUserImage),
+        backgroundImage: profileEntity.profilePicture!.isNotEmpty ? MemoryImage(profileEntity.profilePicture!) : AssetImage(AppConstants.defaultUserImage),
       ),
-      title: Text(
-        AppFunctions.getCapitalizedWords(profileEntity.name!),
-      ),
+      title: Text(AppFunctions.getCapitalizedWords(profileEntity.name!)),
       subtitle: Opacity(
         opacity: 0.6,
-        child: Text(
-          "My Profile",
-          style: Theme.of(context).textTheme.bodyLarge,
-        ),
+        child: Text("My Profile", style: Theme.of(context).textTheme.bodyLarge),
       ),
       trailing: profileEntity.id == null
           ? null
           : IconButton(
               onPressed: () {
-                context.read<MiniProfileBloc>().add(
-                      MiniProfileQrShareEvent(
-                        profileEntity: profileEntity,
-                        contacts: contacts,
-                      ),
-                    );
+                context.read<MiniProfileBloc>().add(MiniProfileQrShareEvent(profileEntity: profileEntity, contacts: contacts));
               },
               icon: Icon(Icons.qr_code),
             ),
-      onTap: () =>
-          context.read<MiniProfileBloc>().add(MiniProfileViewNavigateEvent()),
+      onTap: () => context.read<MiniProfileBloc>().add(MiniProfileViewNavigateEvent()),
     );
   }
 }

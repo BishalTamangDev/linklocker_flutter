@@ -3,56 +3,65 @@ import 'package:linklocker/core/constants/app_constants.dart';
 import '../../domain/entities/profile_contact_entity.dart';
 
 class ProfileContactModel extends ProfileContactEntity {
-  ProfileContactModel(
-      {required super.contactId,
-      required super.country,
-      required super.contactNumber});
+  ProfileContactModel({
+    required super.contactId,
+    required super.profileId,
+    required super.country,
+    required super.number,
+  });
 
-// from entity
-  factory ProfileContactModel.fromEntity(
-      ProfileContactEntity profileContactEntity) {
+  // from entity
+  factory ProfileContactModel.fromEntity(ProfileContactEntity profileContactEntity) {
     return ProfileContactModel(
-        contactId: profileContactEntity.contactId,
-        country: profileContactEntity.country,
-        contactNumber: profileContactEntity.contactNumber);
+      contactId: profileContactEntity.contactId,
+      profileId: profileContactEntity.profileId,
+      country: profileContactEntity.country,
+      number: profileContactEntity.number,
+    );
   }
 
   // to entity
   ProfileContactEntity toEntity() {
     return ProfileContactEntity(
-        contactId: contactId ?? 0,
-        country: country ?? AppConstants.defaultCountry,
-        contactNumber: contactNumber ?? '');
+      contactId: contactId ?? 0,
+      profileId: profileId ?? 0,
+      country: country ?? AppConstants.defaultCountry,
+      number: number ?? '',
+    );
   }
 
-// from map
+  // from map
   factory ProfileContactModel.fromMap(Map<String, dynamic> map) {
     return ProfileContactModel(
-        contactId: map['user_contact_id'] ?? 0,
-        country: map['country'] ?? AppConstants.defaultCountry,
-        contactNumber: map['contact'] ?? '');
+      contactId: map['contact_id'] ?? 0,
+      profileId: map['profile_id'] ?? 0,
+      country: map['country'] ?? AppConstants.defaultCountry,
+      number: map['number'] ?? '',
+    );
   }
 
-// to map
+  // to map
   Map<String, dynamic> toMap() {
     return {
-      'user_contact_id': contactId,
+      'contact_id': contactId,
+      'profile_id': profileId,
       'country': country,
-      'contact': contactNumber
+      'number': number,
     };
   }
 
-// to string
+  // to string
   @override
   String toString() {
-    return "ContactModel{contactId: $contactId, country: $country,  contactNumber: $contactNumber}";
+    return "ContactModel{contactId: $contactId, profileId: $profileId, country: $country, number: $number}";
   }
 
-// data to upload
-  Map<String, dynamic> dataToUpload() {
+  // data to upload
+  Map<String, dynamic> dataToUpload(int profileId) {
     return {
+      'profile_id': profileId ?? 0,
       'country': country ?? AppConstants.defaultCountry,
-      'contact': contactNumber ?? ''
+      'number': number ?? '',
     };
   }
 }

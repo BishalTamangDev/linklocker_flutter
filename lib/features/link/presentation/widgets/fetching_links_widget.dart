@@ -8,21 +8,14 @@ class FetchingLinksWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      spacing: 16.0,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Center(
-          child: Opacity(
-            opacity: 0.6,
-            child: Text("Loading your links..."),
-          ),
-        ),
+        const SizedBox(height: 8.0),
         ...List.generate(
-          5,
+          3,
           (data) => Column(
-            spacing: 12.0,
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              const SizedBox(height: 16.0),
               ClipRRect(
                 borderRadius: BorderRadius.circular(12.0),
                 child: Container(
@@ -32,8 +25,7 @@ class FetchingLinksWidget extends StatelessWidget {
                       const SizedBox(height: 10.0),
                       ListView.separated(
                         padding: EdgeInsets.zero,
-                        separatorBuilder: (context, index) =>
-                            Divider(height: 6.0),
+                        separatorBuilder: (context, index) => Divider(height: 6.0),
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
                         itemCount: Random().nextInt(3) + 1,
@@ -41,9 +33,28 @@ class FetchingLinksWidget extends StatelessWidget {
                           return ListTile(
                             leading: CircleAvatar(
                               radius: 24.0,
-                              backgroundColor: Theme.of(context).canvasColor,
+                              backgroundColor: Theme.of(context).colorScheme.secondary,
                             ),
-                            title: const Text(""),
+                            title: ClipRRect(
+                              borderRadius: BorderRadius.circular(8.0),
+                              child: Container(
+                                width: double.maxFinite,
+                                height: 10.0,
+                                color: Theme.of(context).colorScheme.secondary,
+                              ),
+                            ),
+                            subtitle: ClipRRect(
+                              borderRadius: BorderRadius.circular(8.0),
+                              child: Container(
+                                width: MediaQuery.of(context).size.width / 4,
+                                height: 10.0,
+                                color: Theme.of(context).colorScheme.secondary,
+                              ),
+                            ),
+                            trailing: Icon(
+                              Icons.call,
+                              color: Theme.of(context).colorScheme.secondary,
+                            ),
                           );
                         },
                       ),
@@ -55,23 +66,7 @@ class FetchingLinksWidget extends StatelessWidget {
             ],
           ),
         ),
-        const SizedBox(height: 5.0),
       ],
     );
   }
 }
-
-// return Center(
-// child: Column(
-// spacing: 16.0,
-// mainAxisSize: MainAxisSize.min,
-// children: const <Widget>[
-// CircularProgressIndicator(),
-// Opacity(
-// opacity: 0.6,
-// child: Text("Fetching links"),
-// ),
-// ],
-// ),
-// );
-//

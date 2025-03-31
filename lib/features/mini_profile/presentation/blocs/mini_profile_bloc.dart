@@ -21,34 +21,26 @@ class MiniProfileBloc extends Bloc<MiniProfileEvent, MiniProfileState> {
   }
 
   // fetch profile data
-  Future<void> _miniProfileFetchEvent(
-    MiniProfileFetchEvent event,
-    Emitter<MiniProfileState> emit,
-  ) async {
+  Future<void> _miniProfileFetchEvent(MiniProfileFetchEvent event, Emitter<MiniProfileState> emit) async {
     ProfileRepositoryImpl profileRepository = ProfileRepositoryImpl();
-    FetchProfileUseCase fetchProfileUseCase =
-        FetchProfileUseCase(profileRepository: profileRepository);
+    FetchProfileUseCase fetchProfileUseCase = FetchProfileUseCase(profileRepository: profileRepository);
 
     final response = await fetchProfileUseCase.call();
 
     response.fold((failure) {
-      if (failure == "not-set") {
+      if (!failure) {
         emit(MiniProfileNotSetState());
-      } else {
-        emit(MiniProfileErrorState(message: failure));
       }
-    }, (userData) {
+    }, (data) {
       try {
-        ProfileEntity profileEntity = ProfileModel.fromMap(userData).toEntity();
-        ProfileContactEntity profileContactEntity =
-            ProfileContactModel.fromMap(userData).toEntity();
+        ProfileEntity profileEntity = ProfileModel.fromMap(data[0]).toEntity();
+
+        final contacts = data.map((datum) => ProfileContactModel.fromMap(datum).toEntity()).toList();
 
         if (profileEntity.id != null) {
           emit(MiniProfileLoadedState(
             profileEntity: profileEntity,
-            contacts: [
-              profileContactEntity,
-            ],
+            contacts: contacts,
           ));
         } else {
           emit(MiniProfileNotSetState());
@@ -60,29 +52,17 @@ class MiniProfileBloc extends Bloc<MiniProfileEvent, MiniProfileState> {
   }
 
   // qr show
-  Future<void> _miniProfileQrShowEvent(
-    MiniProfileQrShareEvent event,
-    Emitter<MiniProfileState> emit,
-  ) async {
-    emit(MiniProfileQrShareState(
-      profileEntity: event.profileEntity,
-      contacts: event.contacts,
-    ));
+  Future<void> _miniProfileQrShowEvent(MiniProfileQrShareEvent event, Emitter<MiniProfileState> emit) async {
+    emit(MiniProfileQrShareState(profileEntity: event.profileEntity, contacts: event.contacts));
   }
 
   // navigate to add page
-  Future<void> _miniProfileAddNavigateEvent(
-    MiniProfileAddNavigateEvent event,
-    Emitter<MiniProfileState> emit,
-  ) async {
+  Future<void> _miniProfileAddNavigateEvent(MiniProfileAddNavigateEvent event, Emitter<MiniProfileState> emit) async {
     emit(MiniProfileAddNavigateState());
   }
 
   // navigate to view page
-  Future<void> _miniProfileViewNavigateEvent(
-    MiniProfileViewNavigateEvent event,
-    Emitter<MiniProfileState> emit,
-  ) async {
+  Future<void> _miniProfileViewNavigateEvent(MiniProfileViewNavigateEvent event, Emitter<MiniProfileState> emit) async {
     emit(MiniProfileViewNavigateState());
   }
 }

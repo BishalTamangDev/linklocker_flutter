@@ -1,8 +1,12 @@
-import 'dart:developer' as developer;
-
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:linklocker/data/source/local/local_data_source.dart';
+import 'package:linklocker/features/link/presentation/blocs/all_links/all_links_bloc.dart';
+import 'package:linklocker/features/mini_profile/presentation/blocs/mini_profile_bloc.dart';
+import 'package:linklocker/features/setting/presentation/blocs/setting_bloc.dart';
+import 'package:linklocker/features/setting/presentation/widgets/setting_option_widget.dart';
+import 'package:linklocker/shared/widgets/custom_alert_dialog_widget.dart';
+import 'package:linklocker/shared/widgets/custom_snackbar_widget.dart';
 
 class SettingHomePage extends StatefulWidget {
   const SettingHomePage({super.key});
@@ -12,125 +16,63 @@ class SettingHomePage extends StatefulWidget {
 }
 
 class _SettingHomePageState extends State<SettingHomePage> {
-  //  variables
-  String status = "null";
-  var localDataSource = LocalDataSource.getInstance();
-
-  // reset profile
-  Future<bool> _resetProfile() async {
-    bool profileResponse = await localDataSource.resetUserTable();
-
-    if (profileResponse) {
-      // reset user contact
-      profileResponse = await localDataSource.resetUserContactTable();
-    }
-
-    return profileResponse;
-  }
-
-  // reset links
-  Future<bool> _resetLinks() async {
-    bool linkResponse = await localDataSource.resetLinkTable();
-
-    if (linkResponse) {
-      bool contactResponse = await localDataSource.resetContactTable();
-    }
-
-    return linkResponse;
-  }
-
-  // reset both :: profile and links
-  Future<bool> _resetEverything() async {
-    bool profileResponse = await _resetProfile();
-    bool userResponse = false;
-    if (profileResponse) {
-      userResponse = await _resetLinks();
-    }
-    return userResponse;
-  }
-
-  // functions
-  _delete(String target) {
-    developer.log("Delete :: $target");
+  // delete profile
+  void _resetProfile() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        content: Column(
-          spacing: 12.0,
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              target == "profile"
-                  ? "Delete Profile"
-                  : target == "link"
-                      ? "Delete Links"
-                      : "Delete Everything",
-              style: Theme.of(context)
-                  .textTheme
-                  .titleLarge!
-                  .copyWith(fontWeight: FontWeight.bold),
-            ),
-            Opacity(
-              opacity: 0.6,
-              child: Text(
-                target == "profile"
-                    ? "Are you sure you want to delete your profile permanently?"
-                    : target == "link"
-                        ? "Are you sure you want to delete all your links permanently?"
-                        : "Are you sure you want to delete your profile and the links permanently?",
-              ),
-            ),
-            Row(
-              mainAxisSize: MainAxisSize.max,
-              spacing: 8.0,
-              children: [
-                OutlinedButton(
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.red,
-                  ),
-                  onPressed: () async {
-                    bool response = false;
-                    if (target == "profile") {
-                      response = await _resetProfile();
-                    } else if (target == "link") {
-                      response = await _resetLinks();
-                    } else if (target == "all") {
-                      response = await _resetEverything();
-                      if (!context.mounted) return;
-                    }
+      builder: (context) {
+        return CustomAlertDialogWidget(
+          title: "Reset Profile",
+          description: "Are you sure you want to reset your profile?",
+          option1: 'Yes',
+          option2: 'No',
+          option1CallBack: () {
+            context.read<SettingBloc>().add(SettingResetProfileEvent());
+            context.pop();
+          },
+          option2CallBack: () => context.pop(),
+        );
+      },
+    );
+  }
 
-                    if (!context.mounted) return;
+  // delete links
+  void _resetLink() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return CustomAlertDialogWidget(
+          title: "Reset Links",
+          description: "Are you sure you want to reset all your link?",
+          option1: 'Yes',
+          option2: 'No',
+          option1CallBack: () {
+            context.read<SettingBloc>().add(SettingResetLinkEvent());
+            context.pop();
+          },
+          option2CallBack: () => context.pop(),
+        );
+      },
+    );
+  }
 
-                    context.pop();
-
-                    if (ScaffoldMessenger.of(context).mounted) {
-                      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                    }
-
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        behavior: SnackBarBehavior.floating,
-                        content: Text(
-                          response ? "Reset successful!" : "Reset failed!",
-                        ),
-                      ),
-                    );
-                  },
-                  child: const Text("Yes, Delete Now"),
-                ),
-                OutlinedButton(
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.green,
-                  ),
-                  onPressed: () => context.pop(),
-                  child: const Text("No, Cancel"),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
+  // delete everything
+  void _resetEverything() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return CustomAlertDialogWidget(
+          title: "Reset Everything",
+          description: "Are you sure you want to reset your profile and links?",
+          option1: 'Yes',
+          option2: 'No',
+          option1CallBack: () {
+            context.read<SettingBloc>().add(SettingResetEverythingEvent());
+            context.pop();
+          },
+          option2CallBack: () => context.pop(),
+        );
+      },
     );
   }
 
@@ -152,90 +94,59 @@ class _SettingHomePageState extends State<SettingHomePage> {
       ),
       backgroundColor: Theme.of(context).canvasColor,
       body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            spacing: 16.0,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              //   delete profile
-              Card(
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10.0),
-                ),
-                child: ListTile(
-                  title: Text(
-                    "Delete Profile",
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleMedium!
-                        .copyWith(fontWeight: FontWeight.bold),
-                  ),
-                  subtitle: const Text("Your profile details will be deleted."),
-                  trailing: IconButton(
-                    onPressed: () => _delete("profile"),
-                    icon: Icon(
-                      Icons.delete_outline,
-                      color: Colors.red,
-                    ),
-                  ),
-                ),
-              ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            BlocListener<SettingBloc, SettingState>(
+              listener: (context, state) {
+                if (state is SettingResetProfileActionState) {
+                  CustomSnackBarWidget.show(
+                    context: context,
+                    message: state.response ? "Profile reset successfully." : "Couldn't reset profile.",
+                  );
+                  // refresh mini profile
+                  context.read<MiniProfileBloc>().add(MiniProfileFetchEvent());
+                } else if (state is SettingResetLinkActionState) {
+                  CustomSnackBarWidget.show(
+                    context: context,
+                    message: state.response ? "Links reset successfully." : "Couldn't reset links.",
+                  );
+                  // reset view all link
+                  context.read<AllLinksBloc>().add(AllLinksFetchEvent());
+                } else if (state is SettingResetEverythingActionState) {
+                  CustomSnackBarWidget.show(
+                    context: context,
+                    message: state.response ? "Profile & links reset successfully." : "Couldn't reset profile & links.",
+                  );
 
-              // delete all links
-              Card(
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10.0),
-                ),
-                child: ListTile(
-                  title: Text(
-                    "Delete all links",
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleMedium!
-                        .copyWith(fontWeight: FontWeight.bold),
-                  ),
-                  subtitle: const Text("All the links will be deleted."),
-                  trailing: IconButton(
-                    onPressed: () => _delete("link"),
-                    icon: Icon(
-                      Icons.delete_outline,
-                      color: Colors.red,
-                    ),
-                  ),
-                ),
-              ),
+                  // refresh mini profile
+                  context.read<MiniProfileBloc>().add(MiniProfileFetchEvent());
 
-              // reset everything
-              Card(
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10.0),
-                ),
-                child: ListTile(
-                  isThreeLine: true,
-                  title: Text(
-                    "Reset Everything",
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleMedium!
-                        .copyWith(fontWeight: FontWeight.bold),
-                  ),
-                  subtitle: const Text(
-                      "Your profile details, as well as all the links will be deleted."),
-                  trailing: IconButton(
-                    onPressed: () => _delete("all"),
-                    icon: Icon(
-                      Icons.delete_outline,
-                      color: Colors.red,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
+                  // reset view all link
+                  context.read<AllLinksBloc>().add(AllLinksFetchEvent());
+                }
+              },
+              child: SizedBox.shrink(),
+            ),
+            SettingOptionWidget(
+              title: "Reset Profile",
+              description: "Your account will be deleted but links wont be deleted.",
+              trailingIcon: Icons.person_remove_alt_1_outlined,
+              callback: _resetProfile,
+            ),
+            SettingOptionWidget(
+              title: "Reset Link",
+              description: "Your all links will be deleted.",
+              trailingIcon: Icons.contacts_outlined,
+              callback: _resetLink,
+            ),
+            SettingOptionWidget(
+              title: "Reset Everything",
+              description: "Everything will be deleted including your profile and the links.",
+              trailingIcon: Icons.settings,
+              callback: _resetEverything,
+            ),
+          ],
         ),
       ),
     );

@@ -6,7 +6,7 @@ class DeleteProfileUseCase {
 
   DeleteProfileUseCase({required this.profileRepository});
 
-  Future<Either<String, bool>> call() async {
+  Future<bool> call() async {
     return await profileRepository.deleteProfile();
   }
 }

@@ -1,465 +1,329 @@
-import 'dart:developer' as developer;
-
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 import 'package:linklocker/core/constants/app_constants.dart';
-import 'package:linklocker/core/constants/app_functions.dart';
-import 'package:linklocker/data/source/local/local_data_source.dart';
-import 'package:qr_flutter/qr_flutter.dart';
+import 'package:linklocker/core/functions/app_functions.dart';
+import 'package:linklocker/features/link/data/models/link_model.dart';
+import 'package:linklocker/features/link/presentation/blocs/all_links/all_links_bloc.dart';
+import 'package:linklocker/features/link/presentation/blocs/link_view/link_view_bloc.dart';
+import 'package:linklocker/shared/widgets/custom_alert_dialog_widget.dart';
+import 'package:linklocker/shared/widgets/custom_snackbar_widget.dart';
 import 'package:share_plus/share_plus.dart';
 
-class ViewLinkPage extends StatefulWidget {
-  const ViewLinkPage({super.key, required this.link});
+import '../../../metric/presentation/blocs/metric_bloc.dart';
 
-  final Map<String, dynamic> link;
+class ViewLinkPage extends StatefulWidget {
+  const ViewLinkPage({super.key});
 
   @override
   State<ViewLinkPage> createState() => _ViewLinkPageState();
 }
 
 class _ViewLinkPageState extends State<ViewLinkPage> {
-  // variables
-  Map<String, dynamic> data = {};
-  var localDataSource = LocalDataSource.getInstance();
-
-  @override
-  void initState() {
-    data = widget.link;
-    super.initState();
-  }
-
-  _refreshLinkData() async {
-    Map<String, dynamic> tempData =
-        await localDataSource.getLink(widget.link['link_id']);
-
-    List<Map<String, dynamic>> contacts =
-        await localDataSource.getContacts(widget.link['link_id']);
-
-    Map<String, dynamic> finalLinkData = Map.from(tempData);
-    finalLinkData['contacts'] = contacts;
-
-    developer.log("Refresh link data!");
-    developer.log("temp data :: $tempData");
-    developer.log("contacts :: $contacts");
-
-    if (mounted) {
-      setState(() {
-        data = finalLinkData;
-      });
-    }
+  // functions
+  void _deleteDialog(int linkId) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return CustomAlertDialogWidget(
+          title: "Delete Link",
+          description: "Are you sure you want to delete this link?",
+          option1: "Yes",
+          option2: "No",
+          option1CallBack: () {
+            context.read<LinkViewBloc>().add(DeleteLinkEvent(linkId: linkId));
+            context.pop();
+          },
+          option2CallBack: () => context.pop(),
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    var mediaQuery = MediaQuery.of(context);
-    var themeContext = Theme.of(context);
     var colorScheme = Theme.of(context).colorScheme;
-    var textTheme = Theme.of(context).textTheme;
 
-    return Scaffold(
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.only(top: 16.0),
-        child: CircleAvatar(
-          radius: 26.0,
-          backgroundColor: colorScheme.surface,
-          child: InkWell(
-            highlightColor: Colors.red,
-            onTap: () => context.pop(),
-            child: Icon(Icons.arrow_back_ios_new_rounded),
-          ),
-        ),
-      ),
+    return BlocConsumer<LinkViewBloc, LinkViewState>(
+      listenWhen: (previous, current) => current is LinkViewActionState,
+      buildWhen: (previous, current) => current is! LinkViewActionState,
+      listener: (context, state) {
+        if (state is LinkViewQrShareActionState) {
+          AppFunctions.showQrCode(context: context, linkEntity: state.linkEntity, contacts: state.contacts);
+        } else if (state is LinkViewContactShareActionState) {
+          Share.share(state.shareText, subject: "Contact Share");
+        } else if (state is LinkViewOpenDialerActionState) {
+          AppFunctions.openDialer(state.contact);
+        } else if (state is LinkViewDeleteSuccessActionState) {
+          // refresh all links
+          context.read<AllLinksBloc>().add(AllLinksFetchEvent());
 
-      floatingActionButtonLocation: FloatingActionButtonLocation.startTop,
+          // refresh metric
+          context.read<MetricBloc>().add(MetricFetchEvent());
 
-      backgroundColor: themeContext.canvasColor,
+          CustomSnackBarWidget.show(context: context, message: "Link deleted successfully");
+          context.pop();
+        } else if (state is LinkViewDeletionFailureActionState) {
+          CustomSnackBarWidget.show(context: context, message: "Link couldn't be deleted.");
+        } else if (state is LinkViewNavigateToUpdateActionState) {
+          context.push('/link/update/${state.linkId}');
+        }
+      },
+      builder: (context, state) {
+        if (state is LinkViewLinkNotFoundState) {
+          return Scaffold(
+            appBar: AppBar(
+              title: const Text("Link Details"),
+              leading: IconButton(
+                onPressed: () => context.pop(),
+                highlightColor: Colors.transparent,
+                splashColor: Colors.transparent,
+                icon: Icon(Icons.arrow_back_ios_new),
+              ),
+            ),
+            body: const Center(
+              child: Text("Link Not Found!"),
+            ),
+          );
+        } else if (state is LinkViewLoadingState) {
+          return Scaffold(
+            appBar: AppBar(
+              title: const Text("Link Details"),
+              leading: IconButton(
+                onPressed: () => context.pop(),
+                highlightColor: Colors.transparent,
+                splashColor: Colors.transparent,
+                icon: Icon(Icons.arrow_back_ios_new),
+              ),
+            ),
+            body: const Center(
+              child: CircularProgressIndicator(),
+            ),
+          );
+        } else if (state is LinkViewLoadedState) {
+          LinkModel linkModel = LinkModel.fromEntity(state.linkEntity);
 
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            spacing: 16.0,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              const SizedBox(height: 68.0),
-
-              //   profile picture
-              Center(
+          return Scaffold(
+            appBar: AppBar(
+              leading: IconButton(
+                onPressed: () => context.pop(),
+                highlightColor: Colors.transparent,
+                splashColor: Colors.transparent,
+                icon: Icon(Icons.arrow_back_ios_new),
+              ),
+              title: const Text("Link Details"),
+              actions: [
+                IconButton(
+                  onPressed: () {
+                    if (state.linkEntity.linkId != null) {
+                      _deleteDialog(state.linkEntity.linkId!);
+                    }
+                  },
+                  icon: Icon(Icons.delete_outline),
+                ),
+              ],
+            ),
+            backgroundColor: Theme.of(context).canvasColor,
+            body: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
                 child: Column(
-                  spacing: 18.0,
+                  spacing: 16.0,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    CircleAvatar(
-                      radius: 80.0,
-                      backgroundColor: colorScheme.surface,
-                      foregroundImage: data['profile_picture'].isNotEmpty
-                          ? MemoryImage(data['profile_picture'])
-                          : AssetImage(AppConstants.defaultUserImage),
-                    ),
-                    Text(
-                      AppFunctions.getCapitalizedWords(data['name']),
-                      style: textTheme.headlineSmall!.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(),
-
-              //   contacts
-              ClipRRect(
-                borderRadius: BorderRadius.circular(16.0),
-                child: Container(
-                  color: colorScheme.surface,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 8.0,
-                      horizontal: 8.0,
-                    ),
-                    child: Column(
-                      children: [
-                        data['contacts'].length == 0
-                            ? ListTile(
-                                onTap: () {
-                                  developer.log("Call now");
-                                },
-                                leading: Icon(
-                                  Icons.phone_outlined,
-                                  color: Colors.green,
-                                ),
-                                title: Text("-"),
-                              )
-                            : SizedBox(),
-                        ...data['contacts'].map(
-                          (contact) => ListTile(
-                            leading: Icon(
-                              Icons.phone_outlined,
-                              color: Colors.green,
-                            ),
-                            title: Text(
-                                "${AppFunctions.getCountryCode(contact['country'])} ${contact['contact']}"),
-                            trailing: TextButton(
-                              onPressed: () {
-                                var data =
-                                    "${AppFunctions.getCountryCode(contact['country'])} ${contact['contact']}";
-                                AppFunctions.openDialer(data);
-                              },
-                              child: const Text("call Now"),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-
-              //   email address
-              ClipRRect(
-                borderRadius: BorderRadius.circular(16.0),
-                child: Container(
-                  color: colorScheme.surface,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 8.0, horizontal: 8.0),
-                    child: ListTile(
-                      leading: Icon(
-                        Icons.email_outlined,
-                        color: AppConstants.emailIconColor,
-                      ),
-                      title: Text(data['email'] != "" ? data['email'] : "-"),
-                    ),
-                  ),
-                ),
-              ),
-
-              //   birthday
-              ClipRRect(
-                borderRadius: BorderRadius.circular(16.0),
-                child: Container(
-                  color: colorScheme.surface,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 8.0, horizontal: 8.0),
-                    child: ListTile(
-                      leading: Icon(
-                        Icons.cake_outlined,
-                        color: AppConstants.birthdayIconColor,
-                      ),
-                      title: Text(
-                        data['date_of_birth'] == ""
-                            ? "-"
-                            : AppFunctions.getFormattedDate(
-                                DateTime.parse(data['date_of_birth']),
-                              ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-
-              //   category
-              ClipRRect(
-                borderRadius: BorderRadius.circular(16.0),
-                child: Container(
-                  color: colorScheme.surface,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 8.0, horizontal: 8.0),
-                    child: ListTile(
-                      leading: Icon(
-                        Icons.group_add_outlined,
-                        color: AppConstants.categoryIconColor,
-                      ),
-                      title: Text(
-                        AppFunctions.getCapitalizedWord(data['category']),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-
-              //   note
-              ClipRRect(
-                borderRadius: BorderRadius.circular(16.0),
-                child: Container(
-                  color: colorScheme.surface,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 8.0,
-                      horizontal: 8.0,
-                    ),
-                    child: ListTile(
-                      leading: Icon(
-                        Icons.note_alt_outlined,
-                        color: AppConstants.noteIconColor,
-                      ),
-                      title: Opacity(
-                        opacity: 0.5,
-                        child: Text(
-                          data['note'] != ""
-                              ? AppFunctions.getCapitalizedWord(data['note'])
-                              : "-",
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-
-              // delete link
-              OutlinedButton(
-                onPressed: () async {
-                  showDialog(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      content: Column(
-                        spacing: 16.0,
-                        mainAxisSize: MainAxisSize.min,
-                        // crossAxisAlignment: CrossAxisAlignment.start,
+                    // profile picture
+                    Center(
+                      child: Column(
+                        spacing: 18.0,
                         children: [
                           CircleAvatar(
-                            radius: 32.0,
-                            backgroundColor:
-                                Theme.of(context).colorScheme.surface,
-                            child: Icon(
-                              Icons.delete,
-                              color: Colors.red,
-                            ),
+                            radius: 80.0,
+                            backgroundColor: colorScheme.surface,
+                            foregroundImage:
+                                linkModel.profilePicture!.isNotEmpty ? MemoryImage(linkModel.profilePicture!) : AssetImage(AppConstants.defaultUserImage),
                           ),
-                          const Text(
-                              "Are you sure you want to delete this link?"),
-                          Row(
-                            spacing: 6.0,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              // delete
-                              Expanded(
-                                child: SizedBox(
-                                  height: 44.0,
-                                  child: OutlinedButton(
-                                    onPressed: () async {
-                                      developer
-                                          .log("Link id :: ${data['link_id']}");
-
-                                      String linkDelete = await localDataSource
-                                          .deleteLink(data['link_id']);
-                                      String contactDelete = "";
-
-                                      if (linkDelete == "success") {
-                                        //   delete all contacts of this link
-                                        contactDelete = await localDataSource
-                                            .deleteContacts(data['link_id']);
-                                      }
-
-                                      if (context.mounted) {
-                                        context.pop();
-
-                                        var scaffoldMessenger =
-                                            ScaffoldMessenger.of(context);
-
-                                        if (scaffoldMessenger.mounted) {
-                                          scaffoldMessenger
-                                              .hideCurrentSnackBar();
-                                        }
-
-                                        scaffoldMessenger.showSnackBar(
-                                          SnackBar(
-                                            content: Text(contactDelete ==
-                                                    "success"
-                                                ? "Link deleted successfully!"
-                                                : "Link couldn't be deleted!"),
-                                          ),
-                                        );
-
-                                        context.pop();
-                                      }
-                                    },
-                                    style: OutlinedButton.styleFrom(
-                                      overlayColor: Colors.red,
-                                    ),
-                                    child: Text(
-                                      "Yes, Delete Now",
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodyMedium,
-                                    ),
-                                  ),
-                                ),
-                              ),
-
-                              // keep
-                              Expanded(
-                                child: SizedBox(
-                                  height: 44.0,
-                                  child: OutlinedButton(
-                                    onPressed: () => context.pop(),
-                                    style: OutlinedButton.styleFrom(
-                                      overlayColor: Colors.green,
-                                    ),
-                                    child: Text(
-                                      "No, Keep it!",
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodyMedium,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
+                          Text(
+                            linkModel.name != null && linkModel.name != '' ? AppFunctions.getCapitalizedWords(linkModel.name!) : 'Unknown',
+                            style: Theme.of(context).textTheme.headlineSmall!.copyWith(fontWeight: FontWeight.bold),
                           ),
                         ],
                       ),
                     ),
-                  );
-                },
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: Colors.red,
-                  // backgroundColor: Colors.red,
-                  overlayColor: Colors.red,
-                ),
-                child: const Row(
-                  spacing: 8.0,
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    Text("Delete Contact"),
+
+                    const SizedBox(),
+
+                    // contacts
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(16.0),
+                      child: Container(
+                        color: colorScheme.surface,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
+                          child: Column(
+                            children: [
+                              // empty contact
+                              state.contacts.isEmpty
+                                  ? const ListTile(
+                                      leading: Icon(Icons.phone_outlined, color: Colors.green),
+                                      title: Opacity(opacity: 0.5, child: Text("Contact Not Found")),
+                                    )
+                                  : const SizedBox.shrink(),
+
+                              // more than one contact case
+                              ...state.contacts.map(
+                                (contact) {
+                                  final String code = AppFunctions.getCountryCode(contact.country ?? AppConstants.defaultCountry);
+
+                                  return ListTile(
+                                    leading: Icon(Icons.phone_outlined, color: Colors.green),
+                                    title: Text("$code ${contact.number}"),
+                                    trailing: TextButton(
+                                      onPressed: () => context.read<LinkViewBloc>().add(DialerEvent(linkEntity: state.linkEntity, contacts: state.contacts)),
+                                      child: const Text("call Now"),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    // email address
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(16.0),
+                      child: Container(
+                        color: colorScheme.surface,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
+                          child: ListTile(
+                            leading: Icon(Icons.email_outlined, color: AppConstants.emailIconColor),
+                            title: Text(linkModel.emailAddress != '' && linkModel.emailAddress != null ? linkModel.emailAddress! : "-"),
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    // birthday
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(16.0),
+                      child: Container(
+                        color: colorScheme.surface,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
+                          child: ListTile(
+                            leading: Icon(Icons.cake_outlined, color: AppConstants.birthdayIconColor),
+                            title: Text(
+                              linkModel.dateOfBirth != null ? AppFunctions.getFormattedDate(DateTime.parse(linkModel.dateOfBirth!.toString())) : "-",
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    // category
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(16.0),
+                      child: Container(
+                        color: colorScheme.surface,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
+                          child: ListTile(
+                            leading: Icon(Icons.group_add_outlined, color: AppConstants.categoryIconColor),
+                            title: Text(AppFunctions.getCapitalizedWord(linkModel.category!.label)),
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    // note
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(16.0),
+                      child: Container(
+                        color: colorScheme.surface,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
+                          child: ListTile(
+                            leading: Icon(Icons.note_alt_outlined, color: AppConstants.noteIconColor),
+                            title: Opacity(
+                              opacity: 0.5,
+                              child: Text(AppFunctions.getCapitalizedWord(linkModel.note != '' && linkModel.note != null ? linkModel.note! : "-")),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
-            ],
-          ),
-        ),
-      ),
+            ),
 
-      // bottom actions
-      bottomNavigationBar: Container(
-        color: colorScheme.surface,
-        width: mediaQuery.size.width,
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Row(
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              // contact qr code
-              InkWell(
-                onTap: () {
-                  var qrContacts = data['contacts'];
-                  developer.log("temp :: ${qrContacts[0]}");
-
-                  Map<String, dynamic> qrData = {
-                    "name":
-                        AppFunctions.getCapitalizedWords(data['name']).trim(),
-                    "email_address": data['email'].toString().trim(),
-                    "contact": {
-                      "country": AppFunctions.getCapitalizedWords(
-                              qrContacts[0]['country'])
-                          .trim(),
-                      "number": qrContacts[0]['contact'].toString().trim(),
-                    },
-                  };
-                  developer.log("QR data :: $qrData");
-                  AppFunctions.showUserQrCodeOld(context, qrData);
-                },
-                splashColor: colorScheme.surface, // Custom splash color
-                highlightColor: colorScheme.surface,
-                child: Column(
-                  spacing: 6.0,
-                  mainAxisSize: MainAxisSize.min,
+            // bottom actions
+            bottomNavigationBar: Container(
+              color: colorScheme.surface,
+              width: MediaQuery.of(context).size.width,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Row(
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    Icon(Icons.qr_code),
-                    const Text("QR Code"),
+                    // contact qr code
+                    InkWell(
+                      onTap: () => context.read<LinkViewBloc>().add(QrShareEvent(linkEntity: state.linkEntity, contacts: state.contacts)),
+                      splashColor: colorScheme.surface, // Custom splash color
+                      highlightColor: colorScheme.surface,
+                      child: const Column(
+                        spacing: 6.0,
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          Icon(Icons.qr_code),
+                          Text("QR Code"),
+                        ],
+                      ),
+                    ),
+
+                    // edit
+                    InkWell(
+                      onTap: () => context.read<LinkViewBloc>().add(UpdateNavigateEvent(linkId: linkModel.linkId!)),
+                      splashColor: colorScheme.surface,
+                      highlightColor: colorScheme.surface,
+                      child: const Column(
+                        spacing: 6.0,
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          Icon(Icons.edit),
+                          Text("Update"),
+                        ],
+                      ),
+                    ),
+
+                    // share
+                    InkWell(
+                      onTap: () => context.read<LinkViewBloc>().add(ContactShareEvent(linkEntity: state.linkEntity, contacts: state.contacts)),
+                      splashColor: colorScheme.surface,
+                      highlightColor: colorScheme.surface,
+                      child: const Column(
+                        spacing: 6.0,
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          Icon(Icons.share),
+                          Text("Share"),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),
-
-              //   edit
-              InkWell(
-                onTap: () => context
-                    .push('/link/edit', extra: data)
-                    .then((_) => _refreshLinkData()),
-                splashColor: colorScheme.surface,
-                highlightColor: colorScheme.surface,
-                child: Column(
-                  spacing: 6.0,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.edit),
-                    const Text("Edit"),
-                  ],
-                ),
-              ),
-
-              //   share
-              InkWell(
-                onTap: () {
-                  var name =
-                      AppFunctions.getCapitalizedWords(widget.link['name']);
-
-                  var contactMap = widget.link['contacts'][0];
-
-                  var code = AppFunctions.getCountryCode(
-                      widget.link['contacts'][0]['country']);
-
-                  var shareData = "$name: $code ${contactMap['contact']}";
-
-                  Share.share(shareData, subject: "qwerty");
-                },
-                splashColor: colorScheme.surface,
-                highlightColor: colorScheme.surface,
-                child: Column(
-                  spacing: 6.0,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [Icon(Icons.share), const Text("Share")],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
+            ),
+          );
+        }
+        return Center(
+          child: CircularProgressIndicator(),
+        );
+      },
     );
   }
 }

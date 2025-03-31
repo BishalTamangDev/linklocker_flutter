@@ -3,6 +3,10 @@ part of 'view_profile_bloc.dart';
 @immutable
 sealed class ViewProfileState {}
 
+// action states
+@immutable
+sealed class ViewProfileActionState extends ViewProfileState {}
+
 // initial state
 final class ViewProfileInitial extends ViewProfileState {}
 
@@ -23,10 +27,6 @@ final class ViewProfileLoadedState extends ViewProfileState {
 // profile not found
 final class ViewProfileProfileNotFoundState extends ViewProfileState {}
 
-// action states
-@immutable
-sealed class ViewProfileActionState extends ViewProfileState {}
-
 // share contact through qr
 final class ViewProfileQrActionState extends ViewProfileActionState {
   final ProfileEntity profileEntity;
@@ -46,12 +46,10 @@ final class ViewProfileContactShareActionState extends ViewProfileActionState {
 }
 
 // navigate to edit
-final class ViewProfileNavigateToEditPageActionState
-    extends ViewProfileActionState {}
+final class ViewProfileNavigateToEditPageActionState extends ViewProfileActionState {}
 
 // navigate to home page
-final class ViewProfileNavigateToHomePageActionState
-    extends ViewProfileActionState {}
+final class ViewProfileNavigateToHomePageActionState extends ViewProfileActionState {}
 
 // snack bar
 final class ViewProfileSnackBarActionState extends ViewProfileActionState {

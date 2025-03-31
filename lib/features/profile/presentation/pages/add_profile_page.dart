@@ -22,7 +22,7 @@ class _AddProfilePageState extends State<AddProfilePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.task == "add" ? "Add Profile" : "Edit Profile"),
+        title: Text(widget.task == "add" ? "Add Profile" : "Update Profile"),
         elevation: 0,
         automaticallyImplyLeading: false,
         leading: IconButton(
@@ -36,9 +36,7 @@ class _AddProfilePageState extends State<AddProfilePage> {
             padding: const EdgeInsets.only(right: 8.0),
             child: IconButton(
               highlightColor: Colors.transparent,
-              onPressed: () => context
-                  .read<AddProfileBloc>()
-                  .add(AddProfileLoadEvent(task: widget.task)),
+              onPressed: () => context.read<AddProfileBloc>().add(AddProfileLoadEvent(task: widget.task)),
               icon: Icon(Icons.undo_outlined),
             ),
           ),
@@ -50,21 +48,15 @@ class _AddProfilePageState extends State<AddProfilePage> {
         listener: (context, state) {
           // snack bar
           if (state is AddProfileSnackBarActionState) {
-            CustomSnackBarWidget.show(
-              context: context,
-              message: state.message,
-            );
-          } else if (state is AddProfileViewNavigateActionState) {
+            CustomSnackBarWidget.show(context: context, message: state.message);
+          } else if (state is AddProfileViewNavigateActionState || state is AddProfileHomeNavigateActionState) {
             context.read<MiniProfileBloc>().add(MiniProfileFetchEvent());
             context.read<ViewProfileBloc>().add(ViewProfileFetchEvent());
             context.pop();
-          } else if (state is AddProfileHomeNavigateActionState) {
-            context.read<MiniProfileBloc>().add(MiniProfileFetchEvent());
-            context.pop();
-          } else {}
+          }
         },
         builder: (context, state) {
-          if (state is AddProfileInitial) {
+          if (state is AddProfileInitial || state is AddProfileLoadingState) {
             return const Center(
               child: CircularProgressIndicator(),
             );
@@ -74,8 +66,6 @@ class _AddProfilePageState extends State<AddProfilePage> {
               profileEntity: state.profileEntity,
               profileContactEntity: state.profileContactEntity,
             );
-          } else if (state is AddProfileLoadingState) {
-            return const Center(child: CircularProgressIndicator());
           } else if (state is AddProfileAddedState) {
             return const Center(child: Text("Profile Already Added"));
           } else {

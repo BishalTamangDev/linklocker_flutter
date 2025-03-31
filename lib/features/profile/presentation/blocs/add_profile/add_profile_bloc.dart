@@ -1,10 +1,12 @@
 import 'package:bloc/bloc.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:linklocker/features/profile/data/models/profile_contact_model.dart';
+import 'package:linklocker/features/profile/data/models/profile_model.dart';
 import 'package:linklocker/features/profile/data/repository_impl/profile_repository_impl.dart';
 import 'package:linklocker/features/profile/domain/entities/profile_contact_entity.dart';
 import 'package:linklocker/features/profile/domain/entities/profile_entity.dart';
 import 'package:linklocker/features/profile/domain/usecases/fetch_profile_usecase.dart';
 import 'package:linklocker/features/profile/domain/usecases/update_profile_usecase.dart';
-import 'package:meta/meta.dart';
 
 import '../../../domain/usecases/add_profile_usecase.dart';
 
@@ -21,80 +23,48 @@ class AddProfileBloc extends Bloc<AddProfileEvent, AddProfileState> {
   }
 
   // add profile
-  Future<void> _addProfileAddEvent(
-    AddProfileAddEvent event,
-    Emitter<AddProfileState> emit,
-  ) async {
-    final ProfileRepositoryImpl profileRepository = ProfileRepositoryImpl();
+  Future<void> _addProfileAddEvent(AddProfileAddEvent event, Emitter<AddProfileState> emit) async {
+    AddProfileUseCase addProfileUseCase = AddProfileUseCase(profileRepository: ProfileRepositoryImpl());
 
-    AddProfileUseCase addProfileUseCase = AddProfileUseCase(
-      profileRepository: profileRepository,
-      profileEntity: event.profileEntity,
-      contacts: event.contacts,
+    final response = await addProfileUseCase.call(
+      event.profileEntity,
+      event.contacts,
     );
 
-    final response = await addProfileUseCase.call();
+    final previousState = state;
+    emit(AddProfileSnackBarActionState(message: response ? "Profile added successfully." : "Profile couldn't be added."));
+    await Future.delayed(Duration.zero);
 
-    await response.fold((failure) async {
-      final previousState = state;
+    // emit previous state
+    emit(previousState);
+
+    if (response) {
       await Future.delayed(Duration.zero);
-      emit(AddProfileSnackBarActionState(message: failure));
-      emit(previousState);
-    }, (res) async {
-      final previousState = state;
-      emit(AddProfileSnackBarActionState(
-          message: res
-              ? "Profile added successfully."
-              : "Profile couldn't be set up."));
-      await Future.delayed(Duration.zero);
-      emit(previousState);
-      if (res) {
-        emit(AddProfileHomeNavigateActionState());
-      }
-    });
+      emit(AddProfileHomeNavigateActionState());
+    }
   }
 
   // update profile
-  Future<void> _addProfileUpdateEvent(
-    AddProfileUpdateEvent event,
-    Emitter<AddProfileState> emit,
-  ) async {
+  Future<void> _addProfileUpdateEvent(AddProfileUpdateEvent event, Emitter<AddProfileState> emit) async {
     final ProfileRepositoryImpl profileRepository = ProfileRepositoryImpl();
 
-    UpdateProfileUseCase updateProfileUseCase = UpdateProfileUseCase(
-      profileRepository: profileRepository,
-      profileEntity: event.profileEntity,
-      contacts: event.contacts,
-    );
+    UpdateProfileUseCase updateProfileUseCase = UpdateProfileUseCase(profileRepository: profileRepository);
 
-    final response = await updateProfileUseCase.call();
+    final response = await updateProfileUseCase.call(event.profileEntity, event.contacts);
 
-    await response.fold((failure) async {
-      emit(AddProfileSnackBarActionState(message: failure));
-    }, (res) async {
-      emit(
-        AddProfileSnackBarActionState(
-          message: res
-              ? "Profile updated successfully."
-              : "Profile couldn't be updated.",
-        ),
-      );
-      if (res) {
-        emit(AddProfileViewNavigateActionState());
-      }
-    });
+    emit(AddProfileSnackBarActionState(message: response ? "Profile updated successfully." : "Couldn't update profile."));
+
+    if (response) {
+      emit(AddProfileViewNavigateActionState());
+    }
   }
 
   // load profile form
-  Future<void> _addProfileLoadEvent(
-    AddProfileLoadEvent event,
-    Emitter<AddProfileState> emit,
-  ) async {
+  Future<void> _addProfileLoadEvent(AddProfileLoadEvent event, Emitter<AddProfileState> emit) async {
     emit(AddProfileLoadingState());
 
-    final ProfileRepositoryImpl profileRepository = ProfileRepositoryImpl();
     final FetchProfileUseCase fetchProfileUseCase = FetchProfileUseCase(
-      profileRepository: profileRepository,
+      profileRepository: ProfileRepositoryImpl(),
     );
 
     final response = await fetchProfileUseCase.call();
@@ -109,9 +79,9 @@ class AddProfileBloc extends Bloc<AddProfileEvent, AddProfileState> {
       );
       // emit(AddProfileLoadErrorState(error: failure.toString()));
     }, (data) {
-      if (event.task == "add" && data['name'] != null) {
+      if (event.task == "add" && data[0]['name'] != null) {
         emit(AddProfileAddedState());
-      } else if (event.task == "add" && data['name'] == null) {
+      } else if (event.task == "add" && data[0]['name'] == null) {
         emit(
           AddProfileLoadedState(
             task: "add",
@@ -119,21 +89,14 @@ class AddProfileBloc extends Bloc<AddProfileEvent, AddProfileState> {
             profileContactEntity: ProfileContactEntity(),
           ),
         );
-      } else if (event.task == "edit") {
+      } else if (event.task == "update") {
+        debugPrint("Profile Model :: ${ProfileModel.fromMap(data[0]).toString()}");
+        debugPrint("Profile Contact Model :: ${ProfileContactModel.fromMap(data[0]).toString()}");
         emit(
           AddProfileLoadedState(
-            task: "edit",
-            profileEntity: ProfileEntity(
-              id: data['id'],
-              name: data['name'],
-              profilePicture: data['profile_picture'],
-              email: data['email'],
-            ),
-            profileContactEntity: ProfileContactEntity(
-              country: data['contacts'][0]['country'],
-              contactNumber: data['contacts'][0]['contact'],
-              contactId: data['contacts'][0]['user_contact_id'],
-            ),
+            task: "update",
+            profileEntity: ProfileModel.fromMap(data[0]).toEntity(),
+            profileContactEntity: ProfileContactModel.fromMap(data[0]).toEntity(),
           ),
         );
       } else {
@@ -143,21 +106,12 @@ class AddProfileBloc extends Bloc<AddProfileEvent, AddProfileState> {
   }
 
   // Profile added event
-  Future<void> _addProfileAddedEvent(
-    AddProfileAddedEvent event,
-    Emitter<AddProfileState> emit,
-  ) async {
+  Future<void> _addProfileAddedEvent(AddProfileAddedEvent event, Emitter<AddProfileState> emit) async {
     emit(AddProfileAddedState());
   }
 
   // SnackBar event
-  Future<void> _addProfileSnackBarEvent(
-    AddProfileSnackBarEvent event,
-    Emitter<AddProfileState> emit,
-  ) async {
-    // final previousState = state;
+  Future<void> _addProfileSnackBarEvent(AddProfileSnackBarEvent event, Emitter<AddProfileState> emit) async {
     emit(AddProfileSnackBarActionState(message: event.message));
-    // await Future.delayed(Duration.zero);
-    // emit(previousState);
   }
 }

@@ -10,22 +10,17 @@ class MiniProfileWidgetNotSet extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.only(
-          top: 24.0,
-          bottom: 6.0,
-        ),
+        padding: const EdgeInsets.only(top: 24.0, bottom: 6.0),
         child: Column(
           children: [
-            Icon(Icons.error, color: Colors.red),
+            const Icon(Icons.error, color: Colors.red),
             const SizedBox(height: 12.0),
-            Opacity(
+            const Opacity(
               opacity: 0.6,
-              child: const Text("You haven't set your profile yet!"),
+              child: Text("You haven't set your profile yet!"),
             ),
             TextButton(
-              onPressed: () => context
-                  .read<MiniProfileBloc>()
-                  .add(MiniProfileAddNavigateEvent()),
+              onPressed: () => context.read<MiniProfileBloc>().add(MiniProfileAddNavigateEvent()),
               child: const Text("Setup Now"),
             ),
           ],
