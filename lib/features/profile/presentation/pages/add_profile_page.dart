@@ -56,11 +56,7 @@ class _AddProfilePageState extends State<AddProfilePage> {
           }
         },
         builder: (context, state) {
-          if (state is AddProfileInitial || state is AddProfileLoadingState) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          } else if (state is AddProfileLoadedState) {
+          if (state is AddProfileLoadedState) {
             return AddProfileFormPage(
               task: widget.task,
               profileEntity: state.profileEntity,
@@ -69,7 +65,10 @@ class _AddProfilePageState extends State<AddProfilePage> {
           } else if (state is AddProfileAddedState) {
             return const Center(child: Text("Profile Already Added"));
           } else {
-            return Center(child: Text(state.runtimeType.toString()));
+            // states :: AddProfileInitial && AddProfileLoadingState
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
           }
         },
       ),

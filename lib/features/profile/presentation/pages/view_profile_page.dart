@@ -281,10 +281,11 @@ class _ViewProfilePageState extends State<ViewProfilePage> {
             return const Center(
               child: Text("Profile Not Found!"),
             );
+          } else {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
           }
-          return Center(
-            child: Text(state.toString()),
-          );
         },
       ),
     );

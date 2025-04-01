@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:linklocker/features/home/presentation/pages/home_page.dart';
+import 'package:linklocker/features/independent_pages/initial_page.dart';
+import 'package:linklocker/features/independent_pages/on_boarding_page.dart';
 import 'package:linklocker/features/independent_pages/page_not_found_page.dart';
 import 'package:linklocker/features/link/presentation/blocs/link_add/link_add_bloc.dart';
 import 'package:linklocker/features/link/presentation/pages/add_link_page.dart';
@@ -16,10 +18,29 @@ import '../../features/qr_add/presentation/pages/qr_add_page.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
-    initialLocation: '/home',
+    initialLocation: '/initial',
+    // initialLocation: '/onboarding',
 
     // routes
     routes: [
+      // initial
+      GoRoute(
+        path: '/initial',
+        pageBuilder: (context, state) => CustomTransitionPage(
+          child: InitialPage(),
+          transitionsBuilder: immediateTransitionBuilder,
+        ),
+      ),
+
+      // on boarding page
+      GoRoute(
+        path: '/onboarding',
+        pageBuilder: (context, state) => CustomTransitionPage(
+          child: OnBoardingPage(),
+          transitionsBuilder: immediateTransitionBuilder,
+        ),
+      ),
+
       // home
       GoRoute(
         path: '/home',

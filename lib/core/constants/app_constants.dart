@@ -99,7 +99,7 @@ class AppConstants {
 
   static final String defaultCountry = "nepal";
 
-//   colors
+ // colors
   static Color primaryColor = Colors.blue;
   static Color callIconColor = Colors.green;
   static Color emailIconColor = Colors.deepOrange;

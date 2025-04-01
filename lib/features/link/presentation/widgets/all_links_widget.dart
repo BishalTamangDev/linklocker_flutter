@@ -18,11 +18,8 @@ class AllLinksWidget extends StatelessWidget {
       buildWhen: (previous, current) => current is! AllLinksActionState,
       listener: (context, state) {},
       builder: (context, state) {
-        if (state is AllLinksFetchingState) {
-          return FetchingLinksWidget();
-        } else if (state is AllLinksFetchedState) {
+        if (state is AllLinksFetchedState) {
           final List<Map<String, dynamic>> groupedLinks = state.groupedLinks;
-
           return ListView.builder(
             shrinkWrap: true,
             itemCount: groupedLinks.length,
@@ -69,9 +66,7 @@ class AllLinksWidget extends StatelessWidget {
         } else if (state is AllLinksEmptyState) {
           return EmptyLinksWidget();
         } else {
-          return Center(
-            child: Text(state.toString()),
-          );
+          return FetchingLinksWidget();
         }
       },
     );

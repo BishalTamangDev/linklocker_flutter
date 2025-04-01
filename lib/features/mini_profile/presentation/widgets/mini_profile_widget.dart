@@ -6,7 +6,6 @@ import 'package:linklocker/features/mini_profile/presentation/blocs/mini_profile
 import 'package:linklocker/features/mini_profile/presentation/widgets/mini_profile_widget_error.dart';
 import 'package:linklocker/features/mini_profile/presentation/widgets/mini_profile_widget_loaded.dart';
 import 'package:linklocker/features/mini_profile/presentation/widgets/mini_profile_widget_not_set.dart';
-import 'package:linklocker/features/profile/presentation/blocs/view_profile/view_profile_bloc.dart';
 
 import '../../../profile/presentation/blocs/add_profile/add_profile_bloc.dart';
 import 'mini_profile_widget_loading.dart';
@@ -45,9 +44,7 @@ class _MiniProfileWidgetState extends State<MiniProfileWidget> {
               } else {}
             },
             builder: (context, state) {
-              if (state is MiniProfileInitial || state is MiniProfileLoadingState) {
-                return MiniProfileWidgetLoading();
-              } else if (state is MiniProfileErrorState) {
+              if (state is MiniProfileErrorState) {
                 return MiniProfileWidgetError(callback: () {});
               } else if (state is MiniProfileLoadedState) {
                 return MiniProfileWidgetLoaded(
@@ -57,9 +54,8 @@ class _MiniProfileWidgetState extends State<MiniProfileWidget> {
               } else if (state is MiniProfileNotSetState) {
                 return MiniProfileWidgetNotSet();
               } else {
-                return Center(
-                  child: Text(state.runtimeType.toString()),
-                );
+                // states :: MiniProfileInitial && MiniProfileLoadingState
+                return MiniProfileWidgetLoading();
               }
             },
           ),

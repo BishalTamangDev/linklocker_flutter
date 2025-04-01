@@ -13,38 +13,16 @@ dependencies:
     sdk: flutter
 
   cupertino_icons: ^1.0.8
-
-  #  launcher icon
   flutter_launcher_icons: ^0.14.2
-
-  #  routing
   go_router: ^14.6.2
-
-  #  to get file and folder path
   path: ^1.9.0
   path_provider: ^2.1.5
-
-  #  local database
   sqflite: ^2.4.1
-
-  #  data and time
   intl: ^0.20.1
-
-  #  qr generator
   qr_flutter: ^4.1.0
-
-  #  to generate pie chart
   fl_chart: ^0.70.1
-
-  #  to pick image
   image_picker: ^1.1.2
-
-  #  share text [links]
-
-  #  call dialer
   url_launcher: ^6.3.1
-
-  #  image compressor
   flutter_image_compress: ^2.4.0
   dartz: ^0.10.1
   flutter_bloc: ^9.1.0
@@ -53,6 +31,10 @@ dependencies:
   mobile_scanner: ^6.0.7
   meta: ^1.16.0
   bloc: ^9.0.0
+  smooth_page_indicator: ^1.2.1
+  flutter_svg: ^2.0.17
+  shared_preferences: ^2.5.3
+  flutter_native_splash: ^2.4.5
 
 # launcher icon
 flutter_launcher_icons:
@@ -61,6 +43,21 @@ flutter_launcher_icons:
   image_path: 'assets/icons/ic_launcher.png'
   adaptive_icon_foreground: 'assets/icons/ic_launcher.png'
   adaptive_icon_background: '#000000'
+
+flutter_native_splash:
+  color: "#ffffff"
+  color_dark: "#000000"
+  image: assets/icons/ic_launcher.png
+  image_dark: assets/icons/ic_launcher.png
+  fullscreen: true
+  android: true
+  ios: true
+
+  android_12:
+    color: "#ffffff"
+    color_dark: "#000000"
+    image: assets/icons/ic_launcher.png
+    image_dark: assets/icons/ic_launcher.png
 
 dev_dependencies:
   flutter_test:
@@ -72,7 +69,9 @@ flutter:
   uses-material-design: true
 
   assets:
+    - assets/icons/
     - assets/images/
+    - assets/svg/
 
   fonts:
     - family: 'poppins'

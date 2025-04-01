@@ -8,7 +8,6 @@ import 'package:linklocker/features/link/presentation/blocs/link_search/link_sea
 import 'package:linklocker/features/link/presentation/blocs/link_view/link_view_bloc.dart';
 import 'package:linklocker/features/metric/presentation/blocs/metric_bloc.dart';
 import 'package:linklocker/features/mini_profile/presentation/blocs/mini_profile_bloc.dart';
-import 'package:linklocker/features/qr_add/presentation/blocs/qr_add_bloc.dart';
 import 'package:linklocker/features/setting/presentation/blocs/setting_bloc.dart';
 
 import 'features/profile/presentation/blocs/add_profile/add_profile_bloc.dart';
@@ -21,7 +20,7 @@ class LinkLocker extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        // add links
+        // all links
         BlocProvider(
           create: (state) => AllLinksBloc()..add(AllLinksFetchEvent()),
         ),
