@@ -47,11 +47,14 @@ class _ViewLinkPageState extends State<ViewLinkPage> {
     return BlocConsumer<LinkViewBloc, LinkViewState>(
       listenWhen: (previous, current) => current is LinkViewActionState,
       buildWhen: (previous, current) => current is! LinkViewActionState,
-      listener: (context, state) {
+      listener: (context, state) async {
         if (state is LinkViewQrShareActionState) {
           AppFunctions.showQrCode(context: context, linkEntity: state.linkEntity, contacts: state.contacts);
         } else if (state is LinkViewContactShareActionState) {
-          Share.share(state.shareText, subject: "Contact Share");
+          await Future.delayed(Duration.zero, () {
+            Share.share(state.shareText, subject: "Contact Share");
+            // WidgetsBinding.instance.addPostFrameCallback((_) {});
+          });
         } else if (state is LinkViewOpenDialerActionState) {
           AppFunctions.openDialer(state.contact);
         } else if (state is LinkViewDeleteSuccessActionState) {
@@ -80,6 +83,8 @@ class _ViewLinkPageState extends State<ViewLinkPage> {
                 splashColor: Colors.transparent,
                 icon: Icon(Icons.arrow_back_ios_new),
               ),
+              elevation: 0,
+              backgroundColor: Theme.of(context).canvasColor,
             ),
             body: const Center(
               child: Text("Link Not Found!"),
@@ -95,6 +100,8 @@ class _ViewLinkPageState extends State<ViewLinkPage> {
                 splashColor: Colors.transparent,
                 icon: Icon(Icons.arrow_back_ios_new),
               ),
+              elevation: 0,
+              backgroundColor: Theme.of(context).canvasColor,
             ),
             body: const Center(
               child: CircularProgressIndicator(),
@@ -111,6 +118,8 @@ class _ViewLinkPageState extends State<ViewLinkPage> {
                 splashColor: Colors.transparent,
                 icon: Icon(Icons.arrow_back_ios_new),
               ),
+              elevation: 0,
+              backgroundColor: Theme.of(context).canvasColor,
               title: const Text("Link Details"),
               actions: [
                 IconButton(

@@ -84,21 +84,24 @@ class _HomePageState extends State<HomePage> {
                           Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              IconButton(
-                                onPressed: () {
-                                  // refresh mini profile
-                                  context.read<MiniProfileBloc>().add(MiniProfileFetchEvent());
+                              Visibility(
+                                visible: false,
+                                child: IconButton(
+                                  onPressed: () {
+                                    // refresh mini profile
+                                    context.read<MiniProfileBloc>().add(MiniProfileFetchEvent());
 
-                                  // refresh all links
-                                  context.read<AllLinksBloc>().add(AllLinksFetchEvent());
+                                    // refresh all links
+                                    context.read<AllLinksBloc>().add(AllLinksFetchEvent());
 
-                                  // refresh metric
-                                  context.read<MetricBloc>().add(MetricFetchEvent());
+                                    // refresh metric
+                                    context.read<MetricBloc>().add(MetricFetchEvent());
 
-                                  // refresh search page
-                                  context.read<LinkSearchBloc>().add(LinkSearchInitialEvent());
-                                },
-                                icon: Icon(Icons.refresh),
+                                    // refresh search page
+                                    context.read<LinkSearchBloc>().add(LinkSearchInitialEvent());
+                                  },
+                                  icon: Icon(Icons.refresh),
+                                ),
                               ),
 
                               // scan qr code
