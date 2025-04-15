@@ -10,11 +10,11 @@ class MiniProfileWidgetLoading extends StatelessWidget {
         radius: 32.0,
         backgroundColor: Theme.of(context).canvasColor,
       ),
-      title: Opacity(
+      title: const Opacity(
         opacity: 0.6,
         child: Text("Loading your details..."),
       ),
-      subtitle: Text("My Profile"),
+      subtitle: const Text("My Profile"),
     );
   }
 }

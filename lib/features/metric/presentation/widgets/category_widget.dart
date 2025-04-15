@@ -3,11 +3,7 @@ import 'package:linklocker/core/constants/app_constants.dart';
 import 'package:linklocker/features/metric/data/models/metric_model.dart';
 
 class CategoryWidget extends StatelessWidget {
-  const CategoryWidget({
-    super.key,
-    required this.metricModel,
-    this.loading = false,
-  });
+  const CategoryWidget({super.key, required this.metricModel, this.loading = false});
 
   final bool loading;
   final MetricModel metricModel;

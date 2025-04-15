@@ -3,7 +3,7 @@ import 'package:linklocker/features/setting/data/repository_impl/setting_reposit
 class SettingDeleteEverythingUseCase {
   final SettingRepositoryImpl settingRepository;
 
-  SettingDeleteEverythingUseCase({required this.settingRepository});
+  SettingDeleteEverythingUseCase(this.settingRepository);
 
   Future<bool> call() async {
     return await settingRepository.resetEverything();

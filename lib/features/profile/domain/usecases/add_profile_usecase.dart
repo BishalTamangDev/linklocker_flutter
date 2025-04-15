@@ -5,9 +5,9 @@ import 'package:linklocker/features/profile/domain/entities/profile_entity.dart'
 class AddProfileUseCase {
   final ProfileRepositoryImpl profileRepository;
 
-  AddProfileUseCase({required this.profileRepository});
+  AddProfileUseCase(this.profileRepository);
 
-  Future<bool> call(ProfileEntity profileEntity, List<ProfileContactEntity> contacts) async {
-    return await profileRepository.addProfile(profileEntity, contacts);
+  Future<bool> call({required ProfileEntity profileEntity, required List<ProfileContactEntity> contacts}) async {
+    return await profileRepository.addProfile(profileEntity: profileEntity, contacts: contacts);
   }
 }

@@ -26,12 +26,12 @@ class LinkSearchBloc extends Bloc<LinkSearchEvent, LinkSearchState> {
     final LinkRepositoryImpl linkRepositoryImpl = LinkRepositoryImpl();
     final SearchLinkUseCase searchLinkUseCase = SearchLinkUseCase(linkRepository: linkRepositoryImpl);
 
-    final links = await searchLinkUseCase.call(event.searchText);
+    final List<Map<String, dynamic>> links = await searchLinkUseCase.call(event.searchText);
 
     if (links.isEmpty) {
       emit(LinkSearchEmptyState());
     } else {
-      emit(LinkSearchSearchedState(links: links));
+      emit(LinkSearchSearchedState(links));
     }
   }
 

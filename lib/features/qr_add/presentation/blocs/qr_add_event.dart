@@ -7,5 +7,5 @@ sealed class QrAddEvent {}
 final class QrAddScannedEvent extends QrAddEvent {
   final BarcodeCapture barcodeCapture;
 
-  QrAddScannedEvent({required this.barcodeCapture});
+  QrAddScannedEvent(this.barcodeCapture);
 }

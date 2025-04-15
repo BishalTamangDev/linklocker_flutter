@@ -22,7 +22,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: DrawerWidget(),
+      drawer: const DrawerWidget(),
       backgroundColor: Theme.of(context).canvasColor,
       body: Builder(
         builder: (context) {
@@ -79,7 +79,7 @@ class _HomePageState extends State<HomePage> {
                         children: [
                           InkWell(
                             onTap: () => Scaffold.of(context).openDrawer(),
-                            child: Icon(Icons.menu),
+                            child: const Icon(Icons.menu),
                           ),
                           Row(
                             mainAxisSize: MainAxisSize.min,
@@ -100,7 +100,7 @@ class _HomePageState extends State<HomePage> {
                                     // refresh search page
                                     context.read<LinkSearchBloc>().add(LinkSearchInitialEvent());
                                   },
-                                  icon: Icon(Icons.refresh),
+                                  icon: const Icon(Icons.refresh),
                                 ),
                               ),
 
@@ -135,10 +135,10 @@ class _HomePageState extends State<HomePage> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       // mini profile widget
-                      MiniProfileWidget(),
+                      const MiniProfileWidget(),
 
                       // link lists
-                      AllLinksWidget(),
+                      const AllLinksWidget(),
 
                       const SizedBox(height: 80.0),
                     ],

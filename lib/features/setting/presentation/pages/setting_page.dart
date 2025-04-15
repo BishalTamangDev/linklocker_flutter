@@ -85,7 +85,7 @@ class _SettingHomePageState extends State<SettingHomePage> {
           highlightColor: Colors.transparent,
           splashColor: Colors.transparent,
           onTap: () => context.pop(),
-          child: Icon(Icons.arrow_back_ios_new),
+          child: const Icon(Icons.arrow_back_ios_new),
         ),
         title: const Text("Setting"),
         centerTitle: false,
@@ -126,7 +126,7 @@ class _SettingHomePageState extends State<SettingHomePage> {
                   context.read<AllLinksBloc>().add(AllLinksFetchEvent());
                 }
               },
-              child: SizedBox.shrink(),
+              child: const SizedBox.shrink(),
             ),
             SettingOptionWidget(
               title: "Reset Profile",

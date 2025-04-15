@@ -18,10 +18,7 @@ final class ViewProfileLoadedState extends ViewProfileState {
   final ProfileEntity profileEntity;
   final List<ProfileContactEntity> contacts;
 
-  ViewProfileLoadedState({
-    required this.profileEntity,
-    required this.contacts,
-  });
+  ViewProfileLoadedState({required this.profileEntity, required this.contacts});
 }
 
 // profile not found
@@ -32,17 +29,14 @@ final class ViewProfileQrActionState extends ViewProfileActionState {
   final ProfileEntity profileEntity;
   final List<ProfileContactEntity> contacts;
 
-  ViewProfileQrActionState({
-    required this.profileEntity,
-    required this.contacts,
-  });
+  ViewProfileQrActionState({required this.profileEntity, required this.contacts});
 }
 
 // share contact
 final class ViewProfileContactShareActionState extends ViewProfileActionState {
   final String shareText;
 
-  ViewProfileContactShareActionState({required this.shareText});
+  ViewProfileContactShareActionState(this.shareText);
 }
 
 // navigate to edit
@@ -55,5 +49,5 @@ final class ViewProfileNavigateToHomePageActionState extends ViewProfileActionSt
 final class ViewProfileSnackBarActionState extends ViewProfileActionState {
   final String message;
 
-  ViewProfileSnackBarActionState({required this.message});
+  ViewProfileSnackBarActionState(this.message);
 }

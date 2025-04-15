@@ -6,7 +6,6 @@ import 'package:linklocker/features/setting/domain/usecases/setting_delete_profi
 import 'package:meta/meta.dart';
 
 part 'setting_event.dart';
-
 part 'setting_state.dart';
 
 class SettingBloc extends Bloc<SettingEvent, SettingState> {
@@ -19,24 +18,24 @@ class SettingBloc extends Bloc<SettingEvent, SettingState> {
   // delete profile
   Future<void> _settingResetProfileEvent(SettingResetProfileEvent event, Emitter<SettingState> emit) async {
     final SettingRepositoryImpl settingRepository = SettingRepositoryImpl();
-    final SettingDeleteProfileUseCase settingDeleteProfileUseCase = SettingDeleteProfileUseCase(settingRepository: settingRepository);
-    final response = await settingDeleteProfileUseCase.call();
-    emit(SettingResetProfileActionState(response: response));
+    final SettingDeleteProfileUseCase settingDeleteProfileUseCase = SettingDeleteProfileUseCase(settingRepository);
+    final bool response = await settingDeleteProfileUseCase.call();
+    emit(SettingResetProfileActionState(response));
   }
 
   // delete  links
   Future<void> _settingResetLinkEvent(SettingResetLinkEvent event, Emitter<SettingState> emit) async {
     final SettingRepositoryImpl settingRepository = SettingRepositoryImpl();
-    final SettingDeleteLinksUseCase settingDeleteLinksUseCase = SettingDeleteLinksUseCase(settingRepository: settingRepository);
-    final response = await settingDeleteLinksUseCase.call();
-    emit(SettingResetLinkActionState(response: response));
+    final SettingDeleteLinksUseCase settingDeleteLinksUseCase = SettingDeleteLinksUseCase(settingRepository);
+    final bool response = await settingDeleteLinksUseCase.call();
+    emit(SettingResetLinkActionState(response));
   }
 
   // delete everything
   Future<void> _settingResetEverythingEvent(SettingResetEverythingEvent event, Emitter<SettingState> emit) async {
     final SettingRepositoryImpl settingRepository = SettingRepositoryImpl();
-    final SettingDeleteEverythingUseCase settingDeleteEverythingUseCase = SettingDeleteEverythingUseCase(settingRepository: settingRepository);
-    final response = await settingDeleteEverythingUseCase.call();
-    emit(SettingResetEverythingActionState(response: response));
+    final SettingDeleteEverythingUseCase settingDeleteEverythingUseCase = SettingDeleteEverythingUseCase(settingRepository);
+    final bool response = await settingDeleteEverythingUseCase.call();
+    emit(SettingResetEverythingActionState(response));
   }
 }

@@ -14,19 +14,19 @@ final class SettingInitial extends SettingState {}
 final class SettingResetProfileActionState extends SettingActionState {
   final bool response;
 
-  SettingResetProfileActionState({required this.response});
+  SettingResetProfileActionState(this.response);
 }
 
 // reset links
 final class SettingResetLinkActionState extends SettingActionState {
   final bool response;
 
-  SettingResetLinkActionState({required this.response});
+  SettingResetLinkActionState(this.response);
 }
 
 // reset everything
 final class SettingResetEverythingActionState extends SettingActionState {
   final bool response;
 
-  SettingResetEverythingActionState({required this.response});
+  SettingResetEverythingActionState(this.response);
 }

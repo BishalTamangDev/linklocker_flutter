@@ -17,15 +17,12 @@ final class ViewProfileQrEvent extends ViewProfileEvent {
   final ProfileEntity profileEntity;
   final List<ProfileContactEntity> contacts;
 
-  ViewProfileQrEvent({
-    required this.profileEntity,
-    required this.contacts,
-  });
+  ViewProfileQrEvent({required this.profileEntity, required this.contacts});
 }
 
 // share contact
 final class ViewProfileContactShareEvent extends ViewProfileEvent {
   final Map<String, dynamic> data;
 
-  ViewProfileContactShareEvent({required this.data});
+  ViewProfileContactShareEvent(this.data);
 }

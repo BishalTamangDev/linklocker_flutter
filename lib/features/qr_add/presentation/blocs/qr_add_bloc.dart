@@ -18,8 +18,8 @@ class QrAddBloc extends Bloc<QrAddEvent, QrAddState> {
 
   // scanned
   Future<void> _qrAddScannedEvent(QrAddScannedEvent event, Emitter<QrAddState> emit) async {
-    BarcodeCapture barcodeCapture = event.barcodeCapture;
-    Barcode? barcode = barcodeCapture.barcodes.firstOrNull;
+    final BarcodeCapture barcodeCapture = event.barcodeCapture;
+    final Barcode? barcode = barcodeCapture.barcodes.firstOrNull;
 
     if (barcode != null) {
       final String rawValue = barcode.rawValue.toString();

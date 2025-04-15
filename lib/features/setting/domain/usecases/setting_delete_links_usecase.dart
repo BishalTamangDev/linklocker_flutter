@@ -3,7 +3,7 @@ import 'package:linklocker/features/setting/data/repository_impl/setting_reposit
 class SettingDeleteLinksUseCase {
   final SettingRepositoryImpl settingRepository;
 
-  SettingDeleteLinksUseCase({required this.settingRepository});
+  SettingDeleteLinksUseCase(this.settingRepository);
 
   Future<bool> call() async {
     return await settingRepository.resetLinks();

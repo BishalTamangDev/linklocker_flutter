@@ -9,7 +9,7 @@ class FetchingLinkErrorWidget extends StatelessWidget {
       child: Column(
         spacing: 16.0,
         mainAxisSize: MainAxisSize.min,
-        children: const <Widget>[
+        children: const [
           Icon(
             Icons.error_outline_outlined,
             color: Colors.red,

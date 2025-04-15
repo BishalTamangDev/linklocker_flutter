@@ -28,7 +28,7 @@ final class LinkViewLinkNotFoundState extends LinkViewState {}
 final class LinkViewContactShareActionState extends LinkViewActionState {
   final String shareText;
 
-  LinkViewContactShareActionState({required this.shareText});
+  LinkViewContactShareActionState(this.shareText);
 }
 
 // qr share
@@ -43,14 +43,14 @@ final class LinkViewQrShareActionState extends LinkViewActionState {
 final class LinkViewOpenDialerActionState extends LinkViewActionState {
   final String contact;
 
-  LinkViewOpenDialerActionState({required this.contact});
+  LinkViewOpenDialerActionState(this.contact);
 }
 
 // deletion failure
 final class LinkViewDeletionFailureActionState extends LinkViewActionState {
   final String message;
 
-  LinkViewDeletionFailureActionState({required this.message});
+  LinkViewDeletionFailureActionState(this.message);
 }
 
 // navigate
@@ -60,5 +60,5 @@ final class LinkViewDeleteSuccessActionState extends LinkViewActionState {}
 final class LinkViewNavigateToUpdateActionState extends LinkViewActionState {
   final int linkId;
 
-  LinkViewNavigateToUpdateActionState({required this.linkId});
+  LinkViewNavigateToUpdateActionState(this.linkId);
 }

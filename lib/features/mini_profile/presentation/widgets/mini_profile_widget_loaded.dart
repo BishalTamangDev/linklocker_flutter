@@ -8,11 +8,7 @@ import '../../../../core/constants/app_constants.dart';
 import '../../../../core/functions/app_functions.dart';
 
 class MiniProfileWidgetLoaded extends StatelessWidget {
-  const MiniProfileWidgetLoaded({
-    super.key,
-    required this.profileEntity,
-    required this.contacts,
-  });
+  const MiniProfileWidgetLoaded({super.key, required this.profileEntity, required this.contacts});
 
   final ProfileEntity profileEntity;
   final List<ProfileContactEntity> contacts;
@@ -36,7 +32,7 @@ class MiniProfileWidgetLoaded extends StatelessWidget {
               onPressed: () {
                 context.read<MiniProfileBloc>().add(MiniProfileQrShareEvent(profileEntity: profileEntity, contacts: contacts));
               },
-              icon: Icon(Icons.qr_code),
+              icon: const Icon(Icons.qr_code),
             ),
       onTap: () => context.read<MiniProfileBloc>().add(MiniProfileViewNavigateEvent()),
     );

@@ -27,7 +27,7 @@ class QrAddView extends StatefulWidget {
 class _QrAddViewState extends State<QrAddView> {
   // variables
   bool doneScanning = false;
-  MobileScannerController mobileScannerController = MobileScannerController();
+  final MobileScannerController mobileScannerController = MobileScannerController();
 
   // function
   void _resumeScanning() {
@@ -57,7 +57,7 @@ class _QrAddViewState extends State<QrAddView> {
       appBar: AppBar(
         leading: IconButton(
           onPressed: () => context.pop(),
-          icon: Icon(Icons.arrow_back_ios_new),
+          icon: const Icon(Icons.arrow_back_ios_new),
         ),
         title: const Text("QR Scanner"),
         elevation: 0,
@@ -102,7 +102,7 @@ class _QrAddViewState extends State<QrAddView> {
                       onDetect: (data) {
                         if (!doneScanning) {
                           BarcodeCapture barcodeCapture = data;
-                          context.read<QrAddBloc>().add(QrAddScannedEvent(barcodeCapture: barcodeCapture));
+                          context.read<QrAddBloc>().add(QrAddScannedEvent(barcodeCapture));
                           setState(() {
                             doneScanning = true;
                           });
@@ -146,24 +146,25 @@ class _QrAddViewState extends State<QrAddView> {
                       }
                     },
                     builder: (context, state) {
-                      if (state is QrAddInvalidState) {
-                        return Opacity(
-                          opacity: 0.6,
-                          child: Text(
-                            "Invalid Qr",
-                            style: TextStyle(color: Colors.red),
-                          ),
-                        );
-                      } else if (state is QrAddValidState) {
-                        return Opacity(
-                          opacity: 0.6,
-                          child: Text(
-                            "Valid Qr",
-                            style: TextStyle(color: Colors.green),
-                          ),
-                        );
-                      } else {
-                        return SizedBox.shrink();
+                      switch (state) {
+                        case QrAddInvalidState():
+                          return const Opacity(
+                            opacity: 0.6,
+                            child: Text(
+                              "Invalid Qr",
+                              style: TextStyle(color: Colors.red),
+                            ),
+                          );
+                        case QrAddValidState():
+                          return const Opacity(
+                            opacity: 0.6,
+                            child: Text(
+                              "Valid Qr",
+                              style: TextStyle(color: Colors.green),
+                            ),
+                          );
+                        default:
+                          return const SizedBox.shrink();
                       }
                     },
                   ),

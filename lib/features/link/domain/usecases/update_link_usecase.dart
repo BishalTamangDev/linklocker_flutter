@@ -7,10 +7,7 @@ class UpdateLinkUseCase {
 
   UpdateLinkUseCase({required this.linkRepository});
 
-  Future<bool> call(
-    LinkEntity linkEntity,
-    List<ContactEntity> contacts,
-  ) async {
-    return await linkRepository.update(linkEntity, contacts);
+  Future<bool> call({required LinkEntity linkEntity, required List<ContactEntity> contacts}) async {
+    return await linkRepository.update(linkEntity: linkEntity, contacts: contacts);
   }
 }

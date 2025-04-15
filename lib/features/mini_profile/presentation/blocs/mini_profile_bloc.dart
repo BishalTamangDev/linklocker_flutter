@@ -1,4 +1,5 @@
 import 'package:bloc/bloc.dart';
+import 'package:dartz/dartz.dart';
 import 'package:linklocker/features/profile/data/models/profile_model.dart';
 import 'package:linklocker/features/profile/data/repository_impl/profile_repository_impl.dart';
 import 'package:linklocker/features/profile/domain/entities/profile_contact_entity.dart';
@@ -22,10 +23,10 @@ class MiniProfileBloc extends Bloc<MiniProfileEvent, MiniProfileState> {
 
   // fetch profile data
   Future<void> _miniProfileFetchEvent(MiniProfileFetchEvent event, Emitter<MiniProfileState> emit) async {
-    ProfileRepositoryImpl profileRepository = ProfileRepositoryImpl();
-    FetchProfileUseCase fetchProfileUseCase = FetchProfileUseCase(profileRepository: profileRepository);
+    final ProfileRepositoryImpl profileRepository = ProfileRepositoryImpl();
+    final FetchProfileUseCase fetchProfileUseCase = FetchProfileUseCase(profileRepository);
 
-    final response = await fetchProfileUseCase.call();
+    final Either<bool, List<Map<String, dynamic>>> response = await fetchProfileUseCase.call();
 
     response.fold((failure) {
       if (!failure) {
@@ -33,20 +34,17 @@ class MiniProfileBloc extends Bloc<MiniProfileEvent, MiniProfileState> {
       }
     }, (data) {
       try {
-        ProfileEntity profileEntity = ProfileModel.fromMap(data[0]).toEntity();
+        final ProfileEntity profileEntity = ProfileModel.fromMap(data[0]).toEntity();
 
-        final contacts = data.map((datum) => ProfileContactModel.fromMap(datum).toEntity()).toList();
+        final List<ProfileContactEntity> contacts = data.map((datum) => ProfileContactModel.fromMap(datum).toEntity()).toList();
 
         if (profileEntity.id != null) {
-          emit(MiniProfileLoadedState(
-            profileEntity: profileEntity,
-            contacts: contacts,
-          ));
+          emit(MiniProfileLoadedState(profileEntity: profileEntity, contacts: contacts));
         } else {
           emit(MiniProfileNotSetState());
         }
       } catch (e) {
-        emit(MiniProfileErrorState(message: e.toString()));
+        emit(MiniProfileErrorState(e.toString()));
       }
     });
   }

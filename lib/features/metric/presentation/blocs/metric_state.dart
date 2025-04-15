@@ -15,7 +15,7 @@ final class MetricLoadingState extends MetricState {}
 final class MetricLoadedState extends MetricState {
   final List<MetricEntity> metricData;
 
-  MetricLoadedState({required this.metricData});
+  MetricLoadedState(this.metricData);
 }
 
 // error

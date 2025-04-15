@@ -7,7 +7,7 @@ sealed class AddProfileEvent {}
 final class AddProfileLoadEvent extends AddProfileEvent {
   final String task;
 
-  AddProfileLoadEvent({required this.task});
+  AddProfileLoadEvent(this.task);
 }
 
 // add event
@@ -15,10 +15,7 @@ final class AddProfileAddEvent extends AddProfileEvent {
   final ProfileEntity profileEntity;
   final List<ProfileContactEntity> contacts;
 
-  AddProfileAddEvent({
-    required this.profileEntity,
-    required this.contacts,
-  });
+  AddProfileAddEvent({required this.profileEntity, required this.contacts});
 }
 
 // update event
@@ -26,10 +23,7 @@ final class AddProfileUpdateEvent extends AddProfileEvent {
   final ProfileEntity profileEntity;
   final List<ProfileContactEntity> contacts;
 
-  AddProfileUpdateEvent({
-    required this.profileEntity,
-    required this.contacts,
-  });
+  AddProfileUpdateEvent({required this.profileEntity, required this.contacts});
 }
 
 // profile added
@@ -39,5 +33,5 @@ final class AddProfileAddedEvent extends AddProfileEvent {}
 final class AddProfileSnackBarEvent extends AddProfileEvent {
   final String message;
 
-  AddProfileSnackBarEvent({required this.message});
+  AddProfileSnackBarEvent(this.message);
 }

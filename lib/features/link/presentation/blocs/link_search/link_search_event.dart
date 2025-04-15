@@ -10,7 +10,7 @@ final class LinkSearchInitialEvent extends LinkSearchEvent {}
 final class LinkSearchSearchEvent extends LinkSearchEvent {
   final String searchText;
 
-  LinkSearchSearchEvent({required this.searchText});
+  LinkSearchSearchEvent(this.searchText);
 }
 
 // clear search

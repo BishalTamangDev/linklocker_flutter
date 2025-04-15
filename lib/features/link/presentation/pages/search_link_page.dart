@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:linklocker/features/link/data/models/link_model.dart';
+import 'package:linklocker/features/link/domain/entities/link_entity.dart';
 import 'package:linklocker/features/link/presentation/blocs/link_search/link_search_bloc.dart';
 import 'package:linklocker/features/link/presentation/widgets/link_widget.dart';
 import 'package:linklocker/features/link/presentation/widgets/search_widgets/search_empty_widget.dart';
@@ -33,7 +34,7 @@ class _SearchPageState extends State<SearchPage> {
           autofocus: true,
           controller: searchController,
           onChanged: (newValue) async {
-            final searchText = newValue.toString().trim();
+            final String searchText = newValue.toString().trim();
             _debounce?.cancel();
             _debounce = Timer(const Duration(milliseconds: 300), () {
               setState(() {
@@ -42,7 +43,7 @@ class _SearchPageState extends State<SearchPage> {
               if (searchText.isEmpty) {
                 context.read<LinkSearchBloc>().add(LinkSearchInitialEvent());
               } else {
-                context.read<LinkSearchBloc>().add(LinkSearchSearchEvent(searchText: searchText.toString()));
+                context.read<LinkSearchBloc>().add(LinkSearchSearchEvent(searchText.toString()));
               }
             });
           },
@@ -78,38 +79,30 @@ class _SearchPageState extends State<SearchPage> {
       backgroundColor: Theme.of(context).canvasColor,
 
       // body
-      body: BlocConsumer<LinkSearchBloc, LinkSearchState>(
-        listenWhen: (previous, current) => current is LinkSearchActionState,
-        buildWhen: (previous, current) => current is! LinkSearchActionState,
-        listener: (context, state) {
-          debugPrint("Action state :: ${state.runtimeType}");
-        },
+      body: BlocBuilder<LinkSearchBloc, LinkSearchState>(
         builder: (context, state) {
-          if (state is LinkSearchInitial) {
-            return SearchInitialWidget();
-          } else if (state is LinkSearchSearchingState) {
-            return SearchSearchingWidget();
-          } else if (state is LinkSearchEmptyState) {
-            return SearchEmptyWidget();
-          } else if (state is LinkSearchErrorState) {
-            return SearchErrorWidget();
-          } else if (state is LinkSearchSearchedState) {
-            final links = state.links;
-            return ListView.separated(
-              shrinkWrap: true,
-              itemCount: links.length,
-              itemBuilder: (context, index) {
-                final linkEntity = LinkModel.fromMap(links[index]['profile']).toEntity();
-                final contacts = links[index]['contacts'];
+          switch (state) {
+            case LinkSearchInitial():
+              return SearchInitialWidget();
+            case LinkSearchEmptyState():
+              return SearchEmptyWidget();
+            case LinkSearchErrorState():
+              return SearchErrorWidget();
+            case LinkSearchSearchedState():
+              final links = state.links;
+              return ListView.separated(
+                shrinkWrap: true,
+                itemCount: links.length,
+                itemBuilder: (context, index) {
+                  final LinkEntity linkEntity = LinkModel.fromMap(links[index]['profile']).toEntity();
+                  final List<Map<String, dynamic>> contacts = links[index]['contacts'];
 
-                return LinkWidget(linkEntity: linkEntity, contacts: contacts);
-              },
-              separatorBuilder: (context, index) => Divider(height: 0),
-            );
-          } else {
-            return Center(
-              child: Text(state.toString()),
-            );
+                  return LinkWidget(linkEntity: linkEntity, contacts: contacts);
+                },
+                separatorBuilder: (context, index) => Divider(height: 0),
+              );
+            default:
+              return SearchSearchingWidget();
           }
         },
       ),

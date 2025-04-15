@@ -8,13 +8,9 @@ import '../../../metric/presentation/blocs/metric_bloc.dart';
 import '../blocs/all_links/all_links_bloc.dart';
 import '../blocs/link_add/link_add_bloc.dart';
 import '../blocs/link_view/link_view_bloc.dart';
-// import '../blocs/link_view/link_view_bloc.dart';
 
 class AddLinkPage extends StatefulWidget {
-  const AddLinkPage({
-    super.key,
-    this.task = "add",
-  });
+  const AddLinkPage({super.key, this.task = "add"});
 
   final String task;
 
@@ -34,7 +30,7 @@ class _AddLinkPageState extends State<AddLinkPage> {
           splashColor: Colors.transparent,
           highlightColor: Colors.transparent,
           onPressed: () => context.pop(),
-          icon: Icon(Icons.arrow_back_ios_new_rounded),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded),
         ),
         actions: [
           Padding(
@@ -83,24 +79,22 @@ class _AddLinkPageState extends State<AddLinkPage> {
             context.read<MetricBloc>().add(MetricFetchEvent());
 
             CustomSnackBarWidget.show(context: context, message: "Link updated successfully.");
-            context.read<LinkViewBloc>().add(FetchEvent(linkId: state.linkId));
+            context.read<LinkViewBloc>().add(FetchEvent(state.linkId));
             context.pop();
           } else if (state is LinkAddUpdatingErrorActionState) {
             CustomSnackBarWidget.show(context: context, message: state.message);
           }
         },
         builder: (context, state) {
-          if (state is LinkAddLoadingState) {
-            return const Center(child: CircularProgressIndicator());
-          } else {
-            if (state is LinkAddLoadedState) {
+          switch (state) {
+            case LinkAddLoadedState():
               return AddLinkFormWidget(
                 task: widget.task,
                 linkEntity: state.linkEntity,
                 contacts: state.contacts,
               );
-            }
-            return Center(child: Text("State : $state"));
+            default:
+              return const Center(child: CircularProgressIndicator());
           }
         },
       ),

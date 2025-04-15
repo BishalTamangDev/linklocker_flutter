@@ -58,7 +58,7 @@ class AppRouter {
             path: '/view/:id',
             pageBuilder: (context, state) {
               final int id = int.parse(state.pathParameters['id'] ?? '0');
-              context.read<LinkViewBloc>().add(FetchEvent(linkId: id));
+              context.read<LinkViewBloc>().add(FetchEvent(id));
               return CustomTransitionPage(
                 child: ViewLinkPage(),
                 transitionsBuilder: immediateTransitionBuilder,

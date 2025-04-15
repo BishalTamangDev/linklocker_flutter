@@ -27,7 +27,7 @@ class LinkLocker extends StatelessWidget {
 
         // add profile bloc
         BlocProvider(
-          create: (context) => AddProfileBloc()..add(AddProfileLoadEvent(task: 'add')),
+          create: (context) => AddProfileBloc()..add(AddProfileLoadEvent('add')),
         ),
 
         // view profile bloc
@@ -41,19 +41,13 @@ class LinkLocker extends StatelessWidget {
         ),
 
         // add link bloc
-        BlocProvider(
-          create: (context) => LinkAddBloc(),
-        ),
+        BlocProvider(create: (context) => LinkAddBloc()),
 
         // view link bloc
-        BlocProvider(
-          create: (context) => LinkViewBloc(),
-        ),
+        BlocProvider(create: (context) => LinkViewBloc()),
 
         // search
-        BlocProvider(
-          create: (context) => LinkSearchBloc(),
-        ),
+        BlocProvider(create: (context) => LinkSearchBloc()),
 
         // metric
         BlocProvider(
@@ -61,9 +55,7 @@ class LinkLocker extends StatelessWidget {
         ),
 
         // setting
-        BlocProvider(
-          create: (context) => SettingBloc(),
-        ),
+        BlocProvider(create: (context) => SettingBloc()),
       ],
       child: MaterialApp.router(
         routerConfig: AppRouter.router,

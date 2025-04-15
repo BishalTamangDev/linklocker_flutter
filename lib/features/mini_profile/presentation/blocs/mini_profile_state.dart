@@ -30,7 +30,7 @@ final class MiniProfileNotSetState extends MiniProfileState {}
 final class MiniProfileErrorState extends MiniProfileState {
   final String message;
 
-  MiniProfileErrorState({required this.message});
+  MiniProfileErrorState(this.message);
 }
 
 // show qr

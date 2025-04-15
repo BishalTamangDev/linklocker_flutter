@@ -70,8 +70,8 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
 
   // set initial value
   _setInitialValue() async {
-    final prefs = await SharedPreferences.getInstance();
-    prefs.setBool('onboard_screen_shown', true);
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('onboard_screen_shown', true);
     if (!mounted) return;
     context.pushReplacement('/home');
   }
@@ -100,21 +100,15 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
             onPageChanged: (newIndex) => setState(() {
               index = newIndex;
             }),
-            children: _pages
-                .map((page) => PageBuilder(
-                      title: page['title'],
-                      description: page['description'],
-                      image: page['image'],
-                      type: page['type'],
-                    ))
-                .toList(),
+            children:
+                _pages.map((page) => PageBuilder(title: page['title'], description: page['description'], image: page['image'], type: page['type'])).toList(),
           ),
         ),
       ),
       // bottom section
       bottomSheet: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: index == _pages.length - 1
+        child: index == (_pages.length - 1)
             ? Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
@@ -181,13 +175,7 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
 }
 
 class PageBuilder extends StatelessWidget {
-  const PageBuilder({
-    super.key,
-    required this.title,
-    required this.description,
-    required this.image,
-    required this.type,
-  });
+  const PageBuilder({super.key, required this.title, required this.description, required this.image, required this.type});
 
   final String title;
   final String description;

@@ -1,4 +1,5 @@
 import 'package:bloc/bloc.dart';
+import 'package:dartz/dartz.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:linklocker/features/link/data/models/contact_model.dart';
 import 'package:linklocker/features/link/data/models/link_model.dart';
@@ -11,7 +12,6 @@ import 'package:linklocker/features/link/domain/usecases/update_link_usecase.dar
 import '../../../domain/usecases/add_link_usecase.dart';
 
 part 'link_add_event.dart';
-
 part 'link_add_state.dart';
 
 class LinkAddBloc extends Bloc<LinkAddEvent, LinkAddState> {
@@ -35,7 +35,7 @@ class LinkAddBloc extends Bloc<LinkAddEvent, LinkAddState> {
       // fetch data here
       final LinkRepositoryImpl linkRepository = LinkRepositoryImpl();
       final FetchLinkUseCase fetchLinkUseCase = FetchLinkUseCase(linkRepository: linkRepository);
-      final response = await fetchLinkUseCase.call(event.linkId);
+      final Either<bool, List<Map<String, dynamic>>> response = await fetchLinkUseCase.call(event.linkId);
 
       await response.fold((error) {
         emit(LinkAddLinkNotFoundState());
@@ -54,13 +54,13 @@ class LinkAddBloc extends Bloc<LinkAddEvent, LinkAddState> {
   Future<void> _linkAddAddEvent(LinkAddAddEvent event, Emitter<LinkAddState> emit) async {
     final LinkRepositoryImpl linkRepository = LinkRepositoryImpl();
     final AddLinkUseCase addLinkUseCase = AddLinkUseCase(linkRepository: linkRepository);
-    final response = await addLinkUseCase.call(event.linkEntity, event.contacts);
+    final bool response = await addLinkUseCase.call(event.linkEntity, event.contacts);
 
     if (response) {
       emit(LinkAddAddedActionState());
       emit(LinkAddResetActionState());
     } else {
-      emit(LinkAddAddingErrorActionState(message: "Couldn't add link."));
+      emit(LinkAddAddingErrorActionState("Couldn't add link."));
     }
   }
 
@@ -69,12 +69,12 @@ class LinkAddBloc extends Bloc<LinkAddEvent, LinkAddState> {
     final LinkRepositoryImpl linkRepository = LinkRepositoryImpl();
     final UpdateLinkUseCase updateLinkUseCase = UpdateLinkUseCase(linkRepository: linkRepository);
 
-    final response = await updateLinkUseCase.call(event.linkEntity, event.contacts);
+    final bool response = await updateLinkUseCase.call(linkEntity: event.linkEntity, contacts: event.contacts);
 
     if (response) {
-      emit(LinkAddUpdatedActionState(linkId: event.linkEntity.linkId!));
+      emit(LinkAddUpdatedActionState(event.linkEntity.linkId!));
     } else {
-      emit(LinkAddUpdatingErrorActionState(message: "Couldn't update link."));
+      emit(LinkAddUpdatingErrorActionState("Couldn't update link."));
     }
   }
 

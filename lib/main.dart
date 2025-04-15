@@ -6,7 +6,7 @@ import 'package:linklocker/app.dart';
 void main() {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
-  
+
   // screen orientation
   SystemChrome.setPreferredOrientations(
     [

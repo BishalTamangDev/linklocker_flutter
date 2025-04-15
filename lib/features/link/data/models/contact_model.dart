@@ -56,7 +56,5 @@ class ContactModel extends ContactEntity {
 
   // to String
   @override
-  String toString() {
-    return "ContactModel{linkId: $linkId, contactId: $contactId, country: $country, number: $number}";
-  }
+  String toString() => "ContactModel{linkId: $linkId, contactId: $contactId, country: $country, number: $number}";
 }

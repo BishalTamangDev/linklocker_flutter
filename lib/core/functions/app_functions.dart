@@ -67,8 +67,8 @@ class AppFunctions {
         // developer.log('File size in bytes: ${bytes.length}');
         return bytes;
       }
-    } catch (e) {
-      developer.log("Picking mage error :: $e");
+    } catch (e, stackTrace) {
+      developer.log("Picking mage error :: $e\n$stackTrace");
     }
   }
 

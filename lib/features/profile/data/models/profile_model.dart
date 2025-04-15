@@ -67,9 +67,7 @@ class ProfileModel extends ProfileEntity {
 
   // to string
   @override
-  String toString() {
-    return "ProfileModel{id: $id, name: $name, emailAddress: $emailAddress, profilePicture: $profilePicture}";
-  }
+  String toString() => "ProfileModel{id: $id, name: $name, emailAddress: $emailAddress, profilePicture: $profilePicture}";
 
   // get upload data
   Map<String, dynamic> get profileDataToUpload {

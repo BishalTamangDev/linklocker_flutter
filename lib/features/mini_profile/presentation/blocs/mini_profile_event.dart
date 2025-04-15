@@ -11,10 +11,7 @@ final class MiniProfileQrShareEvent extends MiniProfileEvent {
   final ProfileEntity profileEntity;
   final List<ProfileContactEntity> contacts;
 
-  MiniProfileQrShareEvent({
-    required this.profileEntity,
-    required this.contacts,
-  });
+  MiniProfileQrShareEvent({required this.profileEntity, required this.contacts});
 }
 
 // navigate to add page :: setup

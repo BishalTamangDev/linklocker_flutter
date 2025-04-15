@@ -4,10 +4,10 @@ import 'package:linklocker/features/link/domain/entities/link_entity.dart';
 
 abstract class LinkRepository {
   // add link
-  Future<bool> add(LinkEntity linkEntity, List<ContactEntity> contacts);
+  Future<bool> add({required LinkEntity linkEntity, required List<ContactEntity> contacts});
 
   // update link
-  Future<bool> update(LinkEntity linkEntity, List<ContactEntity> contacts);
+  Future<bool> update({required LinkEntity linkEntity, required List<ContactEntity> contacts});
 
   // fetch link
   Future<Either<bool, List<Map<String, dynamic>>>> fetch(int linkId);

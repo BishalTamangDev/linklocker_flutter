@@ -13,9 +13,9 @@ class InitialPage extends StatefulWidget {
 class _InitialPageState extends State<InitialPage> {
   // check for value :: if onboarding screen is already shown
   Future<void> _checkValue() async {
-    final prefs = await SharedPreferences.getInstance();
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    final initial = prefs.getBool('onboard_screen_shown') ?? false;
+    final bool initial = prefs.getBool('onboard_screen_shown') ?? false;
 
     if (!mounted) return;
 
@@ -38,8 +38,8 @@ class _InitialPageState extends State<InitialPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: const Center(
+    return const Scaffold(
+      body: Center(
         child: CircularProgressIndicator(),
       ),
     );

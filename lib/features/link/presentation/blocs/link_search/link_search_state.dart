@@ -17,7 +17,7 @@ final class LinkSearchSearchingState extends LinkSearchState {}
 final class LinkSearchSearchedState extends LinkSearchState {
   final List<Map<String, dynamic>> links;
 
-  LinkSearchSearchedState({required this.links});
+  LinkSearchSearchedState(this.links);
 }
 
 // error state

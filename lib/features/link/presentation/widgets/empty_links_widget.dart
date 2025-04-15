@@ -13,8 +13,8 @@ class EmptyLinksWidget extends StatelessWidget {
           child: Container(
             width: MediaQuery.of(context).size.width,
             color: Theme.of(context).colorScheme.surface,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 36.0),
+            child: const Padding(
+              padding: EdgeInsets.symmetric(vertical: 36.0),
               child: Column(
                 spacing: 16.0,
                 children: [

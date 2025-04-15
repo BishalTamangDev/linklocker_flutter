@@ -5,7 +5,7 @@ class SearchErrorWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
+    return const Center(
       child: Opacity(
         opacity: 0.6,
         child: Text("An Error Occurred!"),

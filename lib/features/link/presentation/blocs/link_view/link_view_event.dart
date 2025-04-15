@@ -7,7 +7,7 @@ sealed class LinkViewEvent {}
 final class FetchEvent extends LinkViewEvent {
   final int linkId;
 
-  FetchEvent({required this.linkId});
+  FetchEvent(this.linkId);
 }
 
 // contact share
@@ -38,12 +38,12 @@ final class DialerEvent extends LinkViewEvent {
 final class DeleteLinkEvent extends LinkViewEvent {
   final int linkId;
 
-  DeleteLinkEvent({required this.linkId});
+  DeleteLinkEvent(this.linkId);
 }
 
 // navigate to update page
 final class UpdateNavigateEvent extends LinkViewEvent {
   final int linkId;
 
-  UpdateNavigateEvent({required this.linkId});
+  UpdateNavigateEvent(this.linkId);
 }

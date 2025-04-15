@@ -9,16 +9,10 @@ class MiniProfileWidgetError extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.only(
-          top: 24.0,
-          bottom: 6.0,
-        ),
+        padding: const EdgeInsets.only(top: 24.0, bottom: 6.0),
         child: Column(
           children: [
-            Icon(
-              Icons.error,
-              color: Colors.red,
-            ),
+            const Icon(Icons.error, color: Colors.red),
             const SizedBox(height: 12.0),
             const Text("An error occurred!"),
             TextButton(

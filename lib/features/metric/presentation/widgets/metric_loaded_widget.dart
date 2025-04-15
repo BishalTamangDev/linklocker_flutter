@@ -37,14 +37,12 @@ class MetricLoadedWidget extends StatelessWidget {
                 PieChart(
                   PieChartData(
                     sections: [
-                      ...metrics.map((metric) {
-                        return PieChartSectionData(
-                          value: metric.count.toDouble(),
-                          radius: 10.0,
-                          title: "",
-                          color: LinkCategoryEnum.getCategoryFromLabel(metric.title)?.color,
-                        );
-                      }),
+                      ...metrics.map((metric) => PieChartSectionData(
+                            value: metric.count.toDouble(),
+                            radius: 10.0,
+                            title: "",
+                            color: LinkCategoryEnum.getCategoryFromLabel(metric.title)?.color,
+                          )),
                     ],
                   ),
                 ),
@@ -58,9 +56,7 @@ class MetricLoadedWidget extends StatelessWidget {
           shrinkWrap: true,
           itemCount: metrics.length,
           physics: const NeverScrollableScrollPhysics(),
-          itemBuilder: (context, index) {
-            return CategoryWidget(metricModel: MetricModel.fromEntity(metrics[index]));
-          },
+          itemBuilder: (context, index) => CategoryWidget(metricModel: MetricModel.fromEntity(metrics[index])),
         ),
         Divider(
           height: 6.0,
@@ -68,7 +64,7 @@ class MetricLoadedWidget extends StatelessWidget {
         ),
         Row(
           children: [
-            Expanded(
+            const Expanded(
               child: Text("Total"),
             ),
             Text(

@@ -45,14 +45,14 @@ class LinkWidget extends StatelessWidget {
             onPressed: () {
               if (contacts.length == 1) {
                 // launch bottom sheet if link has only one contacts
-                final countryCode = AppFunctions.getCountryCode(contacts[0]['country']!);
-                final number = contacts[0]['number']!;
+                final String countryCode = AppFunctions.getCountryCode(contacts[0]['country']!);
+                final String number = contacts[0]['number']!;
                 AppFunctions.openDialer("$countryCode $number");
               } else {
                 AppFunctions.showCallBottomSheet(context, contacts);
               }
             },
-            icon: Icon(Icons.call),
+            icon: const Icon(Icons.call),
           ),
         ),
         const SizedBox(height: 5.0),

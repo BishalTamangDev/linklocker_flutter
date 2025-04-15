@@ -41,7 +41,7 @@ class MetricLoadingWidget extends StatelessWidget {
           itemCount: LinkCategoryEnum.values.length,
           physics: const NeverScrollableScrollPhysics(),
           itemBuilder: (context, index) {
-            MetricModel metricModel = MetricModel.fromMap({
+            final MetricModel metricModel = MetricModel.fromMap({
               'title': LinkCategoryEnum.values[index].label,
               'count': 0,
             });

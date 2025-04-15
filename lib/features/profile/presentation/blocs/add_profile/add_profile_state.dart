@@ -26,7 +26,7 @@ final class AddProfileLoadedState extends AddProfileState {
 final class AddProfileLoadErrorState extends AddProfileState {
   final String error;
 
-  AddProfileLoadErrorState({required this.error});
+  AddProfileLoadErrorState(this.error);
 }
 
 // Profile added state
@@ -40,7 +40,7 @@ sealed class AddProfileActionState extends AddProfileState {}
 final class AddProfileSnackBarActionState extends AddProfileActionState {
   final String message;
 
-  AddProfileSnackBarActionState({required this.message});
+  AddProfileSnackBarActionState(this.message);
 }
 
 // navigate to home page

@@ -1,4 +1,5 @@
 import 'package:bloc/bloc.dart';
+import 'package:dartz/dartz.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:linklocker/features/profile/data/models/profile_model.dart';
 import 'package:linklocker/features/profile/data/repository_impl/profile_repository_impl.dart';
@@ -11,7 +12,6 @@ import '../../../../../core/functions/app_functions.dart';
 import '../../../data/models/profile_contact_model.dart';
 
 part 'view_profile_event.dart';
-
 part 'view_profile_state.dart';
 
 class ViewProfileBloc extends Bloc<ViewProfileEvent, ViewProfileState> {
@@ -30,16 +30,16 @@ class ViewProfileBloc extends Bloc<ViewProfileEvent, ViewProfileState> {
 
     final ProfileRepositoryImpl profileRepository = ProfileRepositoryImpl();
 
-    final FetchProfileUseCase fetchProfileUseCase = FetchProfileUseCase(profileRepository: profileRepository);
+    final FetchProfileUseCase fetchProfileUseCase = FetchProfileUseCase(profileRepository);
 
-    final response = await fetchProfileUseCase.call();
+    final Either<bool, List<Map<String, dynamic>>> response = await fetchProfileUseCase.call();
 
     response.fold((failure) {
       emit(ViewProfileProfileNotFoundState());
     }, (data) {
-      ProfileEntity profileEntity = ProfileModel.fromMap(data[0]).toEntity();
+      final ProfileEntity profileEntity = ProfileModel.fromMap(data[0]).toEntity();
 
-      List<ProfileContactEntity> contacts = data.map((datum) => ProfileContactModel.fromMap(datum).toEntity()).toList();
+      final List<ProfileContactEntity> contacts = data.map((datum) => ProfileContactModel.fromMap(datum).toEntity()).toList();
 
       emit(ViewProfileLoadedState(profileEntity: profileEntity, contacts: contacts));
     });
@@ -48,11 +48,11 @@ class ViewProfileBloc extends Bloc<ViewProfileEvent, ViewProfileState> {
   // delete profile
   Future<void> _viewProfileDeleteProfileEvent(ViewProfileDeleteProfileEvent event, Emitter<ViewProfileState> emit) async {
     final ProfileRepositoryImpl profileRepository = ProfileRepositoryImpl();
-    DeleteProfileUseCase deleteProfileUseCase = DeleteProfileUseCase(profileRepository: profileRepository);
+    final DeleteProfileUseCase deleteProfileUseCase = DeleteProfileUseCase(profileRepository);
 
-    final response = await deleteProfileUseCase.call();
+    final bool response = await deleteProfileUseCase.call();
 
-    emit(ViewProfileSnackBarActionState(message: response ? "Profile updated successfully." : "Profile couldn't be deleted"));
+    emit(ViewProfileSnackBarActionState(response ? "Profile updated successfully." : "Profile couldn't be deleted"));
 
     if (response) {
       emit(ViewProfileNavigateToHomePageActionState());
@@ -82,7 +82,7 @@ class ViewProfileBloc extends Bloc<ViewProfileEvent, ViewProfileState> {
     final String shareText = "$shareName, $shareContact";
 
     final previousState = state;
-    emit(ViewProfileContactShareActionState(shareText: shareText));
+    emit(ViewProfileContactShareActionState(shareText));
     await Future.delayed(Duration.zero);
     emit(previousState);
   }

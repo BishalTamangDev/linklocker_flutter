@@ -28,7 +28,7 @@ class _AddProfilePageState extends State<AddProfilePage> {
         leading: IconButton(
           highlightColor: Colors.transparent,
           onPressed: () => context.pop(),
-          icon: Icon(Icons.arrow_back_ios_new_rounded),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded),
         ),
         backgroundColor: Theme.of(context).canvasColor,
         actions: [
@@ -36,8 +36,8 @@ class _AddProfilePageState extends State<AddProfilePage> {
             padding: const EdgeInsets.only(right: 8.0),
             child: IconButton(
               highlightColor: Colors.transparent,
-              onPressed: () => context.read<AddProfileBloc>().add(AddProfileLoadEvent(task: widget.task)),
-              icon: Icon(Icons.undo_outlined),
+              onPressed: () => context.read<AddProfileBloc>().add(AddProfileLoadEvent(widget.task)),
+              icon: const Icon(Icons.undo_outlined),
             ),
           ),
         ],
@@ -56,19 +56,19 @@ class _AddProfilePageState extends State<AddProfilePage> {
           }
         },
         builder: (context, state) {
-          if (state is AddProfileLoadedState) {
-            return AddProfileFormPage(
-              task: widget.task,
-              profileEntity: state.profileEntity,
-              profileContactEntity: state.profileContactEntity,
-            );
-          } else if (state is AddProfileAddedState) {
-            return const Center(child: Text("Profile Already Added"));
-          } else {
-            // states :: AddProfileInitial && AddProfileLoadingState
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
+          switch (state) {
+            case AddProfileLoadedState():
+              return AddProfileFormPage(
+                task: widget.task,
+                profileEntity: state.profileEntity,
+                profileContactEntity: state.profileContactEntity,
+              );
+            case AddProfileAddedState():
+              return const Center(child: Text("Profile Already Added"));
+            default:
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
           }
         },
       ),

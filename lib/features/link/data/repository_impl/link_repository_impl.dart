@@ -8,13 +8,13 @@ import '../../domain/repositories/link_repository.dart';
 class LinkRepositoryImpl implements LinkRepository {
   // add link
   @override
-  Future<bool> add(LinkEntity linkEntity, List<ContactEntity> contacts) async {
+  Future<bool> add({required LinkEntity linkEntity, required List<ContactEntity> contacts}) async {
     return await LocalDataSource.getInstance().addLink(linkEntity, contacts);
   }
 
   // update link
   @override
-  Future<bool> update(LinkEntity linkEntity, List<ContactEntity> contacts) async {
+  Future<bool> update({required LinkEntity linkEntity, required List<ContactEntity> contacts}) async {
     return await LocalDataSource.getInstance().updateLink(linkEntity, contacts);
   }
 

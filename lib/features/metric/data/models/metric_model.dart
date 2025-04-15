@@ -1,10 +1,7 @@
 import 'package:linklocker/features/metric/domain/entities/metric_entity.dart';
 
 class MetricModel extends MetricEntity {
-  MetricModel({
-    required super.title,
-    required super.count,
-  });
+  MetricModel({required super.title, required super.count});
 
   // to map
   Map<String, dynamic> toMap() {

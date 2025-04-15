@@ -29,7 +29,7 @@ class CustomAlertDialogWidget extends StatelessWidget {
           style: Theme.of(context).textTheme.labelLarge,
         ),
       ),
-      actionsPadding: EdgeInsets.only(bottom: 16.0, right: 16.0),
+      actionsPadding: const EdgeInsets.only(bottom: 16.0, right: 16.0),
       actions: [
         OutlinedButton(
           onPressed: option1CallBack,

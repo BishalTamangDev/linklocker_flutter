@@ -7,13 +7,13 @@ import 'package:linklocker/features/profile/domain/repositories/profile_reposito
 class ProfileRepositoryImpl implements ProfileRepository {
   // add
   @override
-  Future<bool> addProfile(ProfileEntity profileEntity, List<ProfileContactEntity> contacts) async {
+  Future<bool> addProfile({required ProfileEntity profileEntity, required List<ProfileContactEntity> contacts}) async {
     return await LocalDataSource.getInstance().addProfile(profileEntity, contacts);
   }
 
   // update
   @override
-  Future<bool> updateProfile(ProfileEntity profileEntity, List<ProfileContactEntity> contacts) async {
+  Future<bool> updateProfile({required ProfileEntity profileEntity, required List<ProfileContactEntity> contacts}) async {
     return await LocalDataSource.getInstance().updateProfile(profileEntity, contacts);
   }
 

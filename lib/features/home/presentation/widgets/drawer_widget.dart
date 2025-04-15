@@ -16,7 +16,7 @@ class DrawerWidget extends StatelessWidget {
           child: Column(
             spacing: 16.0,
             children: [
-              Expanded(
+              const Expanded(
                 child: MetricWidget(),
               ),
 

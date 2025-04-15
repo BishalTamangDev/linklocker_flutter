@@ -1,4 +1,5 @@
 import 'package:bloc/bloc.dart';
+import 'package:dartz/dartz.dart';
 import 'package:linklocker/features/metric/data/repository_impl/metric_repository_impl.dart';
 import 'package:linklocker/features/metric/domain/entities/metric_entity.dart';
 import 'package:linklocker/features/metric/domain/usecases/fetch_metric_usecase.dart';
@@ -19,9 +20,9 @@ class MetricBloc extends Bloc<MetricEvent, MetricState> {
     emit(MetricLoadingState());
 
     final MetricRepositoryImpl metricRepository = MetricRepositoryImpl();
-    final FetchMetricUseCase fetchMetricUseCase = FetchMetricUseCase(metricRepository: metricRepository);
+    final FetchMetricUseCase fetchMetricUseCase = FetchMetricUseCase(metricRepository);
 
-    final response = await fetchMetricUseCase.call();
+    final Either<bool, List<MetricEntity>> response = await fetchMetricUseCase.call();
 
     response.fold((res) {
       emit(MetricErrorState());
@@ -29,16 +30,13 @@ class MetricBloc extends Bloc<MetricEvent, MetricState> {
       if (data.isEmpty) {
         emit(MetricErrorState());
       } else {
-        emit(MetricLoadedState(metricData: data));
+        emit(MetricLoadedState(data));
       }
     });
   }
 
   // navigate to setting
-  Future<void> _metricSettingNavigateEvent(
-    MetricSettingNavigateEvent event,
-    Emitter<MetricState> emit,
-  ) async {
+  Future<void> _metricSettingNavigateEvent(MetricSettingNavigateEvent event, Emitter<MetricState> emit) async {
     emit(MetricSettingNavigateState());
   }
 }

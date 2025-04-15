@@ -52,9 +52,7 @@ class ProfileContactModel extends ProfileContactEntity {
 
   // to string
   @override
-  String toString() {
-    return "ContactModel{contactId: $contactId, profileId: $profileId, country: $country, number: $number}";
-  }
+  String toString() => "ContactModel{contactId: $contactId, profileId: $profileId, country: $country, number: $number}";
 
   // data to upload
   Map<String, dynamic> dataToUpload(int profileId) {

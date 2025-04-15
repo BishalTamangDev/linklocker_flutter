@@ -24,7 +24,6 @@ class CustomPageRouteBuilder extends PageRouteBuilder {
   }
 }
 
-
 // scale transition
 // return ScaleTransition(
 //   scale: animation,

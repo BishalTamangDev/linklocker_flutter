@@ -31,7 +31,7 @@ class LinkModel extends LinkEntity {
   Map<String, dynamic> toMap({bool uploadingData = false}) {
     Map<String, dynamic> data = {
       'name': name ?? '',
-      'category': category!.label ?? LinkCategoryEnum.other.label,
+      'category': category!.label,
       'email_address': emailAddress ?? '',
       'note': note ?? '',
       'date_of_birth': dateOfBirth != null ? dateOfBirth!.toString() : '',

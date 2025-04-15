@@ -34,9 +34,9 @@ class _AddProfileFormPageState extends State<AddProfileFormPage> {
   Uint8List profilePicture = Uint8List(0);
 
   // controllers
-  var nameController = TextEditingController();
-  var numberController = TextEditingController();
-  var emailController = TextEditingController();
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController numberController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
 
   // backup data function
   _backupData() {
@@ -58,10 +58,10 @@ class _AddProfileFormPageState extends State<AddProfileFormPage> {
       final XFile? image = await imagePicker.pickImage(source: imageSource);
 
       if (image != null) {
-        Uint8List bytes = await image.readAsBytes();
+        final Uint8List bytes = await image.readAsBytes();
 
         // compress image
-        Uint8List compressedImage = await AppFunctions.compressImage(bytes);
+        final Uint8List compressedImage = await AppFunctions.compressImage(bytes);
 
         if (mounted) {
           setState(() {
@@ -80,7 +80,7 @@ class _AddProfileFormPageState extends State<AddProfileFormPage> {
     // check for data
     if (nameController.text.trim().isEmpty || numberController.text.trim().isEmpty) {
       addProfileBloc.add(
-        AddProfileSnackBarEvent(message: "Please enter both contact number and your name."),
+        AddProfileSnackBarEvent("Please enter both contact number and your name."),
       );
     } else {
       final ProfileEntity newProfileEntity = ProfileEntity(
@@ -90,7 +90,7 @@ class _AddProfileFormPageState extends State<AddProfileFormPage> {
         profilePicture: profilePicture,
       );
 
-      ProfileContactEntity newContactEntity = ProfileContactEntity(
+      final ProfileContactEntity newContactEntity = ProfileContactEntity(
         contactId: widget.task == "add" ? 0 : widget.profileContactEntity.contactId,
         profileId: widget.task == "add" ? 0 : widget.profileContactEntity.profileId,
         number: numberController.text.toString().trim(),
@@ -99,16 +99,10 @@ class _AddProfileFormPageState extends State<AddProfileFormPage> {
 
       if (widget.task == 'add') {
         addProfileBloc.add(
-          AddProfileAddEvent(
-            profileEntity: newProfileEntity,
-            contacts: [newContactEntity],
-          ),
+          AddProfileAddEvent(profileEntity: newProfileEntity, contacts: [newContactEntity]),
         );
       } else {
-        addProfileBloc.add(AddProfileUpdateEvent(
-          profileEntity: newProfileEntity,
-          contacts: [newContactEntity],
-        ));
+        addProfileBloc.add(AddProfileUpdateEvent(profileEntity: newProfileEntity, contacts: [newContactEntity]));
       }
     }
   }
@@ -188,13 +182,13 @@ class _AddProfileFormPageState extends State<AddProfileFormPage> {
                         radius: 80.0,
                         backgroundColor: Theme.of(context).colorScheme.surface,
                         backgroundImage: profilePicture.isNotEmpty ? MemoryImage(profilePicture) : AssetImage(AppConstants.defaultUserImage),
-                        child: Icon(Icons.image_outlined, size: 28.0),
+                        child: const Icon(Icons.image_outlined, size: 28.0),
                       ),
                     ),
                   ),
 
                   profilePicture.isEmpty
-                      ? SizedBox(
+                      ? const SizedBox(
                           height: 48.0,
                           child: Center(
                             child: Opacity(
@@ -254,7 +248,7 @@ class _AddProfileFormPageState extends State<AddProfileFormPage> {
                                   // country code
                                   DropdownButton(
                                     value: country,
-                                    icon: Icon(Icons.keyboard_arrow_down),
+                                    icon: const Icon(Icons.keyboard_arrow_down),
                                     underline: SizedBox(),
                                     onChanged: (newValue) {
                                       setState(() {
@@ -266,9 +260,7 @@ class _AddProfileFormPageState extends State<AddProfileFormPage> {
                                         (countryCode) => DropdownMenuItem(
                                           value: countryCode['country'],
                                           child: Text(
-                                            AppFunctions.getCapitalizedWords(
-                                              countryCode['country'],
-                                            ),
+                                            AppFunctions.getCapitalizedWords(countryCode['country']),
                                           ),
                                         ),
                                       ),

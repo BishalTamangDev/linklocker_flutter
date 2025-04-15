@@ -31,7 +31,7 @@ class _MiniProfileWidgetState extends State<MiniProfileWidget> {
             buildWhen: (previous, current) => current is! MiniProfileActionState,
             listener: (context, state) {
               if (state is MiniProfileAddNavigateState) {
-                context.read<AddProfileBloc>().add(AddProfileLoadEvent(task: "add"));
+                context.read<AddProfileBloc>().add(AddProfileLoadEvent("add"));
                 context.push('/profile/add');
               } else if (state is MiniProfileViewNavigateState) {
                 context.push('/profile/view');
@@ -41,21 +41,21 @@ class _MiniProfileWidgetState extends State<MiniProfileWidget> {
                   profileEntity: state.profileEntity,
                   contacts: state.contacts,
                 );
-              } else {}
+              }
             },
             builder: (context, state) {
-              if (state is MiniProfileErrorState) {
-                return MiniProfileWidgetError(callback: () {});
-              } else if (state is MiniProfileLoadedState) {
-                return MiniProfileWidgetLoaded(
-                  profileEntity: state.profileEntity,
-                  contacts: state.contacts,
-                );
-              } else if (state is MiniProfileNotSetState) {
-                return MiniProfileWidgetNotSet();
-              } else {
-                // states :: MiniProfileInitial && MiniProfileLoadingState
-                return MiniProfileWidgetLoading();
+              switch (state) {
+                case MiniProfileErrorState():
+                  return MiniProfileWidgetError(callback: () {});
+                case MiniProfileLoadedState():
+                  return MiniProfileWidgetLoaded(
+                    profileEntity: state.profileEntity,
+                    contacts: state.contacts,
+                  );
+                case MiniProfileNotSetState():
+                  return MiniProfileWidgetNotSet();
+                default:
+                  return MiniProfileWidgetLoading();
               }
             },
           ),

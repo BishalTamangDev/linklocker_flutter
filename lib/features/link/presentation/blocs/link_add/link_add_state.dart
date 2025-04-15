@@ -35,21 +35,21 @@ final class LinkAddAddedActionState extends LinkAddActionState {}
 final class LinkAddAddingErrorActionState extends LinkAddActionState {
   final String message;
 
-  LinkAddAddingErrorActionState({required this.message});
+  LinkAddAddingErrorActionState(this.message);
 }
 
 // updated
 final class LinkAddUpdatedActionState extends LinkAddActionState {
   final int linkId;
 
-  LinkAddUpdatedActionState({required this.linkId});
+  LinkAddUpdatedActionState(this.linkId);
 }
 
 // updating error
 final class LinkAddUpdatingErrorActionState extends LinkAddActionState {
   final String message;
 
-  LinkAddUpdatingErrorActionState({required this.message});
+  LinkAddUpdatingErrorActionState(this.message);
 }
 
 // reset

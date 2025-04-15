@@ -7,7 +7,7 @@ class UpdateProfileUseCase {
 
   const UpdateProfileUseCase({required this.profileRepository});
 
-  Future<bool> call(ProfileEntity profileEntity, List<ProfileContactEntity> contacts) async {
-    return await profileRepository.updateProfile(profileEntity, contacts);
+  Future<bool> call({required ProfileEntity profileEntity, required List<ProfileContactEntity> contacts}) async {
+    return await profileRepository.updateProfile(profileEntity: profileEntity, contacts: contacts);
   }
 }

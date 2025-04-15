@@ -191,7 +191,7 @@ class _AddLinkFormWidgetState extends State<AddLinkFormWidget> {
                               const SizedBox(height: 8.0),
                               ListTile(
                                 title: const Text("Gallery"),
-                                leading: Icon(Icons.photo_outlined),
+                                leading: const Icon(Icons.photo_outlined),
                                 onTap: () {
                                   _pickImage(ImageSource.gallery);
                                   context.pop();
@@ -199,7 +199,7 @@ class _AddLinkFormWidgetState extends State<AddLinkFormWidget> {
                               ),
                               ListTile(
                                 title: const Text("Camera"),
-                                leading: Icon(Icons.camera_alt_outlined),
+                                leading: const Icon(Icons.camera_alt_outlined),
                                 onTap: () {
                                   context.pop();
                                   _pickImage(ImageSource.camera);
@@ -216,7 +216,7 @@ class _AddLinkFormWidgetState extends State<AddLinkFormWidget> {
                       radius: 80.0,
                       backgroundColor: Theme.of(context).colorScheme.surface,
                       backgroundImage: profilePicture.isNotEmpty ? MemoryImage(profilePicture) : AssetImage(AppConstants.defaultUserImage),
-                      child: Icon(Icons.camera_alt_outlined, color: Colors.blue),
+                      child: const Icon(Icons.camera_alt_outlined, color: Colors.blue),
                     ),
                   ),
 
@@ -229,10 +229,10 @@ class _AddLinkFormWidgetState extends State<AddLinkFormWidget> {
                           },
                           child: const Text("Remove Profile Picture"),
                         )
-                      : SizedBox(
+                      : const SizedBox(
                           height: 48.0,
                           child: Center(
-                            child: const Text("Profile Picture"),
+                            child: Text("Profile Picture"),
                           ),
                         ),
 
@@ -269,12 +269,7 @@ class _AddLinkFormWidgetState extends State<AddLinkFormWidget> {
                                 isExpanded: true,
                                 style: Theme.of(context).textTheme.bodyMedium,
                                 items: [
-                                  ...LinkCategoryEnum.values.map((cat) {
-                                    return DropdownMenuItem(
-                                      value: cat.label,
-                                      child: Text(cat.label),
-                                    );
-                                  }),
+                                  ...LinkCategoryEnum.values.map((cat) => DropdownMenuItem(value: cat.label, child: Text(cat.label))),
                                 ],
                                 onChanged: (newCategory) {
                                   setState(() {
@@ -310,7 +305,7 @@ class _AddLinkFormWidgetState extends State<AddLinkFormWidget> {
                                   // country code
                                   DropdownButton(
                                     value: country,
-                                    icon: Icon(Icons.keyboard_arrow_down),
+                                    icon: const Icon(Icons.keyboard_arrow_down),
                                     underline: SizedBox(),
                                     onChanged: (newValue) {
                                       setState(() {
@@ -332,7 +327,7 @@ class _AddLinkFormWidgetState extends State<AddLinkFormWidget> {
                                     child: TextField(
                                       controller: phoneController,
                                       keyboardType: TextInputType.number,
-                                      decoration: InputDecoration(hintText: "Phone number", border: InputBorder.none),
+                                      decoration: const InputDecoration(hintText: "Phone number", border: InputBorder.none),
                                     ),
                                   ),
                                 ],

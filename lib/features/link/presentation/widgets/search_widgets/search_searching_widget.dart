@@ -9,7 +9,7 @@ class SearchSearchingWidget extends StatelessWidget {
       child: Column(
         spacing: 12.0,
         mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
+        children: [
           CircularProgressIndicator(),
           Opacity(
             opacity: 0.6,

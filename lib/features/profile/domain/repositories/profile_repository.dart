@@ -4,16 +4,10 @@ import 'package:linklocker/features/profile/domain/entities/profile_entity.dart'
 
 abstract class ProfileRepository {
   // add profile
-  Future<bool> addProfile(
-    ProfileEntity profileEntity,
-    List<ProfileContactEntity> contacts,
-  );
+  Future<bool> addProfile({required ProfileEntity profileEntity, required List<ProfileContactEntity> contacts});
 
   // update profile
-  Future<bool> updateProfile(
-    ProfileEntity profileEntity,
-    List<ProfileContactEntity> contacts,
-  );
+  Future<bool> updateProfile({required ProfileEntity profileEntity, required List<ProfileContactEntity> contacts});
 
   // fetch profile
   Future<Either<bool, List<Map<String, dynamic>>>> fetchProfile();

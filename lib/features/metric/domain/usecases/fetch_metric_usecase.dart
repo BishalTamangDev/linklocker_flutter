@@ -5,7 +5,7 @@ import 'package:linklocker/features/metric/domain/entities/metric_entity.dart';
 class FetchMetricUseCase {
   final MetricRepositoryImpl metricRepository;
 
-  FetchMetricUseCase({required this.metricRepository});
+  FetchMetricUseCase(this.metricRepository);
 
   Future<Either<bool, List<MetricEntity>>> call() async {
     return await metricRepository.fetch();

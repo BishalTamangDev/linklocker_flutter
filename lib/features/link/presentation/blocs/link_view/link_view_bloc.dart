@@ -1,4 +1,5 @@
 import 'package:bloc/bloc.dart';
+import 'package:dartz/dartz.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:linklocker/core/constants/app_constants.dart';
 import 'package:linklocker/core/functions/app_functions.dart';
@@ -27,9 +28,9 @@ class LinkViewBloc extends Bloc<LinkViewEvent, LinkViewState> {
   // fetch link
   Future<void> _fetchEvent(FetchEvent event, Emitter<LinkViewState> emit) async {
     emit(LinkViewLoadingState());
-    LinkRepositoryImpl linkRepository = LinkRepositoryImpl();
-    FetchLinkUseCase fetchLinkUseCase = FetchLinkUseCase(linkRepository: linkRepository);
-    final response = await fetchLinkUseCase.call(event.linkId);
+    final LinkRepositoryImpl linkRepository = LinkRepositoryImpl();
+    final FetchLinkUseCase fetchLinkUseCase = FetchLinkUseCase(linkRepository: linkRepository);
+    final Either<bool, List<Map<String, dynamic>>> response = await fetchLinkUseCase.call(event.linkId);
     response.fold((error) {
       emit(LinkViewLinkNotFoundState());
     }, (links) {
@@ -41,18 +42,18 @@ class LinkViewBloc extends Bloc<LinkViewEvent, LinkViewState> {
 
   // update
   Future<void> _updateNavigateEvent(UpdateNavigateEvent event, Emitter<LinkViewState> emit) async {
-    emit(LinkViewNavigateToUpdateActionState(linkId: event.linkId));
+    emit(LinkViewNavigateToUpdateActionState(event.linkId));
   }
 
   // delete
   Future<void> _deleteLinkEvent(DeleteLinkEvent event, Emitter<LinkViewState> emit) async {
     final LinkRepositoryImpl linkRepository = LinkRepositoryImpl();
     final DeleteLinkUseCase deleteLinkUseCase = DeleteLinkUseCase(linkRepository: linkRepository);
-    final response = await deleteLinkUseCase.call(event.linkId);
+    final bool response = await deleteLinkUseCase.call(event.linkId);
     if (response) {
       emit(LinkViewDeleteSuccessActionState());
     } else {
-      emit(LinkViewDeletionFailureActionState(message: "Couldn't delete link."));
+      emit(LinkViewDeletionFailureActionState("Couldn't delete link."));
     }
   }
 
@@ -62,7 +63,7 @@ class LinkViewBloc extends Bloc<LinkViewEvent, LinkViewState> {
         ? AppFunctions.getCountryCode(event.contacts[0].country!)
         : AppConstants.defaultCountry;
     final String number = event.contacts[0].number != null && event.contacts[0].number != '' ? event.contacts[0].number! : '';
-    emit(LinkViewOpenDialerActionState(contact: "$countryCode $number"));
+    emit(LinkViewOpenDialerActionState("$countryCode $number"));
   }
 
   // contact share
@@ -72,8 +73,8 @@ class LinkViewBloc extends Bloc<LinkViewEvent, LinkViewState> {
         ? AppFunctions.getCountryCode(event.contacts[0].country!)
         : AppConstants.defaultCountry;
     final String number = event.contacts[0].number != null && event.contacts[0].number != '' ? event.contacts[0].number! : '';
-    String shareText = "$name, $countryCode $number";
-    emit(LinkViewContactShareActionState(shareText: shareText));
+    final String shareText = "$name, $countryCode $number";
+    emit(LinkViewContactShareActionState(shareText));
   }
 
   // qr share

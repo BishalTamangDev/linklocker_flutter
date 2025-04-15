@@ -33,7 +33,7 @@ class MetricErrorWidget extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   spacing: 6.0,
                   children: [
-                    Icon(Icons.refresh),
+                    const Icon(Icons.refresh),
                     Text("An Error Occurred!", style: Theme.of(context).textTheme.labelSmall),
                   ],
                 ),
@@ -48,15 +48,12 @@ class MetricErrorWidget extends StatelessWidget {
           itemCount: LinkCategoryEnum.values.length,
           physics: const NeverScrollableScrollPhysics(),
           itemBuilder: (context, index) {
-            MetricModel metricModel = MetricModel.fromMap({
+            final MetricModel metricModel = MetricModel.fromMap({
               'title': LinkCategoryEnum.values[index].label,
               'color': LinkCategoryEnum.values[index].color,
               'count': '-',
             });
-            return CategoryWidget(
-              metricModel: metricModel,
-              loading: true,
-            );
+            return CategoryWidget(metricModel: metricModel, loading: true);
           },
         ),
       ],

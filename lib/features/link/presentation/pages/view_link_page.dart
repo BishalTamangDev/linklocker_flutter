@@ -6,6 +6,8 @@ import 'package:linklocker/core/functions/app_functions.dart';
 import 'package:linklocker/features/link/data/models/link_model.dart';
 import 'package:linklocker/features/link/presentation/blocs/all_links/all_links_bloc.dart';
 import 'package:linklocker/features/link/presentation/blocs/link_view/link_view_bloc.dart';
+import 'package:linklocker/features/link/presentation/widgets/view_widgets/view_link_loading_widget.dart';
+import 'package:linklocker/features/link/presentation/widgets/view_widgets/view_link_not_found_widget.dart';
 import 'package:linklocker/shared/widgets/custom_alert_dialog_widget.dart';
 import 'package:linklocker/shared/widgets/custom_snackbar_widget.dart';
 import 'package:share_plus/share_plus.dart';
@@ -31,7 +33,7 @@ class _ViewLinkPageState extends State<ViewLinkPage> {
           option1: "Yes",
           option2: "No",
           option1CallBack: () {
-            context.read<LinkViewBloc>().add(DeleteLinkEvent(linkId: linkId));
+            context.read<LinkViewBloc>().add(DeleteLinkEvent(linkId));
             context.pop();
           },
           option2CallBack: () => context.pop(),
@@ -42,7 +44,9 @@ class _ViewLinkPageState extends State<ViewLinkPage> {
 
   @override
   Widget build(BuildContext context) {
-    var colorScheme = Theme.of(context).colorScheme;
+    final colorScheme = Theme
+        .of(context)
+        .colorScheme;
 
     return BlocConsumer<LinkViewBloc, LinkViewState>(
       listenWhen: (previous, current) => current is LinkViewActionState,
@@ -53,7 +57,6 @@ class _ViewLinkPageState extends State<ViewLinkPage> {
         } else if (state is LinkViewContactShareActionState) {
           await Future.delayed(Duration.zero, () {
             Share.share(state.shareText, subject: "Contact Share");
-            // WidgetsBinding.instance.addPostFrameCallback((_) {});
           });
         } else if (state is LinkViewOpenDialerActionState) {
           AppFunctions.openDialer(state.contact);
@@ -73,265 +76,243 @@ class _ViewLinkPageState extends State<ViewLinkPage> {
         }
       },
       builder: (context, state) {
-        if (state is LinkViewLinkNotFoundState) {
-          return Scaffold(
-            appBar: AppBar(
-              title: const Text("Link Details"),
-              leading: IconButton(
-                onPressed: () => context.pop(),
-                highlightColor: Colors.transparent,
-                splashColor: Colors.transparent,
-                icon: Icon(Icons.arrow_back_ios_new),
-              ),
-              elevation: 0,
-              backgroundColor: Theme.of(context).canvasColor,
-            ),
-            body: const Center(
-              child: Text("Link Not Found!"),
-            ),
-          );
-        } else if (state is LinkViewLoadingState) {
-          return Scaffold(
-            appBar: AppBar(
-              title: const Text("Link Details"),
-              leading: IconButton(
-                onPressed: () => context.pop(),
-                highlightColor: Colors.transparent,
-                splashColor: Colors.transparent,
-                icon: Icon(Icons.arrow_back_ios_new),
-              ),
-              elevation: 0,
-              backgroundColor: Theme.of(context).canvasColor,
-            ),
-            body: const Center(
-              child: CircularProgressIndicator(),
-            ),
-          );
-        } else if (state is LinkViewLoadedState) {
-          LinkModel linkModel = LinkModel.fromEntity(state.linkEntity);
-
-          return Scaffold(
-            appBar: AppBar(
-              leading: IconButton(
-                onPressed: () => context.pop(),
-                highlightColor: Colors.transparent,
-                splashColor: Colors.transparent,
-                icon: Icon(Icons.arrow_back_ios_new),
-              ),
-              elevation: 0,
-              backgroundColor: Theme.of(context).canvasColor,
-              title: const Text("Link Details"),
-              actions: [
-                IconButton(
-                  onPressed: () {
-                    if (state.linkEntity.linkId != null) {
-                      _deleteDialog(state.linkEntity.linkId!);
-                    }
-                  },
-                  icon: Icon(Icons.delete_outline),
+        switch (state) {
+          case LinkViewLinkNotFoundState():
+            return ViewLinkNotFoundWidget();
+          case LinkViewLoadedState():
+            final LinkModel linkModel = LinkModel.fromEntity(state.linkEntity);
+            return Scaffold(
+              appBar: AppBar(
+                leading: IconButton(
+                  onPressed: () => context.pop(),
+                  highlightColor: Colors.transparent,
+                  splashColor: Colors.transparent,
+                  icon: Icon(Icons.arrow_back_ios_new),
                 ),
-              ],
-            ),
-            backgroundColor: Theme.of(context).canvasColor,
-            body: SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  spacing: 16.0,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    // profile picture
-                    Center(
-                      child: Column(
-                        spacing: 18.0,
-                        children: [
-                          CircleAvatar(
-                            radius: 80.0,
-                            backgroundColor: colorScheme.surface,
-                            foregroundImage:
-                                linkModel.profilePicture!.isNotEmpty ? MemoryImage(linkModel.profilePicture!) : AssetImage(AppConstants.defaultUserImage),
-                          ),
-                          Text(
-                            linkModel.name != null && linkModel.name != '' ? AppFunctions.getCapitalizedWords(linkModel.name!) : 'Unknown',
-                            style: Theme.of(context).textTheme.headlineSmall!.copyWith(fontWeight: FontWeight.bold),
-                          ),
-                        ],
+                elevation: 0,
+                backgroundColor: Theme
+                    .of(context)
+                    .canvasColor,
+                title: const Text("Link Details"),
+                actions: [
+                  IconButton(
+                    onPressed: () {
+                      if (state.linkEntity.linkId != null) {
+                        _deleteDialog(state.linkEntity.linkId!);
+                      }
+                    },
+                    icon: const Icon(Icons.delete_outline),
+                  ),
+                ],
+              ),
+              backgroundColor: Theme
+                  .of(context)
+                  .canvasColor,
+              body: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    spacing: 16.0,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      // profile picture
+                      Center(
+                        child: Column(
+                          spacing: 18.0,
+                          children: [
+                            CircleAvatar(
+                              radius: 80.0,
+                              backgroundColor: colorScheme.surface,
+                              foregroundImage:
+                              linkModel.profilePicture!.isNotEmpty ? MemoryImage(linkModel.profilePicture!) : AssetImage(AppConstants.defaultUserImage),
+                            ),
+                            Text(
+                              linkModel.name != null && linkModel.name != '' ? AppFunctions.getCapitalizedWords(linkModel.name!) : 'Unknown',
+                              style: Theme
+                                  .of(context)
+                                  .textTheme
+                                  .headlineSmall!
+                                  .copyWith(fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
 
-                    const SizedBox(),
+                      const SizedBox(),
 
-                    // contacts
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(16.0),
-                      child: Container(
-                        color: colorScheme.surface,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
-                          child: Column(
-                            children: [
-                              // empty contact
-                              state.contacts.isEmpty
-                                  ? const ListTile(
+                      // contacts
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(16.0),
+                        child: Container(
+                          color: colorScheme.surface,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
+                            child: Column(
+                              children: [
+                                // empty contact
+                                state.contacts.isEmpty
+                                    ? const ListTile(
+                                  leading: Icon(Icons.phone_outlined, color: Colors.green),
+                                  title: Opacity(opacity: 0.5, child: Text("Contact Not Found")),
+                                )
+                                    : const SizedBox.shrink(),
+
+                                // more than one contact case
+                                ...state.contacts.map(
+                                      (contact) {
+                                    final String code = AppFunctions.getCountryCode(contact.country ?? AppConstants.defaultCountry);
+
+                                    return ListTile(
                                       leading: Icon(Icons.phone_outlined, color: Colors.green),
-                                      title: Opacity(opacity: 0.5, child: Text("Contact Not Found")),
-                                    )
-                                  : const SizedBox.shrink(),
+                                      title: Text("$code ${contact.number}"),
+                                      trailing: TextButton(
+                                        onPressed: () => context.read<LinkViewBloc>().add(DialerEvent(linkEntity: state.linkEntity, contacts: state.contacts)),
+                                        child: const Text("call Now"),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
 
-                              // more than one contact case
-                              ...state.contacts.map(
-                                (contact) {
-                                  final String code = AppFunctions.getCountryCode(contact.country ?? AppConstants.defaultCountry);
+                      // email address
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(16.0),
+                        child: Container(
+                          color: colorScheme.surface,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
+                            child: ListTile(
+                              leading: Icon(Icons.email_outlined, color: AppConstants.emailIconColor),
+                              title: Text(linkModel.emailAddress != '' && linkModel.emailAddress != null ? linkModel.emailAddress! : "-"),
+                            ),
+                          ),
+                        ),
+                      ),
 
-                                  return ListTile(
-                                    leading: Icon(Icons.phone_outlined, color: Colors.green),
-                                    title: Text("$code ${contact.number}"),
-                                    trailing: TextButton(
-                                      onPressed: () => context.read<LinkViewBloc>().add(DialerEvent(linkEntity: state.linkEntity, contacts: state.contacts)),
-                                      child: const Text("call Now"),
-                                    ),
-                                  );
-                                },
+                      // birthday
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(16.0),
+                        child: Container(
+                          color: colorScheme.surface,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
+                            child: ListTile(
+                              leading: Icon(Icons.cake_outlined, color: AppConstants.birthdayIconColor),
+                              title: Text(
+                                linkModel.dateOfBirth != null ? AppFunctions.getFormattedDate(DateTime.parse(linkModel.dateOfBirth!.toString())) : "-",
                               ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-
-                    // email address
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(16.0),
-                      child: Container(
-                        color: colorScheme.surface,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
-                          child: ListTile(
-                            leading: Icon(Icons.email_outlined, color: AppConstants.emailIconColor),
-                            title: Text(linkModel.emailAddress != '' && linkModel.emailAddress != null ? linkModel.emailAddress! : "-"),
-                          ),
-                        ),
-                      ),
-                    ),
-
-                    // birthday
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(16.0),
-                      child: Container(
-                        color: colorScheme.surface,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
-                          child: ListTile(
-                            leading: Icon(Icons.cake_outlined, color: AppConstants.birthdayIconColor),
-                            title: Text(
-                              linkModel.dateOfBirth != null ? AppFunctions.getFormattedDate(DateTime.parse(linkModel.dateOfBirth!.toString())) : "-",
                             ),
                           ),
                         ),
                       ),
-                    ),
 
-                    // category
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(16.0),
-                      child: Container(
-                        color: colorScheme.surface,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
-                          child: ListTile(
-                            leading: Icon(Icons.group_add_outlined, color: AppConstants.categoryIconColor),
-                            title: Text(AppFunctions.getCapitalizedWord(linkModel.category!.label)),
-                          ),
-                        ),
-                      ),
-                    ),
-
-                    // note
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(16.0),
-                      child: Container(
-                        color: colorScheme.surface,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
-                          child: ListTile(
-                            leading: Icon(Icons.note_alt_outlined, color: AppConstants.noteIconColor),
-                            title: Opacity(
-                              opacity: 0.5,
-                              child: Text(AppFunctions.getCapitalizedWord(linkModel.note != '' && linkModel.note != null ? linkModel.note! : "-")),
+                      // category
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(16.0),
+                        child: Container(
+                          color: colorScheme.surface,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
+                            child: ListTile(
+                              leading: Icon(Icons.group_add_outlined, color: AppConstants.categoryIconColor),
+                              title: Text(AppFunctions.getCapitalizedWord(linkModel.category!.label)),
                             ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
+
+                      // note
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(16.0),
+                        child: Container(
+                          color: colorScheme.surface,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
+                            child: ListTile(
+                              leading: Icon(Icons.note_alt_outlined, color: AppConstants.noteIconColor),
+                              title: Opacity(
+                                opacity: 0.5,
+                                child: Text(AppFunctions.getCapitalizedWord(linkModel.note != '' && linkModel.note != null ? linkModel.note! : "-")),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
 
-            // bottom actions
-            bottomNavigationBar: Container(
-              color: colorScheme.surface,
-              width: MediaQuery.of(context).size.width,
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Row(
-                  mainAxisSize: MainAxisSize.max,
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    // contact qr code
-                    InkWell(
-                      onTap: () => context.read<LinkViewBloc>().add(QrShareEvent(linkEntity: state.linkEntity, contacts: state.contacts)),
-                      splashColor: colorScheme.surface, // Custom splash color
-                      highlightColor: colorScheme.surface,
-                      child: const Column(
-                        spacing: 6.0,
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          Icon(Icons.qr_code),
-                          Text("QR Code"),
-                        ],
+              // bottom actions
+              bottomNavigationBar: Container(
+                color: colorScheme.surface,
+                width: MediaQuery
+                    .of(context)
+                    .size
+                    .width,
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.max,
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      // contact qr code
+                      InkWell(
+                        onTap: () => context.read<LinkViewBloc>().add(QrShareEvent(linkEntity: state.linkEntity, contacts: state.contacts)),
+                        splashColor: colorScheme.surface, // Custom splash color
+                        highlightColor: colorScheme.surface,
+                        child: const Column(
+                          spacing: 6.0,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.qr_code),
+                            Text("QR Code"),
+                          ],
+                        ),
                       ),
-                    ),
 
-                    // edit
-                    InkWell(
-                      onTap: () => context.read<LinkViewBloc>().add(UpdateNavigateEvent(linkId: linkModel.linkId!)),
-                      splashColor: colorScheme.surface,
-                      highlightColor: colorScheme.surface,
-                      child: const Column(
-                        spacing: 6.0,
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          Icon(Icons.edit),
-                          Text("Update"),
-                        ],
+                      // edit
+                      InkWell(
+                        onTap: () => context.read<LinkViewBloc>().add(UpdateNavigateEvent(linkModel.linkId!)),
+                        splashColor: colorScheme.surface,
+                        highlightColor: colorScheme.surface,
+                        child: const Column(
+                          spacing: 6.0,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.edit),
+                            Text("Update"),
+                          ],
+                        ),
                       ),
-                    ),
 
-                    // share
-                    InkWell(
-                      onTap: () => context.read<LinkViewBloc>().add(ContactShareEvent(linkEntity: state.linkEntity, contacts: state.contacts)),
-                      splashColor: colorScheme.surface,
-                      highlightColor: colorScheme.surface,
-                      child: const Column(
-                        spacing: 6.0,
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          Icon(Icons.share),
-                          Text("Share"),
-                        ],
+                      // share
+                      InkWell(
+                        onTap: () => context.read<LinkViewBloc>().add(ContactShareEvent(linkEntity: state.linkEntity, contacts: state.contacts)),
+                        splashColor: colorScheme.surface,
+                        highlightColor: colorScheme.surface,
+                        child: const Column(
+                          spacing: 6.0,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.share),
+                            Text("Share"),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
-          );
+            );
+          default:
+            return ViewLinkLoadingWidget();
         }
-        return Center(
-          child: CircularProgressIndicator(),
-        );
       },
     );
   }

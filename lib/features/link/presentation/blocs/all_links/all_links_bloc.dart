@@ -15,11 +15,13 @@ class AllLinksBloc extends Bloc<AllLinksEvent, AllLinksState> {
   }
 
   // fetch all links
-  Future<void> _allLinksFetchEvent(AllLinksFetchEvent event, Emitter<AllLinksState> emit) async {
+  Future<void> _allLinksFetchEvent(
+      AllLinksFetchEvent event, Emitter<AllLinksState> emit) async {
     emit(AllLinksFetchingState());
 
     final LinkRepositoryImpl linkRepository = LinkRepositoryImpl();
-    final FetchAllLinksUseCase fetchAllLinksUseCase = FetchAllLinksUseCase(linkRepository: linkRepository);
+    final FetchAllLinksUseCase fetchAllLinksUseCase =
+        FetchAllLinksUseCase(linkRepository: linkRepository);
 
     final response = await fetchAllLinksUseCase.call();
 
