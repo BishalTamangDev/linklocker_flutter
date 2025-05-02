@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:linklocker/core/functions/app_functions.dart';
+import 'package:linklocker/core/utils/qr_utils.dart';
 import 'package:linklocker/features/mini_profile/presentation/blocs/mini_profile_bloc.dart';
 import 'package:linklocker/features/mini_profile/presentation/widgets/mini_profile_widget_error.dart';
 import 'package:linklocker/features/mini_profile/presentation/widgets/mini_profile_widget_loaded.dart';
@@ -36,7 +36,7 @@ class _MiniProfileWidgetState extends State<MiniProfileWidget> {
               } else if (state is MiniProfileViewNavigateState) {
                 context.push('/profile/view');
               } else if (state is MiniProfileQrShareState) {
-                AppFunctions.showProfileQrCode(
+                QrUtils.showProfileQrCode(
                   context: context,
                   profileEntity: state.profileEntity,
                   contacts: state.contacts,

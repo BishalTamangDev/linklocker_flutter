@@ -1,8 +1,8 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'package:linklocker/core/constants/app_constants.dart';
 import 'package:linklocker/features/metric/domain/entities/metric_entity.dart';
 
+import '../../../../core/constants/link_category_enum.dart';
 import '../../data/models/metric_model.dart';
 import 'category_widget.dart';
 

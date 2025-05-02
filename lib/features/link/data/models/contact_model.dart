@@ -1,4 +1,4 @@
-import 'package:linklocker/core/constants/app_constants.dart';
+import 'package:linklocker/core/constants/string_constants.dart';
 import 'package:linklocker/features/link/domain/entities/contact_entity.dart';
 
 class ContactModel extends ContactEntity {
@@ -14,7 +14,7 @@ class ContactModel extends ContactEntity {
     return ContactModel(
       contactId: map['contact_id'] ?? 0,
       linkId: map['link_id'] ?? 0,
-      country: map['country'] ?? AppConstants.defaultCountry,
+      country: map['country'] ?? StringConstants.defaultCountry,
       number: map['number'] ?? '',
     );
   }

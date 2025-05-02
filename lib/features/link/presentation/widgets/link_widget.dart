@@ -2,8 +2,11 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:linklocker/core/constants/app_constants.dart';
-import 'package:linklocker/core/functions/app_functions.dart';
+import 'package:linklocker/core/constants/color_constants.dart';
+import 'package:linklocker/core/constants/string_constants.dart';
+import 'package:linklocker/core/utils/bottom_sheet_utils.dart';
+import 'package:linklocker/core/utils/call_pad_utils.dart';
+import 'package:linklocker/core/utils/string_utils.dart';
 import 'package:linklocker/features/link/domain/entities/link_entity.dart';
 
 class LinkWidget extends StatelessWidget {
@@ -14,7 +17,7 @@ class LinkWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final countryCode = AppFunctions.getCountryCode(contacts[0]['country'] ?? AppConstants.defaultCountry);
+    final countryCode = StringUtils.getCountryCode(contacts[0]['country'] ?? StringConstants.defaultCountry);
     final number = contacts[0]['number'] ?? '';
     return Column(
       children: [
@@ -26,9 +29,9 @@ class LinkWidget extends StatelessWidget {
             backgroundColor: Theme.of(context).colorScheme.surface,
             foregroundImage: linkEntity.profilePicture != Uint8List(0) && linkEntity.profilePicture!.isNotEmpty
                 ? MemoryImage(linkEntity.profilePicture!)
-                : AssetImage(AppConstants.defaultUserImage),
+                : AssetImage(StringConstants.defaultUserImage),
           ),
-          title: linkEntity.name == '' ? Text("Unknown") : Text(AppFunctions.getCapitalizedWords(linkEntity.name!)),
+          title: linkEntity.name == '' ? Text("Unknown") : Text(StringUtils.getCapitalizedWords(linkEntity.name!)),
           subtitle: SizedBox(
             child: Wrap(
               children: [
@@ -41,15 +44,15 @@ class LinkWidget extends StatelessWidget {
             ),
           ),
           trailing: IconButton(
-            color: AppConstants.callIconColor,
+            color: ColorConstants.callIconColor,
             onPressed: () {
               if (contacts.length == 1) {
                 // launch bottom sheet if link has only one contacts
-                final String countryCode = AppFunctions.getCountryCode(contacts[0]['country']!);
+                final String countryCode = StringUtils.getCountryCode(contacts[0]['country']!);
                 final String number = contacts[0]['number']!;
-                AppFunctions.openDialer("$countryCode $number");
+                CallPadUtils.openDialer("$countryCode $number");
               } else {
-                AppFunctions.showCallBottomSheet(context, contacts);
+                BottomSheetUtils.showCallBottomSheet(context, contacts);
               }
             },
             icon: const Icon(Icons.call),

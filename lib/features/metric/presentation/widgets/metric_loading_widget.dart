@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:linklocker/features/metric/data/models/metric_model.dart';
 import 'package:linklocker/features/metric/presentation/widgets/category_widget.dart';
 
-import '../../../../core/constants/app_constants.dart';
+import '../../../../core/constants/link_category_enum.dart';
 
 class MetricLoadingWidget extends StatelessWidget {
   const MetricLoadingWidget({super.key});

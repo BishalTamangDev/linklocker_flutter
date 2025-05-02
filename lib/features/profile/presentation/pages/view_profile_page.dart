@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:linklocker/core/constants/app_constants.dart';
-import 'package:linklocker/core/functions/app_functions.dart';
+import 'package:linklocker/core/constants/color_constants.dart';
+import 'package:linklocker/core/constants/string_constants.dart';
+import 'package:linklocker/core/utils/qr_utils.dart';
+import 'package:linklocker/core/utils/string_utils.dart';
 import 'package:linklocker/features/mini_profile/presentation/blocs/mini_profile_bloc.dart';
 import 'package:linklocker/features/profile/domain/entities/profile_contact_entity.dart';
 import 'package:linklocker/features/profile/domain/entities/profile_entity.dart';
@@ -85,7 +87,7 @@ class _ViewProfilePageState extends State<ViewProfilePage> {
         buildWhen: (previous, current) => current is! ViewProfileActionState,
         listener: (context, state) async {
           if (state is ViewProfileQrActionState) {
-            AppFunctions.showProfileQrCode(
+            QrUtils.showProfileQrCode(
               context: context,
               profileEntity: state.profileEntity,
               contacts: state.contacts,
@@ -143,8 +145,8 @@ class _ViewProfilePageState extends State<ViewProfilePage> {
                                   backgroundColor: colorScheme.surface,
                                   backgroundImage: profileEntity.profilePicture!.isNotEmpty
                                       ? MemoryImage(profileEntity.profilePicture!)
-                                      : AssetImage(AppConstants.defaultUserImage)),
-                              Text(AppFunctions.getCapitalizedWords(profileEntity.name!), style: Theme.of(context).textTheme.headlineSmall),
+                                      : AssetImage(StringConstants.defaultUserImage)),
+                              Text(StringUtils.getCapitalizedWords(profileEntity.name!), style: Theme.of(context).textTheme.headlineSmall),
                             ],
                           ),
 
@@ -174,9 +176,9 @@ class _ViewProfilePageState extends State<ViewProfilePage> {
                                         return ListTile(
                                           leading: Icon(
                                             Icons.phone_outlined,
-                                            color: AppConstants.callIconColor,
+                                            color: ColorConstants.callIconColor,
                                           ),
-                                          title: Text("${AppFunctions.getCountryCode(profileContactEntity.country!)} ${profileContactEntity.number}"),
+                                          title: Text("${StringUtils.getCountryCode(profileContactEntity.country!)} ${profileContactEntity.number}"),
                                         );
                                       }),
                                     ],
@@ -200,7 +202,7 @@ class _ViewProfilePageState extends State<ViewProfilePage> {
                                       ListTile(
                                         leading: Icon(
                                           Icons.email_outlined,
-                                          color: AppConstants.emailIconColor,
+                                          color: ColorConstants.emailIconColor,
                                         ),
                                         title: Text(profileEntity.emailAddress != '' ? profileEntity.emailAddress! : '-'),
                                       ),

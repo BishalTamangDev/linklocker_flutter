@@ -1,8 +1,8 @@
 import 'package:bloc/bloc.dart';
 import 'package:dartz/dartz.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:linklocker/core/constants/app_constants.dart';
-import 'package:linklocker/core/functions/app_functions.dart';
+import 'package:linklocker/core/constants/string_constants.dart';
+import 'package:linklocker/core/utils/string_utils.dart';
 import 'package:linklocker/features/link/data/models/contact_model.dart';
 import 'package:linklocker/features/link/data/models/link_model.dart';
 import 'package:linklocker/features/link/data/repository_impl/link_repository_impl.dart';
@@ -60,18 +60,18 @@ class LinkViewBloc extends Bloc<LinkViewEvent, LinkViewState> {
   // open dialer
   Future<void> _dialerEvent(DialerEvent event, Emitter<LinkViewState> emit) async {
     final String countryCode = event.contacts[0].country != null && event.contacts[0].country != ''
-        ? AppFunctions.getCountryCode(event.contacts[0].country!)
-        : AppConstants.defaultCountry;
+        ? StringUtils.getCountryCode(event.contacts[0].country!)
+        : StringConstants.defaultCountry;
     final String number = event.contacts[0].number != null && event.contacts[0].number != '' ? event.contacts[0].number! : '';
     emit(LinkViewOpenDialerActionState("$countryCode $number"));
   }
 
   // contact share
   Future<void> _contactShareEvent(ContactShareEvent event, Emitter<LinkViewState> emit) async {
-    final String name = event.linkEntity.name != null && event.linkEntity.name != '' ? AppFunctions.getCapitalizedWords(event.linkEntity.name!) : '';
+    final String name = event.linkEntity.name != null && event.linkEntity.name != '' ? StringUtils.getCapitalizedWords(event.linkEntity.name!) : '';
     final String countryCode = event.contacts[0].country != null && event.contacts[0].country != ''
-        ? AppFunctions.getCountryCode(event.contacts[0].country!)
-        : AppConstants.defaultCountry;
+        ? StringUtils.getCountryCode(event.contacts[0].country!)
+        : StringConstants.defaultCountry;
     final String number = event.contacts[0].number != null && event.contacts[0].number != '' ? event.contacts[0].number! : '';
     final String shareText = "$name, $countryCode $number";
     emit(LinkViewContactShareActionState(shareText));

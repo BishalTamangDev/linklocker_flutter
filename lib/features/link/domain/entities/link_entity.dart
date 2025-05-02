@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 
-import '../../../../core/constants/app_constants.dart';
+import '../../../../core/constants/link_category_enum.dart';
 
 class LinkEntity {
   int? linkId;

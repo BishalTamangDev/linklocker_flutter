@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 
-import 'package:linklocker/core/constants/app_constants.dart';
+import 'package:linklocker/core/constants/link_category_enum.dart';
 import 'package:linklocker/features/link/domain/entities/link_entity.dart';
 
 class LinkModel extends LinkEntity {

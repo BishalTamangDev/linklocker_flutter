@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:linklocker/core/constants/app_constants.dart';
 import 'package:linklocker/features/metric/data/models/metric_model.dart';
+
+import '../../../../core/constants/link_category_enum.dart';
 
 class CategoryWidget extends StatelessWidget {
   const CategoryWidget({super.key, required this.metricModel, this.loading = false});

@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:dartz/dartz.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:linklocker/core/constants/app_constants.dart';
 import 'package:linklocker/features/link/data/models/contact_model.dart';
 import 'package:linklocker/features/link/data/models/link_model.dart';
 import 'package:linklocker/features/link/domain/entities/contact_entity.dart';
@@ -17,6 +16,7 @@ import 'package:sqflite/sqflite.dart';
 
 import '../../../../features/profile/data/models/profile_contact_model.dart';
 import '../../../../features/profile/data/models/profile_model.dart';
+import '../../../constants/link_category_enum.dart';
 
 class LocalDataSource {
   // private constructor
@@ -61,10 +61,7 @@ class LocalDataSource {
           )
         ''';
 
-        bool profileTblResponse = await dbPath
-            .rawQuery(query)
-            .then((_) => true)
-            .catchError((_) => false);
+        bool profileTblResponse = await dbPath.rawQuery(query).then((_) => true).catchError((_) => false);
 
         // create profile contact table
         query = '''
@@ -76,10 +73,7 @@ class LocalDataSource {
             FOREIGN KEY (profile_id) REFERENCES $profileTbl(profile_id) ON DELETE CASCADE
           )
         ''';
-        bool profileContactTblResponse = await dbPath
-            .rawQuery(query)
-            .then((_) => true)
-            .catchError((_) => false);
+        bool profileContactTblResponse = await dbPath.rawQuery(query).then((_) => true).catchError((_) => false);
 
         // create link table
         query = '''
@@ -93,10 +87,7 @@ class LocalDataSource {
             profile_picture BLOB
           )
         ''';
-        bool linkTblResponse = await dbPath
-            .rawQuery(query)
-            .then((_) => true)
-            .catchError((_) => false);
+        bool linkTblResponse = await dbPath.rawQuery(query).then((_) => true).catchError((_) => false);
 
         // create contact table
         query = '''
@@ -108,24 +99,16 @@ class LocalDataSource {
             FOREIGN KEY (link_id) REFERENCES $linkTbl (link_id) ON DELETE CASCADE
           )
         ''';
-        bool contactTblResponse = await dbPath
-            .rawQuery(query)
-            .then((_) => true)
-            .catchError((_) => false);
+        bool contactTblResponse = await dbPath.rawQuery(query).then((_) => true).catchError((_) => false);
 
         // debugging
         debugPrint("Profile Table Created :: $profileTblResponse");
-        debugPrint(
-            "Profile Contact Table Created :: $profileContactTblResponse");
+        debugPrint("Profile Contact Table Created :: $profileContactTblResponse");
         debugPrint("Link Table Created :: $linkTblResponse");
         debugPrint("Link Contact Table Created :: $contactTblResponse");
 
-        if (!profileTblResponse ||
-            !profileContactTblResponse ||
-            !linkTblResponse ||
-            !contactTblResponse) {
-          debugPrint(
-              "Error occurred in initiating database. Some table couldn't be created.");
+        if (!profileTblResponse || !profileContactTblResponse || !linkTblResponse || !contactTblResponse) {
+          debugPrint("Error occurred in initiating database. Some table couldn't be created.");
         }
       },
     );
@@ -147,32 +130,26 @@ class LocalDataSource {
 
   // profile related
   // add profile
-  Future<bool> addProfile(
-      ProfileEntity profileEntity, List<ProfileContactEntity> contacts) async {
+  Future<bool> addProfile(ProfileEntity profileEntity, List<ProfileContactEntity> contacts) async {
     try {
       Database db = await getDatabase();
 
       // create profile model from entity
       final ProfileModel profileModel = ProfileModel.fromEntity(profileEntity);
-      final Map<String, dynamic> profileDataToUpload =
-          profileModel.profileDataToUpload;
+      final Map<String, dynamic> profileDataToUpload = profileModel.profileDataToUpload;
 
       await db.transaction((txn) async {
         int profileId = await txn.insert(profileTbl, profileDataToUpload);
 
         if (profileId <= 0) {
-          throw Exception(
-              "Couldn't add profile with ID :: ${profileEntity.id}");
+          throw Exception("Couldn't add profile with ID :: ${profileEntity.id}");
         }
 
         for (var contact in contacts) {
-          final ProfileContactModel contactModel =
-              ProfileContactModel.fromEntity(contact);
-          Map<String, dynamic> contactDataToUpload =
-              contactModel.dataToUpload(profileId);
+          final ProfileContactModel contactModel = ProfileContactModel.fromEntity(contact);
+          Map<String, dynamic> contactDataToUpload = contactModel.dataToUpload(profileId);
 
-          int contactId =
-              await txn.insert(profileContactTbl, contactDataToUpload);
+          int contactId = await txn.insert(profileContactTbl, contactDataToUpload);
 
           if (contactId <= 0) {
             throw Exception("Couldn't add contact with ID :: $contactId");
@@ -187,15 +164,13 @@ class LocalDataSource {
   }
 
   // update profile
-  Future<bool> updateProfile(
-      ProfileEntity profileEntity, List<ProfileContactEntity> contacts) async {
+  Future<bool> updateProfile(ProfileEntity profileEntity, List<ProfileContactEntity> contacts) async {
     try {
       Database db = await getDatabase();
 
       // create profile model from entity
       final ProfileModel profileModel = ProfileModel.fromEntity(profileEntity);
-      final Map<String, dynamic> profileDataToUpload =
-          profileModel.profileDataToUpload;
+      final Map<String, dynamic> profileDataToUpload = profileModel.profileDataToUpload;
 
       await db.transaction((txn) async {
         // update profile
@@ -212,10 +187,8 @@ class LocalDataSource {
 
         // update contact
         for (var contact in contacts) {
-          final ProfileContactModel contactModel =
-              ProfileContactModel.fromEntity(contact);
-          final Map<String, dynamic> contactDataToUpload =
-              contactModel.dataToUpload(profileEntity.id!);
+          final ProfileContactModel contactModel = ProfileContactModel.fromEntity(contact);
+          final Map<String, dynamic> contactDataToUpload = contactModel.dataToUpload(profileEntity.id!);
 
           int contactRowsAffected = await txn.update(
             profileContactTbl,
@@ -225,8 +198,7 @@ class LocalDataSource {
           );
 
           if (contactRowsAffected == 0) {
-            throw Exception(
-                'Contact not found or no changes made for contact ${contactModel.contactId}.');
+            throw Exception('Contact not found or no changes made for contact ${contactModel.contactId}.');
           }
         }
       });
@@ -299,14 +271,12 @@ class LocalDataSource {
 
   // link related
   // add link
-  Future<bool> addLink(
-      LinkEntity linkEntity, List<ContactEntity> contacts) async {
+  Future<bool> addLink(LinkEntity linkEntity, List<ContactEntity> contacts) async {
     try {
       Database db = await getDatabase();
 
       await db.transaction((txn) async {
-        final data =
-            LinkModel.fromEntity(linkEntity).toMap(uploadingData: true);
+        final data = LinkModel.fromEntity(linkEntity).toMap(uploadingData: true);
 
         // insert link
         int linkId = await txn.insert(linkTbl, data);
@@ -317,15 +287,13 @@ class LocalDataSource {
 
         // insert contacts
         for (var contact in contacts) {
-          Map<String, dynamic> data =
-              ContactModel.fromEntity(contact).toMap(uploadingData: true);
+          Map<String, dynamic> data = ContactModel.fromEntity(contact).toMap(uploadingData: true);
           data['link_id'] = linkId;
 
           int contactId = await txn.insert(contactTbl, data);
 
           if (contactId <= 0) {
-            throw Exception(
-                "Couldn't add contact with ID : ${contact.contactId}");
+            throw Exception("Couldn't add contact with ID : ${contact.contactId}");
           }
         }
       });
@@ -337,14 +305,12 @@ class LocalDataSource {
   }
 
   // update link
-  Future<bool> updateLink(
-      LinkEntity linkEntity, List<ContactEntity> contacts) async {
+  Future<bool> updateLink(LinkEntity linkEntity, List<ContactEntity> contacts) async {
     try {
       Database db = await getDatabase();
 
       await db.transaction((txn) async {
-        final linkData =
-            LinkModel.fromEntity(linkEntity).toMap(uploadingData: true);
+        final linkData = LinkModel.fromEntity(linkEntity).toMap(uploadingData: true);
 
         int linkRowsAffected = await txn.update(
           linkTbl,
@@ -354,14 +320,12 @@ class LocalDataSource {
         );
 
         if (linkRowsAffected == 0) {
-          throw Exception(
-              "Couldn't update link with ID :: ${linkEntity.linkId}");
+          throw Exception("Couldn't update link with ID :: ${linkEntity.linkId}");
         }
 
         // update contact
         for (var contact in contacts) {
-          Map<String, dynamic> data =
-              ContactModel.fromEntity(contact).toMap(uploadingData: true);
+          Map<String, dynamic> data = ContactModel.fromEntity(contact).toMap(uploadingData: true);
           data['link_id'] = linkEntity.linkId;
 
           int contactRowAffected = await txn.update(
@@ -372,8 +336,7 @@ class LocalDataSource {
           );
 
           if (contactRowAffected == 0) {
-            throw Exception(
-                "Couldn't update contact with ID :: ${contact.contactId}");
+            throw Exception("Couldn't update contact with ID :: ${contact.contactId}");
           }
         }
       });
@@ -389,8 +352,7 @@ class LocalDataSource {
     try {
       Database tempDb = await getDatabase();
 
-      final links = await tempDb.query(linkTbl,
-          where: "link_id = ?", whereArgs: [linkId], limit: 1);
+      final links = await tempDb.query(linkTbl, where: "link_id = ?", whereArgs: [linkId], limit: 1);
 
       if (links.isEmpty) {
         throw Exception("Link not found with ID :: $linkId");
@@ -448,12 +410,10 @@ class LocalDataSource {
       Database db = await getDatabase();
 
       // get links
-      final List<Map<String, dynamic>> linkRepository =
-          await db.rawQuery("SELECT * FROM $linkTbl ORDER BY name");
+      final List<Map<String, dynamic>> linkRepository = await db.rawQuery("SELECT * FROM $linkTbl ORDER BY name");
 
       // get contacts
-      final List<Map<String, dynamic>> contactRepository =
-          await db.rawQuery("SELECT * FROM $contactTbl");
+      final List<Map<String, dynamic>> contactRepository = await db.rawQuery("SELECT * FROM $contactTbl");
 
       List<Map<String, dynamic>> completeLinkRepository = [];
 
@@ -474,9 +434,7 @@ class LocalDataSource {
       // categories
       Set<String> categories = {};
       for (var link in linkRepository) {
-        link['name'] == ''
-            ? categories.add('#')
-            : categories.add(link['name'][0]);
+        link['name'] == '' ? categories.add('#') : categories.add(link['name'][0]);
       }
 
       List<Map<String, dynamic>> groups = [];
@@ -524,8 +482,7 @@ class LocalDataSource {
   }
 
   // fetch complete link
-  Future<Either<bool, List<Map<String, dynamic>>>> fetchCompleteLink(
-      int linkId) async {
+  Future<Either<bool, List<Map<String, dynamic>>>> fetchCompleteLink(int linkId) async {
     try {
       Database db = await getDatabase();
 
@@ -564,16 +521,13 @@ class LocalDataSource {
       }
 
       for (var link in links) {
-        chartData[LinkCategoryEnum.getCategoryFromLabel(link['category'])!
-            .label
-            .toString()] += 1;
+        chartData[LinkCategoryEnum.getCategoryFromLabel(link['category'])!.label.toString()] += 1;
       }
 
       List<MetricEntity> metricData = [];
 
       chartData.forEach((key, value) {
-        final MetricEntity metricEntity =
-            MetricModel.fromMap({'title': key, 'count': value}).toEntity();
+        final MetricEntity metricEntity = MetricModel.fromMap({'title': key, 'count': value}).toEntity();
         metricData.add(metricEntity);
       });
 
@@ -591,8 +545,7 @@ class LocalDataSource {
       // get links
       String sql = "SELECT * FROM $linkTbl WHERE name LIKE ? ORDER BY name ASC";
 
-      final List<Map<String, dynamic>> linkRepository =
-          await tempDb.rawQuery(sql, ["%$searchText%"]);
+      final List<Map<String, dynamic>> linkRepository = await tempDb.rawQuery(sql, ["%$searchText%"]);
 
       if (linkRepository.isEmpty) {
         return [];
@@ -608,8 +561,7 @@ class LocalDataSource {
 
       String placeholders = List.filled(linkIds.length, '?').join(', ');
 
-      final List<Map<String, dynamic>> contactRepository =
-          await tempDb.rawQuery(
+      final List<Map<String, dynamic>> contactRepository = await tempDb.rawQuery(
         "SELECT * FROM $contactTbl WHERE link_id IN ($placeholders)",
         linkIds.map((e) => e.toString()).toList(),
       );
@@ -634,15 +586,13 @@ class LocalDataSource {
   }
 
   // search link by contact
-  Future<List<Map<String, dynamic>>> searchLinkByContact(
-      String searchText) async {
+  Future<List<Map<String, dynamic>>> searchLinkByContact(String searchText) async {
     try {
       final db = await getDatabase();
 
       // get contacts
       String query = "SELECT * FROM $contactTbl WHERE number LIKE ?";
-      final List<Map<String, dynamic>> contactRepository =
-          await db.rawQuery(query, ["%$searchText%"]);
+      final List<Map<String, dynamic>> contactRepository = await db.rawQuery(query, ["%$searchText%"]);
 
       if (contactRepository.isEmpty) {
         return [];
@@ -657,8 +607,7 @@ class LocalDataSource {
 
         final String placeholder = List.filled(linkIds.length, '?').join(', ');
 
-        query =
-            "SELECT * FROM $linkTbl WHERE link_id IN ($placeholder) ORDER BY name ASC";
+        query = "SELECT * FROM $linkTbl WHERE link_id IN ($placeholder) ORDER BY name ASC";
 
         final List<Map<String, dynamic>> linkRepository = await db.rawQuery(
           query,

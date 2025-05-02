@@ -1,6 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:dartz/dartz.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:linklocker/core/utils/string_utils.dart';
 import 'package:linklocker/features/profile/data/models/profile_model.dart';
 import 'package:linklocker/features/profile/data/repository_impl/profile_repository_impl.dart';
 import 'package:linklocker/features/profile/domain/entities/profile_contact_entity.dart';
@@ -8,7 +9,6 @@ import 'package:linklocker/features/profile/domain/entities/profile_entity.dart'
 import 'package:linklocker/features/profile/domain/usecases/delete_profile_usecase.dart';
 import 'package:linklocker/features/profile/domain/usecases/fetch_profile_usecase.dart';
 
-import '../../../../../core/functions/app_functions.dart';
 import '../../../data/models/profile_contact_model.dart';
 
 part 'view_profile_event.dart';
@@ -72,11 +72,11 @@ class ViewProfileBloc extends Bloc<ViewProfileEvent, ViewProfileState> {
     String shareName = "";
     String shareContact = "";
     if (event.data['name'] != null) {
-      shareName = AppFunctions.getCapitalizedWords(event.data['name']);
+      shareName = StringUtils.getCapitalizedWords(event.data['name']);
     }
 
     if (event.data['country'] != null) {
-      shareContact = "${AppFunctions.getCountryCode(event.data['country'])} ${event.data['contact_number']}";
+      shareContact = "${StringUtils.getCountryCode(event.data['country'])} ${event.data['contact_number']}";
     }
 
     final String shareText = "$shareName, $shareContact";

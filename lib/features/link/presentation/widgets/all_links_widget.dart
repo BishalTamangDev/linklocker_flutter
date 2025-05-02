@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:linklocker/core/functions/app_functions.dart';
+import 'package:linklocker/core/utils/string_utils.dart';
 import 'package:linklocker/features/link/domain/entities/link_entity.dart';
 import 'package:linklocker/features/link/presentation/blocs/all_links/all_links_bloc.dart';
 import 'package:linklocker/features/link/presentation/widgets/empty_links_widget.dart';
@@ -36,7 +36,7 @@ class AllLinksWidget extends StatelessWidget {
                   children: [
                     Padding(
                       padding: const EdgeInsets.only(left: 4.0),
-                      child: Text(AppFunctions.getCapitalizedWord(group['title'])),
+                      child: Text(StringUtils.getCapitalizedWord(group['title'])),
                     ),
                     ClipRRect(
                       borderRadius: BorderRadius.circular(16.0),

@@ -1,4 +1,4 @@
-import 'package:linklocker/core/constants/app_constants.dart';
+import 'package:linklocker/core/constants/string_constants.dart';
 
 import '../../domain/entities/profile_contact_entity.dart';
 
@@ -25,7 +25,7 @@ class ProfileContactModel extends ProfileContactEntity {
     return ProfileContactEntity(
       contactId: contactId ?? 0,
       profileId: profileId ?? 0,
-      country: country ?? AppConstants.defaultCountry,
+      country: country ?? StringConstants.defaultCountry,
       number: number ?? '',
     );
   }
@@ -35,7 +35,7 @@ class ProfileContactModel extends ProfileContactEntity {
     return ProfileContactModel(
       contactId: map['contact_id'] ?? 0,
       profileId: map['profile_id'] ?? 0,
-      country: map['country'] ?? AppConstants.defaultCountry,
+      country: map['country'] ?? StringConstants.defaultCountry,
       number: map['number'] ?? '',
     );
   }
@@ -58,7 +58,7 @@ class ProfileContactModel extends ProfileContactEntity {
   Map<String, dynamic> dataToUpload(int profileId) {
     return {
       'profile_id': profileId ?? 0,
-      'country': country ?? AppConstants.defaultCountry,
+      'country': country ?? StringConstants.defaultCountry,
       'number': number ?? '',
     };
   }

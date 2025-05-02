@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:linklocker/core/constants/app_constants.dart';
-import 'package:linklocker/core/functions/app_functions.dart';
+import 'package:linklocker/core/constants/color_constants.dart';
+import 'package:linklocker/core/constants/string_constants.dart';
+import 'package:linklocker/core/utils/call_pad_utils.dart';
+import 'package:linklocker/core/utils/date_time_utils.dart';
+import 'package:linklocker/core/utils/qr_utils.dart';
+import 'package:linklocker/core/utils/string_utils.dart';
 import 'package:linklocker/features/link/data/models/link_model.dart';
 import 'package:linklocker/features/link/presentation/blocs/all_links/all_links_bloc.dart';
 import 'package:linklocker/features/link/presentation/blocs/link_view/link_view_bloc.dart';
@@ -44,22 +48,20 @@ class _ViewLinkPageState extends State<ViewLinkPage> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme
-        .of(context)
-        .colorScheme;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return BlocConsumer<LinkViewBloc, LinkViewState>(
       listenWhen: (previous, current) => current is LinkViewActionState,
       buildWhen: (previous, current) => current is! LinkViewActionState,
       listener: (context, state) async {
         if (state is LinkViewQrShareActionState) {
-          AppFunctions.showQrCode(context: context, linkEntity: state.linkEntity, contacts: state.contacts);
+          QrUtils.showQrCode(context: context, linkEntity: state.linkEntity, contacts: state.contacts);
         } else if (state is LinkViewContactShareActionState) {
           await Future.delayed(Duration.zero, () {
             Share.share(state.shareText, subject: "Contact Share");
           });
         } else if (state is LinkViewOpenDialerActionState) {
-          AppFunctions.openDialer(state.contact);
+          CallPadUtils.openDialer(state.contact);
         } else if (state is LinkViewDeleteSuccessActionState) {
           // refresh all links
           context.read<AllLinksBloc>().add(AllLinksFetchEvent());
@@ -90,9 +92,7 @@ class _ViewLinkPageState extends State<ViewLinkPage> {
                   icon: Icon(Icons.arrow_back_ios_new),
                 ),
                 elevation: 0,
-                backgroundColor: Theme
-                    .of(context)
-                    .canvasColor,
+                backgroundColor: Theme.of(context).canvasColor,
                 title: const Text("Link Details"),
                 actions: [
                   IconButton(
@@ -105,9 +105,7 @@ class _ViewLinkPageState extends State<ViewLinkPage> {
                   ),
                 ],
               ),
-              backgroundColor: Theme
-                  .of(context)
-                  .canvasColor,
+              backgroundColor: Theme.of(context).canvasColor,
               body: SingleChildScrollView(
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
@@ -125,15 +123,11 @@ class _ViewLinkPageState extends State<ViewLinkPage> {
                               radius: 80.0,
                               backgroundColor: colorScheme.surface,
                               foregroundImage:
-                              linkModel.profilePicture!.isNotEmpty ? MemoryImage(linkModel.profilePicture!) : AssetImage(AppConstants.defaultUserImage),
+                                  linkModel.profilePicture!.isNotEmpty ? MemoryImage(linkModel.profilePicture!) : AssetImage(StringConstants.defaultUserImage),
                             ),
                             Text(
-                              linkModel.name != null && linkModel.name != '' ? AppFunctions.getCapitalizedWords(linkModel.name!) : 'Unknown',
-                              style: Theme
-                                  .of(context)
-                                  .textTheme
-                                  .headlineSmall!
-                                  .copyWith(fontWeight: FontWeight.bold),
+                              linkModel.name != null && linkModel.name != '' ? StringUtils.getCapitalizedWords(linkModel.name!) : 'Unknown',
+                              style: Theme.of(context).textTheme.headlineSmall!.copyWith(fontWeight: FontWeight.bold),
                             ),
                           ],
                         ),
@@ -153,15 +147,15 @@ class _ViewLinkPageState extends State<ViewLinkPage> {
                                 // empty contact
                                 state.contacts.isEmpty
                                     ? const ListTile(
-                                  leading: Icon(Icons.phone_outlined, color: Colors.green),
-                                  title: Opacity(opacity: 0.5, child: Text("Contact Not Found")),
-                                )
+                                        leading: Icon(Icons.phone_outlined, color: Colors.green),
+                                        title: Opacity(opacity: 0.5, child: Text("Contact Not Found")),
+                                      )
                                     : const SizedBox.shrink(),
 
                                 // more than one contact case
                                 ...state.contacts.map(
-                                      (contact) {
-                                    final String code = AppFunctions.getCountryCode(contact.country ?? AppConstants.defaultCountry);
+                                  (contact) {
+                                    final String code = StringUtils.getCountryCode(contact.country ?? StringConstants.defaultCountry);
 
                                     return ListTile(
                                       leading: Icon(Icons.phone_outlined, color: Colors.green),
@@ -187,7 +181,7 @@ class _ViewLinkPageState extends State<ViewLinkPage> {
                           child: Padding(
                             padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
                             child: ListTile(
-                              leading: Icon(Icons.email_outlined, color: AppConstants.emailIconColor),
+                              leading: Icon(Icons.email_outlined, color: ColorConstants.emailIconColor),
                               title: Text(linkModel.emailAddress != '' && linkModel.emailAddress != null ? linkModel.emailAddress! : "-"),
                             ),
                           ),
@@ -202,9 +196,9 @@ class _ViewLinkPageState extends State<ViewLinkPage> {
                           child: Padding(
                             padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
                             child: ListTile(
-                              leading: Icon(Icons.cake_outlined, color: AppConstants.birthdayIconColor),
+                              leading: Icon(Icons.cake_outlined, color: ColorConstants.birthdayIconColor),
                               title: Text(
-                                linkModel.dateOfBirth != null ? AppFunctions.getFormattedDate(DateTime.parse(linkModel.dateOfBirth!.toString())) : "-",
+                                linkModel.dateOfBirth != null ? DateTimeUtils.getFormattedDate(DateTime.parse(linkModel.dateOfBirth!.toString())) : "-",
                               ),
                             ),
                           ),
@@ -219,8 +213,8 @@ class _ViewLinkPageState extends State<ViewLinkPage> {
                           child: Padding(
                             padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
                             child: ListTile(
-                              leading: Icon(Icons.group_add_outlined, color: AppConstants.categoryIconColor),
-                              title: Text(AppFunctions.getCapitalizedWord(linkModel.category!.label)),
+                              leading: Icon(Icons.group_add_outlined, color: ColorConstants.categoryIconColor),
+                              title: Text(StringUtils.getCapitalizedWord(linkModel.category!.label)),
                             ),
                           ),
                         ),
@@ -234,10 +228,10 @@ class _ViewLinkPageState extends State<ViewLinkPage> {
                           child: Padding(
                             padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
                             child: ListTile(
-                              leading: Icon(Icons.note_alt_outlined, color: AppConstants.noteIconColor),
+                              leading: Icon(Icons.note_alt_outlined, color: ColorConstants.noteIconColor),
                               title: Opacity(
                                 opacity: 0.5,
-                                child: Text(AppFunctions.getCapitalizedWord(linkModel.note != '' && linkModel.note != null ? linkModel.note! : "-")),
+                                child: Text(StringUtils.getCapitalizedWord(linkModel.note != '' && linkModel.note != null ? linkModel.note! : "-")),
                               ),
                             ),
                           ),
@@ -251,10 +245,7 @@ class _ViewLinkPageState extends State<ViewLinkPage> {
               // bottom actions
               bottomNavigationBar: Container(
                 color: colorScheme.surface,
-                width: MediaQuery
-                    .of(context)
-                    .size
-                    .width,
+                width: MediaQuery.of(context).size.width,
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Row(

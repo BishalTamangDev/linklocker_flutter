@@ -92,83 +92,91 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: ScrollConfiguration(
-          behavior: CustomScrollBehaviour(),
-          child: PageView(
-            controller: _pageController,
-            allowImplicitScrolling: false,
-            onPageChanged: (newIndex) => setState(() {
-              index = newIndex;
-            }),
-            children:
-                _pages.map((page) => PageBuilder(title: page['title'], description: page['description'], image: page['image'], type: page['type'])).toList(),
-          ),
-        ),
-      ),
-      // bottom section
-      bottomSheet: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: index == (_pages.length - 1)
-            ? Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  ElevatedButton(
-                    onPressed: _setInitialValue,
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(32.0),
-                      ),
-                    ),
-                    child: const Text("Get Started"),
-                  ),
-                ],
-              )
-            : Row(
-                children: [
-                  Opacity(
-                    opacity: 0.6,
-                    child: InkWell(
-                      splashColor: Colors.transparent,
-                      highlightColor: Colors.transparent,
-                      onTap: _skip,
-                      child: const Text("Skip"),
-                    ),
-                  ),
-                  Expanded(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+        child: Column(
+          children: [
+            Expanded(
+              child: ScrollConfiguration(
+                behavior: CustomScrollBehaviour(),
+                child: PageView(
+                  controller: _pageController,
+                  allowImplicitScrolling: false,
+                  onPageChanged: (newIndex) => setState(() {
+                    index = newIndex;
+                  }),
+                  children: _pages
+                      .map((page) => PageBuilder(title: page['title'], description: page['description'], image: page['image'], type: page['type']))
+                      .toList(),
+                ),
+              ),
+            ),
+
+            // bottom section
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: index == (_pages.length - 1)
+                  ? Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        SmoothPageIndicator(
-                          controller: _pageController,
-                          count: _pages.length,
-                          effect: WormEffect(
-                            activeDotColor: Theme.of(context).colorScheme.primary,
-                            dotWidth: 12.0,
-                            dotHeight: 12.0,
-                            dotColor: Theme.of(context).colorScheme.surface,
+                        ElevatedButton(
+                          onPressed: _setInitialValue,
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(32.0),
+                            ),
                           ),
-                          onDotClicked: (newIndex) => _pageController.animateToPage(
-                            newIndex,
-                            duration: const Duration(milliseconds: 300),
-                            curve: Curves.linear,
+                          child: const Text("Get Started"),
+                        ),
+                      ],
+                    )
+                  : Row(
+                      children: [
+                        Opacity(
+                          opacity: 0.6,
+                          child: InkWell(
+                            splashColor: Colors.transparent,
+                            highlightColor: Colors.transparent,
+                            onTap: _skip,
+                            child: const Text("Skip"),
                           ),
+                        ),
+                        Expanded(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              SmoothPageIndicator(
+                                controller: _pageController,
+                                count: _pages.length,
+                                effect: WormEffect(
+                                  activeDotColor: Theme.of(context).colorScheme.primary,
+                                  dotWidth: 12.0,
+                                  dotHeight: 12.0,
+                                  dotColor: Theme.of(context).colorScheme.surface,
+                                ),
+                                onDotClicked: (newIndex) => _pageController.animateToPage(
+                                  newIndex,
+                                  duration: const Duration(milliseconds: 300),
+                                  curve: Curves.linear,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        ElevatedButton(
+                          onPressed: _nextPage,
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.all(8.0),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(32.0),
+                            ),
+                          ),
+                          child: const Text("Next"),
                         ),
                       ],
                     ),
-                  ),
-                  ElevatedButton(
-                    onPressed: _nextPage,
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.all(8.0),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(32.0),
-                      ),
-                    ),
-                    child: const Text("Next"),
-                  ),
-                ],
-              ),
+            ),
+          ],
+        ),
       ),
     );
   }

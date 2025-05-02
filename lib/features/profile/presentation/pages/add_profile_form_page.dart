@@ -4,8 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:linklocker/core/constants/app_constants.dart';
-import 'package:linklocker/core/functions/app_functions.dart';
+import 'package:linklocker/core/constants/color_constants.dart';
+import 'package:linklocker/core/constants/county_codes.dart';
+import 'package:linklocker/core/constants/string_constants.dart';
+import 'package:linklocker/core/utils/image_compressor_utils.dart';
+import 'package:linklocker/core/utils/string_utils.dart';
 import 'package:linklocker/features/profile/domain/entities/profile_contact_entity.dart';
 import 'package:linklocker/features/profile/domain/entities/profile_entity.dart';
 import 'package:linklocker/shared/widgets/custom_text_field_widget.dart';
@@ -30,7 +33,7 @@ class AddProfileFormPage extends StatefulWidget {
 
 class _AddProfileFormPageState extends State<AddProfileFormPage> {
   // variables
-  String country = AppConstants.defaultCountry;
+  String country = StringConstants.defaultCountry;
   Uint8List profilePicture = Uint8List(0);
 
   // controllers
@@ -47,7 +50,7 @@ class _AddProfileFormPageState extends State<AddProfileFormPage> {
 
     // contact
     numberController.text = widget.profileContactEntity.number ?? '';
-    country = widget.profileContactEntity.country ?? AppConstants.defaultCountry;
+    country = widget.profileContactEntity.country ?? StringConstants.defaultCountry;
   }
 
   // image picker
@@ -61,7 +64,7 @@ class _AddProfileFormPageState extends State<AddProfileFormPage> {
         final Uint8List bytes = await image.readAsBytes();
 
         // compress image
-        final Uint8List compressedImage = await AppFunctions.compressImage(bytes);
+        final Uint8List compressedImage = await ImageCompressUtils.compressImage(bytes);
 
         if (mounted) {
           setState(() {
@@ -181,7 +184,7 @@ class _AddProfileFormPageState extends State<AddProfileFormPage> {
                       child: CircleAvatar(
                         radius: 80.0,
                         backgroundColor: Theme.of(context).colorScheme.surface,
-                        backgroundImage: profilePicture.isNotEmpty ? MemoryImage(profilePicture) : AssetImage(AppConstants.defaultUserImage),
+                        backgroundImage: profilePicture.isNotEmpty ? MemoryImage(profilePicture) : AssetImage(StringConstants.defaultUserImage),
                         child: const Icon(Icons.image_outlined, size: 28.0),
                       ),
                     ),
@@ -242,7 +245,7 @@ class _AddProfileFormPageState extends State<AddProfileFormPage> {
                                   // call icon
                                   Icon(
                                     Icons.call,
-                                    color: AppConstants.callIconColor,
+                                    color: ColorConstants.callIconColor,
                                   ),
 
                                   // country code
@@ -256,11 +259,11 @@ class _AddProfileFormPageState extends State<AddProfileFormPage> {
                                       });
                                     },
                                     items: [
-                                      ...AppConstants.countryCodes.map(
+                                      ...countryCodes.map(
                                         (countryCode) => DropdownMenuItem(
                                           value: countryCode['country'],
                                           child: Text(
-                                            AppFunctions.getCapitalizedWords(countryCode['country']),
+                                            StringUtils.getCapitalizedWords(countryCode['country']),
                                           ),
                                         ),
                                       ),
@@ -303,17 +306,19 @@ class _AddProfileFormPageState extends State<AddProfileFormPage> {
           ),
 
           // bottom actions
-          SizedBox(
-            height: 50.0,
-            width: MediaQuery.of(context).size.width,
-            child: ElevatedButton(
-              style: TextButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12.0),
+          SafeArea(
+            child: SizedBox(
+              height: 50.0,
+              width: MediaQuery.of(context).size.width,
+              child: ElevatedButton(
+                style: TextButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.0),
+                  ),
                 ),
+                onPressed: _proceed,
+                child: Text(widget.task == "add" ? "Save" : "Update"),
               ),
-              onPressed: _proceed,
-              child: Text(widget.task == "add" ? "Save" : "Update"),
             ),
           ),
         ],

@@ -4,12 +4,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:linklocker/core/constants/color_constants.dart';
+import 'package:linklocker/core/constants/string_constants.dart';
+import 'package:linklocker/core/utils/date_time_utils.dart';
+import 'package:linklocker/core/utils/image_compressor_utils.dart';
+import 'package:linklocker/core/utils/string_utils.dart';
 import 'package:linklocker/features/link/domain/entities/link_entity.dart';
 import 'package:linklocker/features/link/presentation/blocs/link_add/link_add_bloc.dart';
 import 'package:linklocker/shared/widgets/custom_snackbar_widget.dart';
 
-import '../../../../core/constants/app_constants.dart';
-import '../../../../core/functions/app_functions.dart';
+import '../../../../core/constants/county_codes.dart';
+import '../../../../core/constants/link_category_enum.dart';
 import '../../../../shared/widgets/custom_text_field_widget.dart';
 import '../../domain/entities/contact_entity.dart';
 
@@ -40,7 +45,7 @@ class _AddLinkFormWidgetState extends State<AddLinkFormWidget> {
   var phoneController = TextEditingController();
   var emailController = TextEditingController();
   var noteController = TextEditingController();
-  String country = AppConstants.defaultCountry;
+  String country = StringConstants.defaultCountry;
 
   // functions
   // select profile picture
@@ -54,7 +59,7 @@ class _AddLinkFormWidgetState extends State<AddLinkFormWidget> {
       var bytes = await image.readAsBytes();
 
       // compress image
-      Uint8List compressedImage = await AppFunctions.compressImage(bytes);
+      Uint8List compressedImage = await ImageCompressUtils.compressImage(bytes);
 
       if (mounted) {
         setState(() {
@@ -73,7 +78,7 @@ class _AddLinkFormWidgetState extends State<AddLinkFormWidget> {
       noteController.clear();
       birthday = null;
       category = LinkCategoryEnum.other.label;
-      country = AppConstants.defaultCountry;
+      country = StringConstants.defaultCountry;
       profilePicture = Uint8List(0);
     });
   }
@@ -92,12 +97,12 @@ class _AddLinkFormWidgetState extends State<AddLinkFormWidget> {
         profilePicture = widget.linkEntity.profilePicture ?? Uint8List(0);
 
         // contact
-        country = contactEntity.country ?? AppConstants.defaultCountry;
+        country = contactEntity.country ?? StringConstants.defaultCountry;
         phoneController.text = contactEntity.number ?? '';
       });
     } else {
       // contact
-      country = contactEntity.country ?? AppConstants.defaultCountry;
+      country = contactEntity.country ?? StringConstants.defaultCountry;
       phoneController.text = contactEntity.number ?? '';
     }
   }
@@ -215,7 +220,7 @@ class _AddLinkFormWidgetState extends State<AddLinkFormWidget> {
                     child: CircleAvatar(
                       radius: 80.0,
                       backgroundColor: Theme.of(context).colorScheme.surface,
-                      backgroundImage: profilePicture.isNotEmpty ? MemoryImage(profilePicture) : AssetImage(AppConstants.defaultUserImage),
+                      backgroundImage: profilePicture.isNotEmpty ? MemoryImage(profilePicture) : AssetImage(StringConstants.defaultUserImage),
                       child: const Icon(Icons.camera_alt_outlined, color: Colors.blue),
                     ),
                   ),
@@ -259,7 +264,7 @@ class _AddLinkFormWidgetState extends State<AddLinkFormWidget> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.group_add_outlined, color: AppConstants.categoryIconColor),
+                            Icon(Icons.group_add_outlined, color: ColorConstants.categoryIconColor),
                             Expanded(
                               child: DropdownButton(
                                 value: category,
@@ -300,7 +305,7 @@ class _AddLinkFormWidgetState extends State<AddLinkFormWidget> {
                                 spacing: 10.0,
                                 children: [
                                   // call icon
-                                  Icon(Icons.call, color: AppConstants.callIconColor),
+                                  Icon(Icons.call, color: ColorConstants.callIconColor),
 
                                   // country code
                                   DropdownButton(
@@ -313,10 +318,10 @@ class _AddLinkFormWidgetState extends State<AddLinkFormWidget> {
                                       });
                                     },
                                     items: [
-                                      ...AppConstants.countryCodes.map(
+                                      ...countryCodes.map(
                                         (countryCode) => DropdownMenuItem(
                                           value: countryCode['country'],
-                                          child: Text(AppFunctions.getCapitalizedWords(countryCode['country'])),
+                                          child: Text(StringUtils.getCapitalizedWords(countryCode['country'])),
                                         ),
                                       ),
                                     ],
@@ -362,7 +367,7 @@ class _AddLinkFormWidgetState extends State<AddLinkFormWidget> {
                           mainAxisSize: MainAxisSize.max,
                           spacing: 16.0,
                           children: [
-                            Icon(Icons.cake_outlined, color: AppConstants.birthdayIconColor),
+                            Icon(Icons.cake_outlined, color: ColorConstants.birthdayIconColor),
                             Expanded(
                               child: Row(
                                 mainAxisSize: MainAxisSize.max,
@@ -389,7 +394,7 @@ class _AddLinkFormWidgetState extends State<AddLinkFormWidget> {
                                     child: Row(
                                       spacing: 8.0,
                                       children: [
-                                        Text(birthday == null ? "Select birthday" : AppFunctions.getFormattedDate(birthday!)),
+                                        Text(birthday == null ? "Select birthday" : DateTimeUtils.getFormattedDate(birthday!)),
                                         const Icon(Icons.date_range, size: 16.0),
                                       ],
                                     ),
@@ -416,7 +421,7 @@ class _AddLinkFormWidgetState extends State<AddLinkFormWidget> {
                           children: [
                             Padding(
                               padding: const EdgeInsets.only(top: 10.0),
-                              child: Icon(Icons.note_alt_outlined, color: AppConstants.noteIconColor),
+                              child: Icon(Icons.note_alt_outlined, color: ColorConstants.noteIconColor),
                             ),
                             Expanded(
                               child: TextField(
@@ -443,17 +448,19 @@ class _AddLinkFormWidgetState extends State<AddLinkFormWidget> {
           const SizedBox(height: 16.0),
 
           // action
-          SizedBox(
-            height: 54.0,
-            width: MediaQuery.of(context).size.width,
-            child: ElevatedButton(
-              onPressed: _proceed,
-              style: ElevatedButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12.0),
+          SafeArea(
+            child: SizedBox(
+              height: 54.0,
+              width: MediaQuery.of(context).size.width,
+              child: ElevatedButton(
+                onPressed: _proceed,
+                style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.0),
+                  ),
                 ),
+                child: widget.task == 'update' ? Text("Update") : Text("Add"),
               ),
-              child: widget.task == 'update' ? Text("Update") : Text("Add"),
             ),
           ),
         ],
